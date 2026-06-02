@@ -281,6 +281,22 @@ const C={
   purple:'#8B5CF6',red:'#EF4444',blue:'#3B82F6'
 };
 
+function aggregateByDate(data){
+  const map={};
+  data.forEach(r=>{
+    const d=r.closing_date;
+    if(!map[d])map[d]={closing_date:d,pension_sales_count:0,instant1000_sales_count:0,instant2000_sales_count:0,instant_total_amount:0,instant1000_sales_amount:0,instant2000_sales_amount:0,total_fee:0,worker:'합산'};
+    map[d].pension_sales_count+=parseInt(r.pension_sales_count)||0;
+    map[d].instant1000_sales_count+=parseInt(r.instant1000_sales_count)||0;
+    map[d].instant2000_sales_count+=parseInt(r.instant2000_sales_count)||0;
+    map[d].instant_total_amount+=parseInt(r.instant_total_amount)||0;
+    map[d].instant1000_sales_amount+=parseInt(r.instant1000_sales_amount)||0;
+    map[d].instant2000_sales_amount+=parseInt(r.instant2000_sales_amount)||0;
+    map[d].total_fee+=parseInt(r.total_fee)||0;
+  });
+  return Object.values(map).sort((a,b)=>a.closing_date>b.closing_date?1:-1);
+}
+
 function fmt(n){
   const v=parseInt(n)||0;
   if(v>=10000000)return(v/10000000).toFixed(1)+'천만';
@@ -342,9 +358,9 @@ function renderSalesChart(d){
   charts['salesChart']=new Chart(document.getElementById('salesChart'),{
     type:'line',
     data:{labels:s.map(r=>fd(r.closing_date)),datasets:[
-      {label:'연금',data:s.map(r=>parseInt(r.pension_sales_count)||0),borderColor:C.pension,backgroundColor:'rgba(245,158,11,0.08)',borderWidth:2,tension:.4,fill:true,pointRadius:0,pointHoverRadius:4},
-      {label:'스1000',data:s.map(r=>parseInt(r.instant1000_sales_count)||0),borderColor:C.sp1000,backgroundColor:'rgba(79,70,229,0.08)',borderWidth:2,tension:.4,fill:true,pointRadius:0,pointHoverRadius:4},
-      {label:'스2000',data:s.map(r=>parseInt(r.instant2000_sales_count)||0),borderColor:C.sp2000,backgroundColor:'rgba(16,185,129,0.08)',borderWidth:2,tension:.4,fill:true,pointRadius:0,pointHoverRadius:4},
+      {label:'연금',data:s.map(r=>parseInt(r.pension_sales_count)||0),borderColor:C.pension,backgroundColor:'rgba(245,158,11,0.08)',borderWidth:2.5,tension:.4,fill:true,pointRadius:0,pointHoverRadius:5},
+      {label:'스1000',data:s.map(r=>parseInt(r.instant1000_sales_count)||0),borderColor:C.sp1000,backgroundColor:'rgba(79,70,229,0.08)',borderWidth:2.5,tension:.4,fill:true,pointRadius:0,pointHoverRadius:5},
+      {label:'스2000',data:s.map(r=>parseInt(r.instant2000_sales_count)||0),borderColor:C.sp2000,backgroundColor:'rgba(16,185,129,0.08)',borderWidth:2.5,tension:.4,fill:true,pointRadius:0,pointHoverRadius:5},
     ]},
     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
       plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.raw.toLocaleString()}장`}}},
@@ -602,17 +618,18 @@ function renderInventory(d){
 function renderAll(){
   const d=filtered();
   if(!d.length){document.getElementById('data-info').textContent='데이터 없음';return;}
-  document.getElementById('data-info').textContent=`${d.length}일 데이터 · ${fd(d[0]?.closing_date)}~${fd(d[d.length-1]?.closing_date)}`;
+  const agg=aggregateByDate(d);
+  document.getElementById('data-info').textContent=`${agg.length}일 데이터 · ${fd(agg[0]?.closing_date)}~${fd(agg[agg.length-1]?.closing_date)}`;
   renderSalesKPI(d);
-  renderSalesChart(d);
+  renderSalesChart(agg);
   renderDonut(d);
   renderDayChart(d);
   renderWorkerRank(d);
-  renderAmtChart(d);
-  renderPensionChart(d);
-  renderScratchChart(d);
-  renderOrder(d);
-  renderInventory(d);
+  renderAmtChart(agg);
+  renderPensionChart(agg);
+  renderScratchChart(agg);
+  renderOrder(agg);
+  renderInventory(agg);
 }
 
 async function load(){
