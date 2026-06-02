@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>즉석/연금 통계</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Malgun Gothic',sans-serif}
+body{background:#F1F5F9;color:#0F172A;width:1213px;min-height:580px}
+
+/* 탭 */
+.tab-bar{background:#fff;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;padding:0 20px;height:44px;gap:4px}
+.tab{padding:0 16px;height:44px;display:flex;align-items:center;font-size:13px;color:#64748B;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+.tab:hover{color:#4F46E5}
+.tab.active{color:#4F46E5;font-weight:600;border-bottom-color:#4F46E5}
+
+/* 필터바 */
+.filter-bar{background:#fff;border-bottom:1px solid #E2E8F0;padding:8px 20px;display:flex;align-items:center;gap:10px}
+.filter-label{font-size:11px;color:#94A3B8;font-weight:600}
+.pill{font-size:11px;padding:4px 12px;border:1px solid #E2E8F0;border-radius:20px;color:#64748B;cursor:pointer;background:#fff}
+.pill.active{background:#EEF2FF;color:#4F46E5;border-color:#C7D2FE;font-weight:600}
+.filter-sep{width:1px;height:16px;background:#E2E8F0}
+.date-txt{font-size:11px;color:#CBD5E1}
+
+/* 콘텐츠 */
+.content{padding:16px 20px;display:flex;flex-direction:column;gap:12px}
+
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.kpi{background:#fff;border:1px solid #E2E8F0;border-radius:10px;padding:12px 14px}
+.kpi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.kpi-lbl{font-size:10px;color:#94A3B8;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.kpi-ico{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.kpi-val{font-size:18px;font-weight:700;color:#0F172A;line-height:1}
+.kpi-sub{font-size:10px;color:#CBD5E1;margin-top:4px}
+.kpi-chg{font-size:10px;font-weight:600;padding:1px 5px;border-radius:4px;margin-top:4px;display:inline-block}
+.up{background:#ECFDF5;color:#059669}
+.dn{background:#FEF2F2;color:#DC2626}
+
+/* 차트 행 */
+.row2{display:grid;grid-template-columns:2fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.card{background:#fff;border:1px solid #E2E8F0;border-radius:10px;padding:14px 16px}
+.card-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.card-title{font-size:12px;font-weight:700;color:#0F172A}
+.card-meta{font-size:10px;color:#CBD5E1;margin-top:2px}
+.leg-wrap{display:flex;gap:8px;flex-wrap:wrap}
+.leg{display:flex;align-items:center;gap:4px;font-size:10px;color:#64748B}
+.leg-dot{width:7px;height:7px;border-radius:50%}
+
+/* 재고 테이블 */
+.inv-table{width:100%;border-collapse:collapse}
+.inv-table th{font-size:10px;color:#94A3B8;font-weight:600;padding:6px 8px;text-align:left;border-bottom:1px solid #F1F5F9;background:#F8FAFC}
+.inv-table td{font-size:12px;color:#0F172A;padding:7px 8px;border-bottom:1px solid #F8FAFC}
+.inv-table tr:last-child td{border-bottom:none}
+.inv-table tr:hover td{background:#F8FAFC}
+.badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px}
+.badge-ok{background:#ECFDF5;color:#059669}
+.badge-warn{background:#FFFBEB;color:#D97706}
+.badge-low{background:#FEF2F2;color:#DC2626}
+.progress-bg{height:5px;background:#F1F5F9;border-radius:3px;overflow:hidden;margin-top:3px}
+.progress-fill{height:100%;border-radius:3px}
+
+/* 주문 추천 */
+.order-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.order-card{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:12px}
+.order-prod{font-size:11px;color:#64748B;margin-bottom:6px;font-weight:600}
+.order-val{font-size:20px;font-weight:700;color:#4F46E5}
+.order-unit{font-size:11px;color:#94A3B8;margin-left:3px}
+.order-reason{font-size:10px;color:#94A3B8;margin-top:4px}
+.order-detail{display:flex;gap:8px;margin-top:8px}
+.order-detail-item{font-size:10px;color:#64748B}
+.order-detail-item span{font-weight:600;color:#0F172A}
+
+/* 페이지 숨김 */
+.page{display:none}
+.page.active{display:block}
+
+.empty{text-align:center;padding:30px;color:#94A3B8;font-size:12px}
+</style>
+</head>
+<body>
+
+<!-- 탭 -->
+<div class="tab-bar">
+  <div class="tab active" onclick="showTab('sales')">📊 판매량통계</div>
+  <div class="tab" onclick="showTab('order')">📦 주문량추천</div>
+  <div class="tab" onclick="showTab('inventory')">🗃️ 재고/잔여관리</div>
+</div>
+
+<!-- 필터 -->
+<div class="filter-bar">
+  <span class="filter-label">기간</span>
+  <div style="display:flex;gap:6px">
+    <div class="pill" onclick="setPeriod(7,this)">7일</div>
+    <div class="pill active" onclick="setPeriod(30,this)">30일</div>
+    <div class="pill" onclick="setPeriod(90,this)">90일</div>
+  </div>
+  <div class="filter-sep"></div>
+  <span class="date-txt" id="period-label">최근 30일</span>
+  <span style="margin-left:auto;font-size:10px;color:#CBD5E1" id="data-info">-</span>
+</div>
+
+<!-- ===== 판매량통계 ===== -->
+<div id="page-sales" class="page active">
+<div class="content">
+  <div class="kpi-row" id="kpi-sales">
+    <div class="empty" style="grid-column:1/-1">로딩 중...</div>
+  </div>
+  <div class="row2">
+    <div class="card">
+      <div class="card-head">
+        <div><div class="card-title">일별 판매장수 추이</div><div class="card-meta">연금 · 스크래치1000 · 스크래치2000</div></div>
+        <div class="leg-wrap">
+          <div class="leg"><div class="leg-dot" style="background:#F59E0B"></div>연금</div>
+          <div class="leg"><div class="leg-dot" style="background:#4F46E5"></div>스1000</div>
+          <div class="leg"><div class="leg-dot" style="background:#10B981"></div>스2000</div>
+        </div>
+      </div>
+      <canvas id="salesChart" height="110"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div><div class="card-title">상품별 비중</div><div class="card-meta">판매금액 기준</div></div>
+      </div>
+      <canvas id="donutChart" height="110"></canvas>
+      <div id="donut-legend" style="margin-top:8px;display:flex;flex-direction:column;gap:5px"></div>
+    </div>
+  </div>
+  <div class="row3">
+    <div class="card">
+      <div class="card-head"><div class="card-title">요일별 평균 판매장수</div></div>
+      <canvas id="dayChart" height="100"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">근무자별 판매량</div></div>
+      <div id="worker-list" style="display:flex;flex-direction:column;gap:6px;margin-top:4px"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">판매금액 추이</div></div>
+      <canvas id="amtChart" height="100"></canvas>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===== 주문량추천 ===== -->
+<div id="page-order" class="page">
+<div class="content">
+  <div class="card" style="padding:16px 18px">
+    <div class="card-head">
+      <div><div class="card-title">📦 주문량 추천</div><div class="card-meta">최근 판매 데이터 기반 자동 계산</div></div>
+      <div style="font-size:10px;color:#94A3B8" id="order-date">기준일: -</div>
+    </div>
+    <div class="order-grid" id="order-grid">
+      <div class="empty" style="grid-column:1/-1">로딩 중...</div>
+    </div>
+  </div>
+  <div class="row2">
+    <div class="card">
+      <div class="card-head"><div class="card-title">일별 판매량 추이 (주문 기준)</div><div class="card-meta">최근 14일</div></div>
+      <canvas id="orderTrendChart" height="110"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">주문 참고 지표</div></div>
+      <div id="order-stats" style="display:flex;flex-direction:column;gap:8px;margin-top:4px"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===== 재고/잔여관리 ===== -->
+<div id="page-inventory" class="page">
+<div class="content">
+  <div class="kpi-row" id="kpi-inv" style="grid-template-columns:repeat(3,1fr)">
+    <div class="empty" style="grid-column:1/-1">로딩 중...</div>
+  </div>
+  <div class="row2">
+    <div class="card">
+      <div class="card-head"><div class="card-title">상품별 재고 현황</div><div class="card-meta">최근 마감 기준</div></div>
+      <table class="inv-table" id="inv-table">
+        <thead><tr><th>상품</th><th>출근재고</th><th>마감재고</th><th>판매</th><th>잔여</th><th>상태</th></tr></thead>
+        <tbody id="inv-tbody"><tr><td colspan="6" class="empty">로딩 중...</td></tr></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">재고 추이</div><div class="card-meta">일별 마감재고</div></div>
+      <canvas id="invChart" height="130"></canvas>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head"><div class="card-title">잔여장 현황</div><div class="card-meta">미판매 잔여장 추이</div></div>
+    <canvas id="remainChart" height="80"></canvas>
+  </div>
+</div>
+</div>
+
+<script>
+const SID = new URLSearchParams(location.search).get('store_id') || 'store001';
+let allData = [], period = 30, charts = {};
+const C = { grid:'rgba(0,0,0,0.04)', txt:'#94A3B8', pension:'#F59E0B', sp1000:'#4F46E5', sp2000:'#10B981', purple:'#8B5CF6' };
+
+function fmt(n) {
+  const v = parseInt(n)||0;
+  if(v>=10000) return Math.round(v/10000)+'만';
+  return v.toLocaleString();
+}
+function fd(s){ return s?String(s).slice(5):''; }
+function filtered() {
+  const c = new Date(); c.setDate(c.getDate()-period);
+  return allData.filter(r=>new Date(r.closing_date)>=c && r.worker!=='시재');
+}
+function dc(id){ if(charts[id]){charts[id].destroy();delete charts[id];} }
+
+function showTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    const tabs=['sales','order','inventory'];
+    t.classList.toggle('active', tabs[i]===tab);
+  });
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+tab).classList.add('active');
+}
+
+function setPeriod(d,el) {
+  period=d;
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('period-label').textContent=`최근 ${d}일`;
+  renderAll();
+}
+
+// ===== 판매량통계 =====
+function renderSalesKPI(d) {
+  const tP = d.reduce((s,r)=>s+(parseInt(r.pension_sales_count)||0),0);
+  const tS1 = d.reduce((s,r)=>s+(parseInt(r.instant1000_sales_count)||0),0);
+  const tS2 = d.reduce((s,r)=>s+(parseInt(r.instant2000_sales_count)||0),0);
+  const tI = d.reduce((s,r)=>s+(parseInt(r.instant_total_amount)||0),0);
+  const avgDay = d.length ? Math.round((tP+tS1+tS2)/d.length) : 0;
+  const n = d.length||1;
+
+  const kpis=[
+    {l:'연금 판매',v:tP.toLocaleString()+'장',s:`일평균 ${Math.round(tP/n)}장`,ic:'🎫',bg:'#FFFBEB'},
+    {l:'스크래치1000',v:tS1.toLocaleString()+'장',s:`일평균 ${Math.round(tS1/n)}장`,ic:'🎟',bg:'#EEF2FF'},
+    {l:'스크래치2000',v:tS2.toLocaleString()+'장',s:`일평균 ${Math.round(tS2/n)}장`,ic:'🎪',bg:'#ECFDF5'},
+    {l:'즉석 총판매액',v:fmt(tI)+'원',s:`일평균 ${fmt(Math.round(tI/n))}원`,ic:'💰',bg:'#FFF1F2'},
+    {l:'일평균 판매장수',v:avgDay.toLocaleString()+'장',s:`조회 ${d.length}일`,ic:'📊',bg:'#F0FDF4'},
+    {l:'데이터 기간',v:d.length+'일',s:d.length?`${fd(d[0]?.closing_date)}~${fd(d[d.length-1]?.closing_date)}`:'',ic:'📅',bg:'#F8FAFC'},
+  ];
+  document.getElementById('kpi-sales').innerHTML = kpis.map(k=>`
+    <div class="kpi">
+      <div class="kpi-top"><div class="kpi-lbl">${k.l}</div><div class="kpi-ico" style="background:${k.bg}">${k.ic}</div></div>
+      <div class="kpi-val">${k.v}</div>
+      <div class="kpi-sub">${k.s}</div>
+    </div>
+  `).join('');
+}
+
+function renderSalesChart(d) {
+  dc('salesChart');
+  const s=[...d].sort((a,b)=>a.closing_date>b.closing_date?1:-1);
+  charts['salesChart']=new Chart(document.getElementById('salesChart'),{
+    type:'line',
+    data:{labels:s.map(r=>fd(r.closing_date)),datasets:[
+      {label:'연금',data:s.map(r=>parseInt(r.pension_sales_count)||0),borderColor:C.pension,backgroundColor:'rgba(245,158,11,0.07)',borderWidth:1.5,tension:.4,fill:true,pointRadius:0,pointHoverRadius:4},
+      {label:'스1000',data:s.map(r=>parseInt(r.instant1000_sales_count)||0),borderColor:C.sp1000,backgroundColor:'rgba(79,70,229,0.07)',borderWidth:1.5,tension:.4,fill:true,pointRadius:0,pointHoverRadius:4},
+      {label:'스2000',data:s.map(r=>parseInt(r.instant2000_sales_count)||0),borderColor:C.sp2000,backgroundColor:'rgba(16,185,129,0.07)',borderWidth:1.5,tension:.4,fill:true,pointRadius:0,pointHoverRadius:4},
+    ]},
+    options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false}},scales:{x:{grid:{color:C.grid},ticks:{color:C.txt,maxTicksLimit:8}},y:{grid:{color:C.grid},ticks:{color:C.txt}}}}
+  });
+}
+
+function renderDonut(d) {
+  dc('donutChart');
+  const tP=d.reduce((s,r)=>s+(parseInt(r.pension_sales_count)||0)*1000,0);
+  const tS1=d.reduce((s,r)=>s+(parseInt(r.instant1000_sales_amount)||0),0);
+  const tS2=d.reduce((s,r)=>s+(parseInt(r.instant2000_sales_amount)||0),0);
+  const total=tP+tS1+tS2||1;
+  charts['donutChart']=new Chart(document.getElementById('donutChart'),{
+    type:'doughnut',
+    data:{labels:['연금','스1000','스2000'],datasets:[{data:[tP,tS1,tS2],backgroundColor:[C.pension,C.sp1000,C.sp2000],borderWidth:0,hoverOffset:4}]},
+    options:{responsive:true,cutout:'70%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${fmt(c.raw)}원`}}}}
+  });
+  document.getElementById('donut-legend').innerHTML=[
+    {l:'연금',v:tP,c:C.pension},
+    {l:'스1000',v:tS1,c:C.sp1000},
+    {l:'스2000',v:tS2,c:C.sp2000},
+  ].map(i=>`
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:#64748B">
+        <div style="width:8px;height:8px;border-radius:2px;background:${i.c}"></div>${i.l}
+      </div>
+      <div style="font-size:10px;font-weight:600;color:#0F172A">${fmt(i.v)}원 <span style="color:#94A3B8">(${Math.round(i.v/total*100)}%)</span></div>
+    </div>
+  `).join('');
+}
+
+function renderDayChart(d) {
+  dc('dayChart');
+  const dm={},dc2={};
+  d.forEach(r=>{
+    const wd=new Date(r.closing_date).getDay();
+    const cnt=(parseInt(r.pension_sales_count)||0)+(parseInt(r.instant1000_sales_count)||0)+(parseInt(r.instant2000_sales_count)||0);
+    dm[wd]=(dm[wd]||0)+cnt; dc2[wd]=(dc2[wd]||0)+1;
+  });
+  const days=['일','월','화','수','목','금','토'];
+  const vals=days.map((_,i)=>dc2[i]?Math.round(dm[i]/dc2[i]):0);
+  const mx=Math.max(...vals);
+  charts['dayChart']=new Chart(document.getElementById('dayChart'),{
+    type:'bar',
+    data:{labels:days,datasets:[{data:vals,backgroundColor:vals.map(v=>v===mx?C.sp1000:'#DBEAFE'),borderRadius:4,borderSkipped:false}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:C.txt}},y:{grid:{color:C.grid},ticks:{color:C.txt}}}}
+  });
+}
+
+function renderWorkerList(d) {
+  const wm={};
+  d.forEach(r=>{
+    const w=r.worker||'미상';
+    wm[w]=(wm[w]||0)+(parseInt(r.pension_sales_count)||0)+(parseInt(r.instant1000_sales_count)||0)+(parseInt(r.instant2000_sales_count)||0);
+  });
+  const sorted=Object.entries(wm).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const mx=sorted[0]?.[1]||1;
+  const cs=[C.sp1000,C.pension,C.sp2000,C.purple,'#EF4444'];
+  document.getElementById('worker-list').innerHTML=sorted.map(([n,v],i)=>`
+    <div style="display:flex;align-items:center;gap:6px">
+      <div style="font-size:10px;color:#94A3B8;width:12px">${i+1}</div>
+      <div style="font-size:11px;color:#475569;width:48px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${n}</div>
+      <div style="flex:1;height:5px;background:#F1F5F9;border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:${Math.round(v/mx*100)}%;background:${cs[i]};border-radius:3px"></div>
+      </div>
+      <div style="font-size:10px;color:#64748B;white-space:nowrap">${v.toLocaleString()}장</div>
+    </div>
+  `).join('');
+}
+
+function renderAmtChart(d) {
+  dc('amtChart');
+  const s=[...d].sort((a,b)=>a.closing_date>b.closing_date?1:-1);
+  charts['amtChart']=new Chart(document.getElementById('amtChart'),{
+    type:'bar',
+    data:{labels:s.map(r=>fd(r.closing_date)),datasets:[
+      {label:'연금',data:s.map(r=>parseInt(r.pension_sales_count)||0),backgroundColor:'rgba(245,158,11,0.8)',borderRadius:2,borderSkipped:false},
+      {label:'스1000',data:s.map(r=>(parseInt(r.instant1000_sales_amount)||0)/1000),backgroundColor:'rgba(79,70,229,0.8)',borderRadius:2,borderSkipped:false},
+      {label:'스2000',data:s.map(r=>(parseInt(r.instant2000_sales_amount)||0)/1000),backgroundColor:'rgba(16,185,129,0.8)',borderRadius:2,borderSkipped:false},
+    ]},
+    options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.raw}천원`}}},scales:{x:{grid:{display:false},ticks:{color:C.txt,maxTicksLimit:8}},y:{grid:{color:C.grid},ticks:{color:C.txt},stacked:true},x:{stacked:true}}}
+  });
+}
+
+// ===== 주문량추천 =====
+function renderOrder(d) {
+  if(!d.length) return;
+  const recent=d.slice(-14);
+  const avgP=Math.round(recent.reduce((s,r)=>s+(parseInt(r.pension_sales_count)||0),0)/recent.length);
+  const avgS1=Math.round(recent.reduce((s,r)=>s+(parseInt(r.instant1000_sales_count)||0),0)/recent.length);
+  const avgS2=Math.round(recent.reduce((s,r)=>s+(parseInt(r.instant2000_sales_count)||0),0)/recent.length);
+  const last=d[d.length-1];
+  const remainP=parseInt(last?.pension_sales_count)||0;
+  const remainS1=parseInt(last?.instant1000_sales_count)||0;
+  const remainS2=parseInt(last?.instant2000_sales_count)||0;
+
+  document.getElementById('order-date').textContent='기준일: '+new Date().toLocaleDateString('ko-KR');
+
+  const orders=[
+    {prod:'연금복권', avg:avgP, remain:remainP, unit:'권', price:1000, color:C.pension,
+     reason:`일평균 ${avgP}장 판매 기준`},
+    {prod:'스크래치1000', avg:avgS1, remain:remainS1, unit:'장', price:1000, color:C.sp1000,
+     reason:`일평균 ${avgS1}장 판매 기준`},
+    {prod:'스크래치2000', avg:avgS2, remain:remainS2, unit:'장', price:2000, color:C.sp2000,
+     reason:`일평균 ${avgS2}장 판매 기준`},
+  ];
+
+  document.getElementById('order-grid').innerHTML=orders.map(o=>{
+    const recommend=Math.max(0, Math.ceil(o.avg*3-o.remain));
+    const days=o.avg>0?Math.round(o.remain/o.avg):0;
+    return `
+    <div class="order-card">
+      <div class="order-prod">${o.prod}</div>
+      <div>
+        <span class="order-val" style="color:${o.color}">${recommend}</span>
+        <span class="order-unit">${o.unit} 추천</span>
+      </div>
+      <div class="order-reason">${o.reason}</div>
+      <div class="order-detail">
+        <div class="order-detail-item">일평균 <span>${o.avg}${o.unit}</span></div>
+        <div class="order-detail-item">현재잔여 <span>${o.remain}${o.unit}</span></div>
+        <div class="order-detail-item">예상소진 <span>${days}일</span></div>
+      </div>
+      <div class="progress-bg" style="margin-top:8px">
+        <div class="progress-fill" style="width:${Math.min(100,Math.round(o.remain/(o.avg*7)*100))}%;background:${o.color}"></div>
+      </div>
+    </div>
+    `;
+  }).join('');
+
+  dc('orderTrendChart');
+  const s=[...recent].sort((a,b)=>a.closing_date>b.closing_date?1:-1);
+  charts['orderTrendChart']=new Chart(document.getElementById('orderTrendChart'),{
+    type:'line',
+    data:{labels:s.map(r=>fd(r.closing_date)),datasets:[
+      {label:'연금',data:s.map(r=>parseInt(r.pension_sales_count)||0),borderColor:C.pension,borderWidth:1.5,tension:.4,pointRadius:2},
+      {label:'스1000',data:s.map(r=>parseInt(r.instant1000_sales_count)||0),borderColor:C.sp1000,borderWidth:1.5,tension:.4,pointRadius:2},
+      {label:'스2000',data:s.map(r=>parseInt(r.instant2000_sales_count)||0),borderColor:C.sp2000,borderWidth:1.5,tension:.4,pointRadius:2},
+    ]},
+    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},scales:{x:{grid:{display:false},ticks:{color:C.txt,maxTicksLimit:7}},y:{grid:{color:C.grid},ticks:{color:C.txt}}}}
+  });
+
+  document.getElementById('order-stats').innerHTML=[
+    {l:'연금 일평균',v:avgP+'장',c:C.pension},
+    {l:'스1000 일평균',v:avgS1+'장',c:C.sp1000},
+    {l:'스2000 일평균',v:avgS2+'장',c:C.sp2000},
+    {l:'분석 기간',v:recent.length+'일',c:'#64748B'},
+  ].map(i=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #F8FAFC">
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#64748B">
+        <div style="width:8px;height:8px;border-radius:50%;background:${i.c}"></div>${i.l}
+      </div>
+      <div style="font-size:12px;font-weight:600;color:#0F172A">${i.v}</div>
+    </div>
+  `).join('');
+}
+
+// ===== 재고/잔여관리 =====
+function renderInventory(d) {
+  if(!d.length) return;
+  const last=[...d].sort((a,b)=>a.closing_date>b.closing_date?-1:1)[0];
+
+  const items=[
+    {prod:'연금복권', start:parseInt(last.pension_sales_count)||0, end:0,
+     sold:parseInt(last.pension_sales_count)||0, remain:parseInt(last.pension_sales_count)||0,
+     out:parseInt(last.pension_sales_count)||0},
+  ];
+
+  // KPI
+  const totalRemain=(parseInt(last.pension_sales_count)||0)+(parseInt(last.instant1000_sales_count)||0)+(parseInt(last.instant2000_sales_count)||0);
+  document.getElementById('kpi-inv').style.gridTemplateColumns='repeat(3,1fr)';
+  document.getElementById('kpi-inv').innerHTML=[
+    {l:'연금 잔여',v:(parseInt(last.pension_sales_count)||0)+'장',ic:'🎫',bg:'#FFFBEB'},
+    {l:'스1000 잔여',v:(parseInt(last.instant1000_sales_count)||0)+'장',ic:'🎟',bg:'#EEF2FF'},
+    {l:'스2000 잔여',v:(parseInt(last.instant2000_sales_count)||0)+'장',ic:'🎪',bg:'#ECFDF5'},
+  ].map(k=>`
+    <div class="kpi">
+      <div class="kpi-top"><div class="kpi-lbl">${k.l}</div><div class="kpi-ico" style="background:${k.bg}">${k.ic}</div></div>
+      <div class="kpi-val">${k.v}</div>
+      <div class="kpi-sub">최근 마감 기준</div>
+    </div>
+  `).join('');
+
+  // 재고 테이블
+  const rows=[
+    {prod:'연금복권',start:last.pension_sales_count||0,end:0,sold:last.pension_sales_count||0,remain:last.pension_sales_count||0,color:C.pension},
+    {prod:'스크래치1000',start:last.instant1000_sales_count||0,end:0,sold:last.instant1000_sales_count||0,remain:last.instant1000_sales_count||0,color:C.sp1000},
+    {prod:'스크래치2000',start:last.instant2000_sales_count||0,end:0,sold:last.instant2000_sales_count||0,remain:last.instant2000_sales_count||0,color:C.sp2000},
+  ];
+  document.getElementById('inv-tbody').innerHTML=rows.map(r=>{
+    const pct=r.start>0?Math.round(r.remain/r.start*100):0;
+    const badge=pct>30?'badge-ok':pct>10?'badge-warn':'badge-low';
+    const badgeTxt=pct>30?'충분':pct>10?'보통':'부족';
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;border-radius:2px;background:${r.color}"></div>${r.prod}</div></td>
+      <td>${parseInt(r.start).toLocaleString()}장</td>
+      <td>-</td>
+      <td>${parseInt(r.sold).toLocaleString()}장</td>
+      <td>${parseInt(r.remain).toLocaleString()}장</td>
+      <td><span class="badge ${badge}">${badgeTxt}</span></td>
+    </tr>`;
+  }).join('');
+
+  // 재고 추이 차트
+  dc('invChart');
+  const s=[...d].sort((a,b)=>a.closing_date>b.closing_date?1:-1).slice(-14);
+  charts['invChart']=new Chart(document.getElementById('invChart'),{
+    type:'line',
+    data:{labels:s.map(r=>fd(r.closing_date)),datasets:[
+      {label:'연금',data:s.map(r=>parseInt(r.pension_sales_count)||0),borderColor:C.pension,borderWidth:1.5,tension:.4,pointRadius:2},
+      {label:'스1000',data:s.map(r=>parseInt(r.instant1000_sales_count)||0),borderColor:C.sp1000,borderWidth:1.5,tension:.4,pointRadius:2},
+      {label:'스2000',data:s.map(r=>parseInt(r.instant2000_sales_count)||0),borderColor:C.sp2000,borderWidth:1.5,tension:.4,pointRadius:2},
+    ]},
+    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},scales:{x:{grid:{display:false},ticks:{color:C.txt,maxTicksLimit:7}},y:{grid:{color:C.grid},ticks:{color:C.txt}}}}
+  });
+
+  // 잔여장 차트
+  dc('remainChart');
+  charts['remainChart']=new Chart(document.getElementById('remainChart'),{
+    type:'bar',
+    data:{labels:s.map(r=>fd(r.closing_date)),datasets:[
+      {label:'연금 잔여',data:s.map(r=>parseInt(r.pension_sales_count)||0),backgroundColor:'rgba(245,158,11,0.7)',borderRadius:2,borderSkipped:false},
+      {label:'스1000 잔여',data:s.map(r=>parseInt(r.instant1000_sales_count)||0),backgroundColor:'rgba(79,70,229,0.7)',borderRadius:2,borderSkipped:false},
+      {label:'스2000 잔여',data:s.map(r=>parseInt(r.instant2000_sales_count)||0),backgroundColor:'rgba(16,185,129,0.7)',borderRadius:2,borderSkipped:false},
+    ]},
+    options:{responsive:true,plugins:{legend:{position:'right',labels:{boxWidth:8,font:{size:10}}}},scales:{x:{grid:{display:false},ticks:{color:C.txt,maxTicksLimit:8}},y:{grid:{color:C.grid},ticks:{color:C.txt}},xAxes:[{stacked:true}],yAxes:[{stacked:true}]}}
+  });
+}
+
+function renderAll() {
+  const d = filtered();
+  if(!d.length) return;
+  renderSalesKPI(d);
+  renderSalesChart(d);
+  renderDonut(d);
+  renderDayChart(d);
+  renderWorkerList(d);
+  renderAmtChart(d);
+  renderOrder(d);
+  renderInventory(d);
+  document.getElementById('data-info').textContent=`총 ${d.length}일 데이터`;
+}
+
+async function load() {
+  try {
+    const r = await fetch(`/stats/list?store_id=${SID}&days=365`);
+    if(!r.ok) throw new Error('서버 오류');
+    allData = await r.json();
+    renderAll();
+  } catch(e) {
+    document.getElementById('kpi-sales').innerHTML=`<div class="empty" style="grid-column:1/-1">오류: ${e.message}</div>`;
+  }
+}
+
+load();
+</script>
+</body>
+</html>
