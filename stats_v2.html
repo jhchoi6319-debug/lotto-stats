@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>매장통계 대시보드</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Malgun Gothic',sans-serif}
+body{display:flex;min-height:100vh;background:#F0F4FF}
+
+/* 사이드바 */
+.sidebar{width:200px;min-height:100vh;background:#fff;border-right:1px solid #E8EDF5;display:flex;flex-direction:column;flex-shrink:0}
+.sidebar-logo{padding:20px 16px;border-bottom:1px solid #E8EDF5}
+.sidebar-logo .logo-icon{width:32px;height:32px;background:#4F46E5;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;margin-bottom:6px}
+.sidebar-logo .logo-title{font-size:15px;font-weight:700;color:#1E293B}
+.sidebar-logo .logo-sub{font-size:11px;color:#94A3B8;margin-top:1px}
+.sidebar-nav{padding:12px 0;flex:1}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;font-size:13px;color:#64748B;cursor:pointer;border-radius:0;transition:all .15s}
+.nav-item:hover{background:#F8FAFF;color:#4F46E5}
+.nav-item.active{background:#EEF2FF;color:#4F46E5;font-weight:600;border-right:3px solid #4F46E5}
+.nav-icon{font-size:15px;width:20px;text-align:center}
+.sidebar-footer{padding:16px;border-top:1px solid #E8EDF5}
+.store-card{background:#F8FAFF;border-radius:10px;padding:12px}
+.store-name{font-size:13px;font-weight:600;color:#1E293B}
+.store-online{display:flex;align-items:center;gap:5px;font-size:11px;color:#059669;margin-top:3px}
+.online-dot{width:6px;height:6px;border-radius:50%;background:#059669;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.store-code{font-size:11px;color:#94A3B8;margin-top:4px}
+.logout-btn{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:12px;color:#94A3B8;cursor:pointer;padding:4px 0}
+.logout-btn:hover{color:#EF4444}
+
+/* 메인 */
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{background:#fff;border-bottom:1px solid #E8EDF5;padding:12px 24px;display:flex;align-items:center;justify-content:space-between}
+.topbar-left{display:flex;align-items:center;gap:8px}
+.topbar-menu{font-size:18px;cursor:pointer;color:#64748B}
+.page-title{font-size:15px;font-weight:700;color:#1E293B}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.date-badge{display:flex;align-items:center;gap:6px;font-size:12px;color:#64748B;padding:5px 12px;border:1px solid #E8EDF5;border-radius:6px;background:#fff}
+.period-btn{display:flex;align-items:center;gap:5px;font-size:12px;color:#4F46E5;padding:5px 12px;border:1px solid #C7D2FE;border-radius:6px;background:#EEF2FF;cursor:pointer}
+.notif-btn{position:relative;width:32px;height:32px;border:1px solid #E8EDF5;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px}
+.notif-badge{position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:#EF4444;border-radius:50%;font-size:9px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
+.user-info{display:flex;align-items:center;gap:8px}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:#4F46E5;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:600}
+.user-name{font-size:12px;font-weight:600;color:#1E293B}
+.user-code{font-size:10px;color:#94A3B8}
+
+/* 콘텐츠 */
+.content{padding:20px 24px;overflow-y:auto;flex:1}
+.welcome{margin-bottom:16px}
+.welcome h2{font-size:18px;font-weight:700;color:#1E293B}
+.welcome p{font-size:12px;color:#94A3B8;margin-top:3px}
+.update-bar{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-bottom:16px}
+.update-time{font-size:11px;color:#94A3B8}
+.update-time span{color:#4F46E5;font-weight:600}
+.refresh-btn{display:flex;align-items:center;gap:5px;font-size:11px;color:#64748B;padding:4px 10px;border:1px solid #E8EDF5;border-radius:5px;background:#fff;cursor:pointer}
+.refresh-btn:hover{background:#F8FAFF}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
+.kpi-card{background:#fff;border-radius:12px;padding:16px;border:1px solid #E8EDF5}
+.kpi-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.kpi-icon-wrap{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.kpi-label{font-size:11px;color:#94A3B8;font-weight:600;margin-top:4px}
+.kpi-val{font-size:20px;font-weight:700;color:#1E293B;line-height:1.2}
+.kpi-footer{display:flex;align-items:center;gap:6px;margin-top:6px}
+.kpi-change{font-size:11px;font-weight:600;padding:2px 6px;border-radius:5px}
+.kpi-change.up{background:#ECFDF5;color:#059669}
+.kpi-change.dn{background:#FEF2F2;color:#DC2626}
+.kpi-sub{font-size:11px;color:#CBD5E1}
+
+/* 차트 행 */
+.chart-row{display:grid;gap:12px;margin-bottom:12px}
+.chart-row-2{grid-template-columns:3fr 2fr}
+.chart-row-3{grid-template-columns:1fr 1fr 1fr}
+.chart-card{background:#fff;border-radius:12px;padding:18px 20px;border:1px solid #E8EDF5}
+.chart-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.chart-title{font-size:13px;font-weight:700;color:#1E293B}
+.chart-meta{font-size:11px;color:#CBD5E1;margin-top:2px}
+.chart-period{font-size:11px;color:#4F46E5;padding:3px 8px;border:1px solid #C7D2FE;border-radius:5px;background:#EEF2FF;cursor:pointer}
+.legend-wrap{display:flex;gap:10px;flex-wrap:wrap}
+.leg{display:flex;align-items:center;gap:4px;font-size:11px;color:#64748B}
+.leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* 도넛 */
+.donut-wrap{display:flex;align-items:center;gap:20px}
+.donut-chart{position:relative;width:140px;height:140px;flex-shrink:0}
+.donut-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.donut-center-label{font-size:10px;color:#94A3B8}
+.donut-center-val{font-size:14px;font-weight:700;color:#1E293B}
+.donut-legend{flex:1}
+.donut-item{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid #F1F5F9}
+.donut-item:last-child{border-bottom:none}
+.donut-item-left{display:flex;align-items:center;gap:6px;font-size:12px;color:#475569}
+.donut-item-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.donut-item-val{font-size:12px;font-weight:600;color:#1E293B}
+.donut-item-pct{font-size:11px;color:#94A3B8;margin-left:4px}
+
+/* 일별 요약 */
+.summary-list{display:flex;flex-direction:column;gap:0}
+.summary-item{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid #F1F5F9}
+.summary-item:last-child{border-bottom:none}
+.summary-label{font-size:12px;color:#64748B}
+.summary-val{font-size:12px;font-weight:600;color:#1E293B}
+
+/* 7일 비교 */
+.compare-list{display:flex;flex-direction:column;gap:8px}
+.compare-item{display:flex;align-items:center;gap:8px}
+.compare-label{font-size:12px;color:#64748B;width:64px;flex-shrink:0}
+.compare-bar-bg{flex:1;height:6px;background:#F1F5F9;border-radius:3px;overflow:hidden}
+.compare-bar-fill{height:100%;border-radius:3px;transition:width .6s}
+.compare-val{font-size:12px;font-weight:600;color:#1E293B;white-space:nowrap;min-width:70px;text-align:right}
+.compare-change{font-size:11px;font-weight:600;min-width:44px;text-align:right}
+.compare-change.up{color:#059669}
+.compare-change.dn{color:#DC2626}
+
+.empty{background:#F8FAFF;color:#94A3B8;padding:30px;border-radius:8px;font-size:12px;text-align:center;border:1px dashed #E8EDF5}
+.err{background:#FEF2F2;color:#DC2626;padding:12px;border-radius:8px;font-size:12px}
+</style>
+</head>
+<body>
+
+<!-- 사이드바 -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">📊</div>
+    <div class="logo-title">매장통계</div>
+    <div class="logo-sub">대시보드</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-item active"><span class="nav-icon">🏠</span>대시보드</div>
+    <div class="nav-item"><span class="nav-icon">📅</span>일별 통계</div>
+    <div class="nav-item"><span class="nav-icon">📆</span>월별 통계</div>
+    <div class="nav-item"><span class="nav-icon">🎯</span>상품별 분석</div>
+    <div class="nav-item"><span class="nav-icon">📈</span>판매 분석</div>
+    <div class="nav-item"><span class="nav-icon">💰</span>수수료 현황</div>
+    <div class="nav-item"><span class="nav-icon">⚖️</span>차액 현황</div>
+    <div class="nav-item"><span class="nav-icon">🗄️</span>데이터 관리</div>
+    <div class="nav-item"><span class="nav-icon">⚙️</span>설정</div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="store-card">
+      <div class="store-name" id="s-name">행운로또점</div>
+      <div class="store-online"><div class="online-dot"></div>온라인</div>
+      <div class="store-code">점포코드: <span id="s-code">store001</span></div>
+      <div class="store-code" style="margin-top:2px">최근 접속: <span id="s-date">-</span></div>
+    </div>
+    <div class="logout-btn">🚪 로그아웃</div>
+  </div>
+</div>
+
+<!-- 메인 -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-menu">☰</div>
+      <div style="margin-left:8px">
+        <div class="page-title">매장통계 대시보드</div>
+        <div style="font-size:11px;color:#94A3B8" id="store-sub">행운로또점 (store001)</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="date-badge">📅 <span id="today-str">-</span></div>
+      <div class="period-btn" onclick="togglePeriod()">기간 비교 ▾</div>
+      <div class="notif-btn">🔔<div class="notif-badge">3</div></div>
+      <div class="user-info">
+        <div class="user-avatar">행</div>
+        <div>
+          <div class="user-name">행운로또점</div>
+          <div class="user-code">store001</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="welcome">
+      <h2>안녕하세요, <span id="w-name">행운로또점</span>님! 👋</h2>
+      <p>오늘도 좋은 하루 보내세요!</p>
+    </div>
+    <div class="update-bar">
+      <div class="update-time">⏱ 데이터 마지막 업데이트 <span id="last-update">-</span></div>
+      <button class="refresh-btn" onclick="load()">↺ 새로고침</button>
+    </div>
+
+    <div id="ksec" class="kpi-grid">
+      <div class="empty" style="grid-column:1/-1">로딩 중...</div>
+    </div>
+
+    <div class="chart-row chart-row-2">
+      <div class="chart-card">
+        <div class="chart-head">
+          <div><div class="chart-title">매출 추이</div><div class="chart-meta">일별 총매출 · 즉석복권 · 토토 · 로또</div></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="legend-wrap">
+              <div class="leg"><div class="leg-dot" style="background:#6366F1"></div>총매출</div>
+              <div class="leg"><div class="leg-dot" style="background:#F59E0B"></div>즉석복권</div>
+              <div class="leg"><div class="leg-dot" style="background:#06B6D4"></div>토토</div>
+              <div class="leg"><div class="leg-dot" style="background:#10B981"></div>로또</div>
+            </div>
+            <div class="chart-period">최근 30일 ▾</div>
+          </div>
+        </div>
+        <canvas id="mainChart" height="140"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-head">
+          <div><div class="chart-title">수수료 추이</div><div class="chart-meta">일별 총 수수료</div></div>
+          <div class="chart-period">최근 30일 ▾</div>
+        </div>
+        <canvas id="feeChart" height="140"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-row chart-row-3">
+      <div class="chart-card">
+        <div class="chart-head">
+          <div><div class="chart-title">상품별 매출 비중</div></div>
+        </div>
+        <div class="donut-wrap">
+          <div class="donut-chart">
+            <canvas id="donutChart"></canvas>
+            <div class="donut-center">
+              <div class="donut-center-label">총 매출</div>
+              <div class="donut-center-val" id="donut-total">-</div>
+            </div>
+          </div>
+          <div class="donut-legend" id="donut-legend"></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-head">
+          <div><div class="chart-title">일별 요약</div><div class="chart-meta" id="summary-date">-</div></div>
+        </div>
+        <div class="summary-list" id="summary-list">
+          <div class="empty">로딩 중...</div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-head">
+          <div><div class="chart-title">최근 7일 비교</div></div>
+          <div style="font-size:11px;color:#4F46E5;cursor:pointer">더보기 ›</div>
+        </div>
+        <div class="compare-list" id="compare-list">
+          <div class="empty">로딩 중...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SID = new URLSearchParams(location.search).get('store_id') || 'store001';
+let allData = [], period = 30, charts = {};
+
+const C = {
+  purple: '#6366F1', amber: '#F59E0B', cyan: '#06B6D4',
+  green: '#10B981', red: '#EF4444', pink: '#EC4899',
+  grid: 'rgba(0,0,0,0.04)', txt: '#94A3B8'
+};
+
+function fmt(n) {
+  const v = parseInt(n) || 0;
+  if (v >= 100000000) return (v/100000000).toFixed(1) + '억';
+  if (v >= 10000000) return (v/10000000).toFixed(1) + '천만';
+  if (v >= 10000) return Math.round(v/10000) + '만';
+  return v.toLocaleString();
+}
+function fd(s) { return s ? String(s).slice(5) : ''; }
+function now() { return new Date().toLocaleString('ko-KR', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
+function today() { return new Date().toLocaleDateString('ko-KR', {year:'numeric',month:'long',day:'numeric',weekday:'short'}); }
+
+function filtered() {
+  const c = new Date(); c.setDate(c.getDate() - period);
+  return allData.filter(r => new Date(r.closing_date) >= c);
+}
+
+function dc(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
+
+function renderKPI(d) {
+  if (!d.length) { document.getElementById('ksec').innerHTML = '<div class="empty" style="grid-column:1/-1">데이터가 없습니다.</div>'; return; }
+  const tR = d.reduce((s,r) => s+(parseInt(r.total_revenue)||0), 0);
+  const tF = d.reduce((s,r) => s+(parseInt(r.total_fee)||0), 0);
+  const tI = d.reduce((s,r) => s+(parseInt(r.instant_total_amount)||0), 0);
+  const tT = d.reduce((s,r) => s+(parseInt(r.toto_sales)||0), 0);
+  const tDiff = d.reduce((s,r) => s+(parseInt(r.cash_diff)||0), 0);
+  const tIc = d.reduce((s,r) => s+(parseInt(r.instant1000_sales_count)||0)+(parseInt(r.instant2000_sales_count)||0)+(parseInt(r.pension_sales_count)||0), 0);
+
+  const kpis = [
+    {l:'오늘 총 매출', v:fmt(tR)+'원', ch:'+15.3%', up:true, ic:'🛍️', bg:'#EEF2FF', ic2:'#6366F1'},
+    {l:'오늘 총 수수료', v:fmt(tF)+'원', ch:'+8.7%', up:true, ic:'💰', bg:'#ECFDF5', ic2:'#10B981'},
+    {l:'즉석복권 판매', v:tIc.toLocaleString()+'건', ch:'+12.1%', up:true, ic:'🎟️', bg:'#FFFBEB', ic2:'#F59E0B'},
+    {l:'토토 판매', v:fmt(tT)+'원', ch:'+5.2%', up:true, ic:'⚽', bg:'#ECFEFF', ic2:'#06B6D4'},
+    {l:'차액', v:fmt(Math.abs(tDiff))+'원', ch:'-2,000원', up:false, ic:'⚖️', bg:'#FFF1F2', ic2:'#EF4444'},
+  ];
+
+  document.getElementById('ksec').innerHTML = kpis.map(k => `
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <div class="kpi-label">${k.l}</div>
+        <div class="kpi-icon-wrap" style="background:${k.bg}"><span style="font-size:18px">${k.ic}</span></div>
+      </div>
+      <div class="kpi-val">${k.v}</div>
+      <div class="kpi-footer">
+        <span class="kpi-change ${k.up?'up':'dn'}">${k.up?'▲':'▼'} ${k.ch}</span>
+        <span class="kpi-sub">전일 대비</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderMain(d) {
+  dc('mainChart');
+  const s = [...d].sort((a,b) => a.closing_date > b.closing_date ? 1 : -1);
+  charts['mainChart'] = new Chart(document.getElementById('mainChart'), {
+    type: 'line',
+    data: {
+      labels: s.map(r => fd(r.closing_date)),
+      datasets: [
+        {label:'총매출', data:s.map(r=>parseInt(r.total_revenue)||0), borderColor:C.purple, backgroundColor:'rgba(99,102,241,0.08)', borderWidth:2, tension:.4, fill:true, pointRadius:0, pointHoverRadius:4},
+        {label:'즉석복권', data:s.map(r=>parseInt(r.instant_total_amount)||0), borderColor:C.amber, borderWidth:1.5, tension:.4, pointRadius:0},
+        {label:'토토', data:s.map(r=>parseInt(r.toto_sales)||0), borderColor:C.cyan, borderWidth:1.5, tension:.4, pointRadius:0},
+        {label:'로또', data:s.map(r=>parseInt(r.lotto_sales)||0), borderColor:C.green, borderWidth:1.5, tension:.4, pointRadius:0},
+      ]
+    },
+    options: {
+      responsive:true, interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${fmt(c.raw)}원`}}},
+      scales:{x:{grid:{color:C.grid},ticks:{color:C.txt,maxTicksLimit:8}},y:{grid:{color:C.grid},ticks:{color:C.txt,callback:v=>fmt(v)}}}
+    }
+  });
+}
+
+function renderFee(d) {
+  dc('feeChart');
+  const s = [...d].sort((a,b) => a.closing_date > b.closing_date ? 1 : -1);
+  charts['feeChart'] = new Chart(document.getElementById('feeChart'), {
+    type: 'line',
+    data: {
+      labels: s.map(r => fd(r.closing_date)),
+      datasets: [{label:'총 수수료', data:s.map(r=>parseInt(r.total_fee)||0), borderColor:C.green, backgroundColor:'rgba(16,185,129,0.1)', borderWidth:2, tension:.4, fill:true, pointRadius:2, pointHoverRadius:5, pointBackgroundColor:C.green}]
+    },
+    options: {
+      responsive:true, interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>` 총 수수료: ${fmt(c.raw)}원`}}},
+      scales:{x:{grid:{color:C.grid},ticks:{color:C.txt,maxTicksLimit:8}},y:{grid:{color:C.grid},ticks:{color:C.txt,callback:v=>fmt(v)}}}
+    }
+  });
+}
+
+function renderDonut(d) {
+  dc('donutChart');
+  const tI = d.reduce((s,r)=>s+(parseInt(r.instant_total_amount)||0),0);
+  const tT = d.reduce((s,r)=>s+(parseInt(r.toto_sales)||0),0);
+  const tL = d.reduce((s,r)=>s+(parseInt(r.lotto_sales)||0),0);
+  const total = tI + tT + tL;
+  document.getElementById('donut-total').textContent = fmt(total)+'원';
+
+  charts['donutChart'] = new Chart(document.getElementById('donutChart'), {
+    type:'doughnut',
+    data:{
+      labels:['즉석복권','토토','로또'],
+      datasets:[{data:[tI,tT,tL], backgroundColor:[C.amber,C.cyan,C.green], borderWidth:0, hoverOffset:4}]
+    },
+    options:{responsive:true, cutout:'70%', plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>` ${c.label}: ${fmt(c.raw)}원`}}}}
+  });
+
+  const items = [
+    {l:'즉석복권', v:tI, c:C.amber},
+    {l:'토토', v:tT, c:C.cyan},
+    {l:'로또', v:tL, c:C.green},
+  ];
+  document.getElementById('donut-legend').innerHTML = items.map(i => `
+    <div class="donut-item">
+      <div class="donut-item-left"><div class="donut-item-dot" style="background:${i.c}"></div>${i.l}</div>
+      <div><span class="donut-item-val">${fmt(i.v)}원</span><span class="donut-item-pct">(${total?Math.round(i.v/total*100):0}%)</span></div>
+    </div>
+  `).join('');
+}
+
+function renderSummary(d) {
+  if (!d.length) return;
+  const last = [...d].sort((a,b) => a.closing_date > b.closing_date ? -1 : 1)[0];
+  document.getElementById('summary-date').textContent = last.closing_date;
+  const items = [
+    {l:'로또 판매', v:fmt(last.lotto_sales||0)+'원'},
+    {l:'로또 취소', v:fmt(last.lotto_cancel||0)+'원'},
+    {l:'로또 수수료', v:fmt(last.lotto_fee||0)+'원'},
+    {l:'토토 판매', v:fmt(last.toto_sales||0)+'원'},
+    {l:'토토 취소', v:fmt(last.toto_cancel||0)+'원'},
+    {l:'토토 수수료', v:fmt(last.toto_fee||0)+'원'},
+  ];
+  document.getElementById('summary-list').innerHTML = items.map(i => `
+    <div class="summary-item">
+      <span class="summary-label">${i.l}</span>
+      <span class="summary-val">${i.v}</span>
+    </div>
+  `).join('');
+}
+
+function renderCompare(d) {
+  const tR = d.reduce((s,r)=>s+(parseInt(r.total_revenue)||0),0);
+  const tF = d.reduce((s,r)=>s+(parseInt(r.total_fee)||0),0);
+  const tI = d.reduce((s,r)=>s+(parseInt(r.instant_total_amount)||0),0);
+  const tT = d.reduce((s,r)=>s+(parseInt(r.toto_sales)||0),0);
+  const tDiff = d.reduce((s,r)=>s+Math.abs(parseInt(r.cash_diff)||0),0);
+
+  const items = [
+    {l:'총 매출', v:tR, c:C.purple, ch:'+15.3%', up:true},
+    {l:'총 수수료', v:tF, c:C.green, ch:'+8.7%', up:true},
+    {l:'즉석 판매', v:tI, c:C.amber, ch:'+12.1%', up:true},
+    {l:'토토 판매', v:tT, c:C.cyan, ch:'+5.2%', up:true},
+    {l:'차액', v:tDiff, c:C.red, ch:'-2,000원', up:false},
+  ];
+  const maxV = Math.max(...items.map(i=>i.v)) || 1;
+
+  document.getElementById('compare-list').innerHTML = items.map(i => `
+    <div class="compare-item">
+      <div class="compare-label">${i.l}</div>
+      <div class="compare-bar-bg"><div class="compare-bar-fill" style="width:${Math.round(i.v/maxV*100)}%;background:${i.c}"></div></div>
+      <div class="compare-val">${fmt(i.v)}원</div>
+      <div class="compare-change ${i.up?'up':'dn'}">${i.up?'▲':'▼'} ${i.ch}</div>
+    </div>
+  `).join('');
+}
+
+function renderAll() {
+  const d = filtered();
+  renderKPI(d);
+  renderMain(d);
+  renderFee(d);
+  renderDonut(d);
+  renderSummary(d);
+  renderCompare(d);
+}
+
+function togglePeriod() {
+  period = period === 30 ? 7 : period === 7 ? 90 : 30;
+  renderAll();
+}
+
+async function load() {
+  try {
+    const r = await fetch(`/stats/list?store_id=${SID}&days=365`);
+    if (!r.ok) throw new Error(`서버 오류 ${r.status}`);
+    allData = await r.json();
+
+    const d = new Date();
+    document.getElementById('today-str').textContent = d.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
+    document.getElementById('last-update').textContent = d.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+
+    if (allData.length) {
+      const sn = allData[0].store_name || SID;
+      document.getElementById('s-name').textContent = sn;
+      document.getElementById('w-name').textContent = sn;
+      document.getElementById('s-date').textContent = new Date().toLocaleDateString('ko-KR');
+    }
+    renderAll();
+  } catch(e) {
+    document.getElementById('ksec').innerHTML = `<div class="err" style="grid-column:1/-1">오류: ${e.message}</div>`;
+  }
+}
+
+load();
+</script>
+</body>
+</html>
