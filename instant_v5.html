@@ -11,10 +11,10 @@
   --text:#111827;
   --muted:#6B7280;
   --soft:#9CA3AF;
-  --indigo:#5B5CF6;
-  --amber:#F59E0B;
-  --green:#10B981;
-  --cyan:#06B6D4;
+  --indigo:#4F46E5;
+  --amber:#F97316;
+  --green:#7C3AED;
+  --cyan:#2563EB;
   --red:#EF4444;
   --purple:#8B5CF6;
   --blue:#3B82F6;
@@ -390,7 +390,7 @@ body{background:var(--bg);width:1213px;color:var(--text);font-size:13px}
 const SID=new URLSearchParams(location.search).get('store_id')||'store001';
 let allData=[],periodMode='month',charts={};
 const C={
-  indigo:'#5B5CF6',amber:'#F59E0B',cyan:'#06B6D4',green:'#10B981',
+  indigo:'#4F46E5',amber:'#F97316',cyan:'#2563EB',green:'#7C3AED',
   red:'#EF4444',purple:'#8B5CF6',blue:'#3B82F6',
   grid:'rgba(0,0,0,0.04)',txt:'#9CA3AF'
 };
@@ -517,10 +517,10 @@ function renderSales(agg){
   charts['c-sales']=new Chart(document.getElementById('c-sales'),{
     type:'line',
     data:{labels,datasets:[
-      {label:'전체',data:total,borderColor:C.indigo,backgroundColor:'rgba(91,92,246,0.1)',borderWidth:3,tension:.4,fill:true,pointRadius:3,pointBackgroundColor:C.indigo,pointHoverRadius:6,pointHoverBackgroundColor:'#fff',pointHoverBorderWidth:2},
-      {label:'연금',data:agg.map(r=>r.p),borderColor:C.amber,borderWidth:1.5,tension:.4,pointRadius:0,pointHoverRadius:4,borderDash:[],fill:false},
-      {label:'스피또1000',data:agg.map(r=>r.s1),borderColor:C.cyan,borderWidth:1.5,tension:.4,pointRadius:0,pointHoverRadius:4,fill:false},
-      {label:'스피또2000',data:agg.map(r=>r.s2),borderColor:C.green,borderWidth:1.5,tension:.4,pointRadius:0,pointHoverRadius:4,fill:false},
+      {label:'전체',data:total,borderColor:C.indigo,backgroundColor:'rgba(79,70,229,0.15)',borderWidth:3.5,tension:0,fill:true,pointRadius:4,pointBackgroundColor:C.indigo,pointHoverRadius:7,pointHoverBackgroundColor:'#fff',pointHoverBorderWidth:2},
+      {label:'연금',data:agg.map(r=>r.p),borderColor:C.amber,borderWidth:1.5,tension:0,pointRadius:0,pointHoverRadius:4,borderDash:[],fill:false},
+      {label:'스피또1000',data:agg.map(r=>r.s1),borderColor:C.cyan,borderWidth:1.5,tension:0,pointRadius:0,pointHoverRadius:4,fill:false},
+      {label:'스피또2000',data:agg.map(r=>r.s2),borderColor:C.green,borderWidth:1.5,tension:0,pointRadius:0,pointHoverRadius:4,fill:false},
     ]},
     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
       plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.raw.toLocaleString()}장`}}},
@@ -539,7 +539,7 @@ function renderDonut(raw){
   document.getElementById('donut-total').textContent=fmt(total)+'원';
   charts['c-donut']=new Chart(document.getElementById('c-donut'),{
     type:'doughnut',
-    data:{labels:['연금','스피또1000','스피또2000'],datasets:[{data:[tP,tS1,tS2],backgroundColor:[C.amber,C.cyan,C.green],borderWidth:3,borderColor:'#fff',hoverOffset:8}]},
+    data:{labels:['연금','스피또1000','스피또2000'],datasets:[{data:[tP,tS1,tS2],backgroundColor:[C.amber,C.cyan,C.green],borderWidth:3.5,borderColor:'#fff',hoverOffset:8}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'70%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${fmt(c.raw)}원 (${Math.round(c.raw/total*100)}%)`}}}}
   });
   document.getElementById('donut-legend').innerHTML=[
@@ -621,7 +621,7 @@ function renderAmt(agg){
 function lineDS(label,data,color,fill=false,dash=[]){
   return{label,data,borderColor:color,
     backgroundColor:fill?color.replace('#','rgba(').replace(/^rgba\(([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})\)/,(m,r,g,b)=>`rgba(${parseInt(r,16)},${parseInt(g,16)},${parseInt(b,16)},0.12)`):'transparent',
-    borderWidth:2.5,tension:.4,fill,pointRadius:2,pointBackgroundColor:color,pointHoverRadius:5,borderDash:dash};
+    borderWidth:2.5,tension:0,fill,pointRadius:3,pointBackgroundColor:color,pointHoverRadius:5,borderDash:dash};
 }
 
 function renderLine(id,agg,datasets,yFmt=null){
