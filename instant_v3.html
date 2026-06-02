@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>즉석/연금 판매량 통계</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif}
+body{background:#F0F4F8;width:1213px;color:#1A202C;font-size:13px}
+
+.top-bar{background:#fff;border-bottom:1px solid #E2E8F0;padding:0 20px;height:50px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.tab-group{display:flex;height:50px}
+.tab{display:flex;align-items:center;gap:6px;padding:0 20px;font-size:13px;font-weight:600;color:#718096;cursor:pointer;border-bottom:3px solid transparent;transition:all .15s;white-space:nowrap}
+.tab:hover{color:#4F46E5;background:#FAFAFE}
+.tab.active{color:#4F46E5;border-bottom-color:#4F46E5}
+
+.period-bar{background:#fff;border-bottom:1px solid #E2E8F0;padding:8px 20px;display:flex;align-items:center;gap:6px}
+.pb-label{font-size:11px;color:#A0AEC0;font-weight:700;margin-right:4px}
+.pp{font-size:12px;padding:5px 14px;border:1px solid #E2E8F0;border-radius:20px;cursor:pointer;color:#718096;background:#fff;font-weight:500;white-space:nowrap}
+.pp:hover{border-color:#C7D2FE;color:#4F46E5}
+.pp.active{background:#4F46E5;color:#fff;border-color:#4F46E5;font-weight:700}
+.data-info{margin-left:auto;font-size:11px;color:#A0AEC0;background:#F7FAFC;border:1px solid #EDF2F7;border-radius:5px;padding:3px 10px}
+
+.content{padding:16px 20px;display:flex;flex-direction:column;gap:12px}
+
+.kpi-strip{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.kpi{background:#fff;border:1px solid #E8EEF4;border-radius:10px;padding:14px 15px;border-top:3px solid #E8EEF4}
+.kpi-lbl{font-size:11px;font-weight:700;color:#A0AEC0;letter-spacing:.05em;text-transform:uppercase;margin-bottom:10px}
+.kpi-main{font-size:22px;font-weight:700;color:#1A202C;line-height:1;margin-bottom:4px}
+.kpi-sub1{font-size:12px;color:#4A5568;font-weight:600;margin-bottom:2px}
+.kpi-sub2{font-size:11px;color:#A0AEC0}
+
+.row-main{display:grid;grid-template-columns:1fr 280px;gap:10px}
+.row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row-full{width:100%}
+
+.card{background:#fff;border:1px solid #E8EEF4;border-radius:10px;padding:15px 17px}
+.card-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.card-title{font-size:13px;font-weight:700;color:#2D3748}
+.card-desc{font-size:11px;color:#A0AEC0;margin-top:2px}
+.card-badge{font-size:11px;padding:3px 9px;background:#EEF2FF;color:#4F46E5;border-radius:5px;font-weight:700}
+
+.leg-wrap{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.leg{display:flex;align-items:center;gap:4px;font-size:11px;color:#718096}
+.leg-sq{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+.donut-wrap{display:flex;gap:14px;align-items:center}
+.donut-box{position:relative;width:110px;height:110px;flex-shrink:0}
+.donut-ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:10px}
+.donut-ctr-lbl{font-size:10px;color:#A0AEC0;font-weight:600}
+.donut-ctr-val{font-size:13px;font-weight:700;color:#1A202C;line-height:1.2;word-break:keep-all}
+.donut-legend{flex:1;display:flex;flex-direction:column;gap:7px}
+.dl-item{display:flex;align-items:center;justify-content:space-between}
+.dl-left{display:flex;align-items:center;gap:6px;font-size:12px;color:#4A5568}
+.dl-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.dl-val{font-size:12px;font-weight:700;color:#1A202C;white-space:nowrap}
+.dl-pct{font-size:10px;color:#A0AEC0;margin-left:3px}
+
+.rank-list{display:flex;flex-direction:column;gap:8px}
+.rank-item{display:flex;align-items:center;gap:7px}
+.rank-no{font-size:11px;color:#CBD5E0;width:14px;text-align:right;font-weight:700}
+.rank-name{font-size:12px;color:#4A5568;width:50px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.rank-bg{flex:1;height:6px;background:#F7FAFC;border-radius:3px;overflow:hidden}
+.rank-fill{height:100%;border-radius:3px;transition:width .6s}
+.rank-val{font-size:11px;color:#718096;white-space:nowrap;min-width:50px;text-align:right}
+
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{font-size:11px;font-weight:700;color:#A0AEC0;padding:8px 10px;text-align:right;border-bottom:2px solid #EDF2F7;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.data-table th:first-child{text-align:left}
+.data-table td{font-size:12px;color:#2D3748;padding:8px 10px;border-bottom:1px solid #F7FAFC;text-align:right;white-space:nowrap}
+.data-table td:first-child{text-align:left;font-weight:600;color:#1A202C}
+.data-table tr:hover td{background:#FAFBFF}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tfoot td{font-size:12px;font-weight:700;color:#1A202C;background:#F7FAFC;border-top:2px solid #EDF2F7}
+
+.page{display:flex;flex-direction:column;gap:12px}
+.page.hidden{display:none}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="tab-group">
+    <div class="tab active" onclick="showTab('sales')">📊 판매량 통계</div>
+    <div class="tab" onclick="showTab('order')">📦 주문량 추천</div>
+    <div class="tab" onclick="showTab('inventory')">🗃️ 재고·잔여 관리</div>
+  </div>
+</div>
+
+<div class="period-bar">
+  <span class="pb-label">조회 기간</span>
+  <div class="pp active" onclick="setPeriod('week',this)">이번 주</div>
+  <div class="pp" onclick="setPeriod('lastweek',this)">지난 주</div>
+  <div class="pp" onclick="setPeriod('month',this)">이번 달</div>
+  <div class="pp" onclick="setPeriod('90',this)">최근 90일</div>
+  <div class="pp" onclick="setPeriod('monthly',this)">월별 전체</div>
+  <div class="pp" onclick="setPeriod('yearly',this)">연도별</div>
+  <div class="data-info" id="data-info">로딩 중...</div>
+</div>
+
+<div class="content">
+
+<!-- 판매량통계 -->
+<div id="page-sales" class="page">
+  <div class="kpi-strip" id="kpi-strip"></div>
+
+  <div class="row-main">
+    <div class="card">
+      <div class="card-hd">
+        <div><div class="card-title">일별 판매장수 추이</div><div class="card-desc">날짜별 합산 · 최고/최저 표시</div></div>
+        <div class="leg-wrap">
+          <div class="leg"><div class="leg-sq" style="background:#F59E0B"></div>연금</div>
+          <div class="leg"><div class="leg-sq" style="background:#4F46E5"></div>스피또1000</div>
+          <div class="leg"><div class="leg-sq" style="background:#10B981"></div>스피또2000</div>
+        </div>
+      </div>
+      <div style="position:relative;height:170px"><canvas id="c-sales" role="img" aria-label="일별 판매장수 추이">판매장수 추이</canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div><div class="card-title">상품별 매출 비중</div><div class="card-desc">판매금액 기준</div></div></div>
+      <div class="donut-wrap">
+        <div class="donut-box">
+          <canvas id="c-donut" role="img" aria-label="상품별 매출 비중">도넛차트</canvas>
+          <div class="donut-ctr">
+            <div class="donut-ctr-lbl">총매출</div>
+            <div class="donut-ctr-val" id="donut-total">-</div>
+          </div>
+        </div>
+        <div class="donut-legend" id="donut-legend"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row-3">
+    <div class="card">
+      <div class="card-hd"><div><div class="card-title">요일별 평균 판매장수</div><div class="card-desc">최고 요일 강조</div></div></div>
+      <div style="position:relative;height:120px"><canvas id="c-day" role="img" aria-label="요일별 평균">요일별</canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div><div class="card-title">근무자별 판매량</div><div class="card-desc">시재 제외 · 상위 5명</div></div></div>
+      <div class="rank-list" id="rank-list" style="margin-top:6px"></div>
+    </div>
+    <div class="card">
+      <div class="card-hd">
+        <div><div class="card-title">판매금액 누적</div><div class="card-desc">상품별 일별 금액</div></div>
+        <div class="leg-wrap">
+          <div class="leg"><div class="leg-sq" style="background:#F59E0B"></div>연금</div>
+          <div class="leg"><div class="leg-sq" style="background:#4F46E5"></div>스피또1000</div>
+          <div class="leg"><div class="leg-sq" style="background:#10B981"></div>스피또2000</div>
+        </div>
+      </div>
+      <div style="position:relative;height:120px"><canvas id="c-amt" role="img" aria-label="판매금액 누적">금액 누적</canvas></div>
+    </div>
+  </div>
+
+  <div class="row-2">
+    <div class="card">
+      <div class="card-hd">
+        <div><div class="card-title">당첨금 지급 추이</div><div class="card-desc">연금 + 스피또1000 + 스피또2000 합산</div></div>
+        <div class="card-badge">지급</div>
+      </div>
+      <div style="position:relative;height:100px"><canvas id="c-prize" role="img" aria-label="당첨금 지급">당첨금</canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-hd">
+        <div><div class="card-title">스크래치 일별 추이</div><div class="card-desc">스피또1000 · 스피또2000</div></div>
+        <div class="leg-wrap">
+          <div class="leg"><div class="leg-sq" style="background:#4F46E5"></div>스피또1000</div>
+          <div class="leg"><div class="leg-sq" style="background:#10B981;border:1px dashed #10B981"></div>스피또2000</div>
+        </div>
+      </div>
+      <div style="position:relative;height:100px"><canvas id="c-scratch" role="img" aria-label="스크래치 추이">스크래치</canvas></div>
+    </div>
+  </div>
+
+  <div class="row-2">
+    <div class="card">
+      <div class="card-hd">
+        <div><div class="card-title">연금복권 일별 추이</div><div class="card-desc">날짜별 합산 판매장수</div></div>
+        <div class="card-badge" style="background:#FFFBEB;color:#D97706">연금</div>
+      </div>
+      <div style="position:relative;height:100px"><canvas id="c-pension" role="img" aria-label="연금 추이">연금</canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div><div class="card-title">총 수수료 추이</div><div class="card-desc">일별 합산 수수료</div></div></div>
+      <div style="position:relative;height:100px"><canvas id="c-fee" role="img" aria-label="수수료 추이">수수료</canvas></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div><div class="card-title">상세 판매 데이터</div><div class="card-desc">날짜별 합산 · 전체 내역</div></div>
+      <div id="table-range" style="font-size:11px;color:#A0AEC0"></div>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="data-table">
+        <thead><tr>
+          <th>날짜</th>
+          <th>연금(장)</th>
+          <th>스피또1000(장)</th>
+          <th>스피또2000(장)</th>
+          <th>총합(장)</th>
+          <th>판매금액</th>
+          <th>수수료</th>
+        </tr></thead>
+        <tbody id="data-tbody"></tbody>
+        <tfoot id="data-tfoot"></tfoot>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- 주문량추천 -->
+<div id="page-order" class="page hidden">
+  <div class="card" style="padding:16px 18px">
+    <div class="card-hd">
+      <div><div class="card-title">📦 주문량 추천</div><div class="card-desc">최근 14일 평균 기반 · 3일 여유분 포함</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px" id="order-grid"></div>
+  </div>
+  <div class="row-main">
+    <div class="card">
+      <div class="card-hd"><div><div class="card-title">최근 14일 판매 추이</div></div></div>
+      <div style="position:relative;height:160px"><canvas id="c-order-trend" role="img" aria-label="주문 트렌드">주문트렌드</canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div class="card-title">주문 참고 지표</div></div>
+      <div id="order-stats" style="display:flex;flex-direction:column;gap:8px;margin-top:4px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 재고/잔여관리 -->
+<div id="page-inventory" class="page hidden">
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px" id="kpi-inv"></div>
+  <div class="row-main">
+    <div class="card">
+      <div class="card-hd"><div><div class="card-title">상품별 재고 현황</div><div class="card-desc">최근 마감 기준</div></div></div>
+      <table class="data-table">
+        <thead><tr><th>상품</th><th>출근재고</th><th>마감재고</th><th>판매</th><th>잔여</th><th>소진예상</th><th>상태</th></tr></thead>
+        <tbody id="inv-tbody"></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div><div class="card-title">재고 추이</div><div class="card-desc">일별 판매장수</div></div></div>
+      <div style="position:relative;height:160px"><canvas id="c-inv" role="img" aria-label="재고 추이">재고</canvas></div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const SID=new URLSearchParams(location.search).get('store_id')||'store001';
+let allData=[],periodMode='week',charts={};
+const C={pension:'#F59E0B',sp1000:'#4F46E5',sp2000:'#10B981',fee:'#8B5CF6',prize:'#EF4444',grid:'rgba(0,0,0,0.04)',txt:'#A0AEC0'};
+
+function fmt(n,unit=''){
+  const v=parseInt(n)||0;
+  if(v>=100000000)return(v/100000000).toFixed(1)+'억'+unit;
+  if(v>=10000000)return(v/10000000).toFixed(1)+'천만'+unit;
+  if(v>=10000)return Math.round(v/10000)+'만'+unit;
+  return v.toLocaleString()+unit;
+}
+function fmtK(n){
+  const v=parseInt(n)||0;
+  if(v>=10000)return Math.round(v/10000)+'만';
+  return v.toLocaleString();
+}
+function fd(s){return s?String(s).slice(5):''}
+function dc(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+
+// 기간 필터
+function getDateRange(mode){
+  const now=new Date();
+  const dow=now.getDay();
+  let from,to;
+  if(mode==='week'){
+    from=new Date(now);from.setDate(now.getDate()-(dow===0?6:dow-1));
+    to=new Date(now);
+  }else if(mode==='lastweek'){
+    from=new Date(now);from.setDate(now.getDate()-(dow===0?13:dow+6));
+    to=new Date(from);to.setDate(from.getDate()+6);
+  }else if(mode==='month'){
+    from=new Date(now.getFullYear(),now.getMonth(),1);
+    to=new Date(now);
+  }else if(mode==='90'){
+    from=new Date(now);from.setDate(now.getDate()-90);
+    to=new Date(now);
+  }else if(mode==='monthly'||mode==='yearly'){
+    return null;
+  }
+  return{from,to};
+}
+
+function filtered(){
+  const range=getDateRange(periodMode);
+  if(!range)return allData.filter(r=>r.worker!=='시재');
+  return allData.filter(r=>{
+    const d=new Date(r.closing_date);
+    return d>=range.from&&d<=range.to&&r.worker!=='시재';
+  });
+}
+
+// 날짜별 합산
+function aggregate(data,groupBy='date'){
+  const map={};
+  data.forEach(r=>{
+    let key;
+    if(groupBy==='date') key=r.closing_date;
+    else if(groupBy==='month') key=r.closing_date.slice(0,7);
+    else if(groupBy==='year') key=r.closing_date.slice(0,4);
+    else key=r.closing_date;
+
+    if(!map[key])map[key]={date:key,p:0,s1:0,s2:0,pa:0,s1a:0,s2a:0,fee:0,prize:0,lotto_fee:0};
+    map[key].p+=parseInt(r.pension_sales_count)||0;
+    map[key].s1+=parseInt(r.instant1000_sales_count)||0;
+    map[key].s2+=parseInt(r.instant2000_sales_count)||0;
+    map[key].pa+=(parseInt(r.pension_sales_count)||0)*1000;
+    map[key].s1a+=parseInt(r.instant1000_sales_amount)||0;
+    map[key].s2a+=parseInt(r.instant2000_sales_amount)||0;
+    map[key].fee+=parseInt(r.total_fee)||0;
+    map[key].prize+=parseInt(r.instant_total_amount)||0;
+  });
+  return Object.values(map).sort((a,b)=>a.date>b.date?1:-1);
+}
+
+function getGroupBy(){
+  if(periodMode==='monthly')return'month';
+  if(periodMode==='yearly')return'year';
+  return'date';
+}
+
+function showTab(t){
+  document.querySelectorAll('.tab').forEach((el,i)=>{
+    el.classList.toggle('active',['sales','order','inventory'][i]===t);
+  });
+  ['sales','order','inventory'].forEach(id=>{
+    document.getElementById('page-'+id).classList.toggle('hidden',id!==t);
+  });
+}
+
+function setPeriod(mode,el){
+  periodMode=mode;
+  document.querySelectorAll('.pp').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  renderAll();
+}
+
+// ===== KPI =====
+function renderKPI(raw,agg){
+  const tP=raw.reduce((s,r)=>s+(parseInt(r.pension_sales_count)||0),0);
+  const tS1=raw.reduce((s,r)=>s+(parseInt(r.instant1000_sales_count)||0),0);
+  const tS2=raw.reduce((s,r)=>s+(parseInt(r.instant2000_sales_count)||0),0);
+  const tAmt=raw.reduce((s,r)=>s+(parseInt(r.instant_total_amount)||0),0);
+  const tFee=raw.reduce((s,r)=>s+(parseInt(r.total_fee)||0),0);
+  const days=agg.length||1;
+  const totalCards=tP+tS1+tS2;
+
+  // 권수 계산 (연금 50장/권, 스1000 200장/권, 스2000 100장/권)
+  const pBundles=Math.floor(tP/50);
+  const s1Bundles=Math.floor(tS1/200);
+  const s2Bundles=Math.floor(tS2/100);
+  const totalBundles=pBundles+s1Bundles+s2Bundles;
+
+  const kpis=[
+    {lbl:'연금복권',main:tP.toLocaleString()+'장',sub1:`${pBundles}권 ${tP%50}장`,sub2:`일평균 ${Math.round(tP/days)}장`,color:C.pension},
+    {lbl:'스피또1000',main:tS1.toLocaleString()+'장',sub1:`${s1Bundles}권 ${tS1%200}장`,sub2:`일평균 ${Math.round(tS1/days)}장`,color:C.sp1000},
+    {lbl:'스피또2000',main:tS2.toLocaleString()+'장',sub1:`${s2Bundles}권 ${tS2%100}장`,sub2:`일평균 ${Math.round(tS2/days)}장`,color:C.sp2000},
+    {lbl:'일평균 합계',main:Math.round(totalCards/days).toLocaleString()+'장',sub1:`총 ${totalCards.toLocaleString()}장`,sub2:`${totalBundles}권 합산`,color:'#64748B'},
+    {lbl:'즉석 총매출',main:fmt(tAmt)+'원',sub1:`일평균 ${fmt(Math.round(tAmt/days))}원`,sub2:`${days}일 합산`,color:'#3B82F6'},
+    {lbl:'총 수수료',main:fmt(tFee)+'원',sub1:`일평균 ${fmt(Math.round(tFee/days))}원`,sub2:`즉석 관련`,color:C.fee},
+  ];
+  document.getElementById('kpi-strip').innerHTML=kpis.map(k=>`
+    <div class="kpi" style="border-top-color:${k.color}">
+      <div class="kpi-lbl">${k.lbl}</div>
+      <div class="kpi-main">${k.main}</div>
+      <div class="kpi-sub1">${k.sub1}</div>
+      <div class="kpi-sub2">${k.sub2}</div>
+    </div>
+  `).join('');
+}
+
+// ===== 라인차트 헬퍼 =====
+function makeLineDS(label,data,color,fill=false,dash=[]){
+  return{label,data,borderColor:color,backgroundColor:fill?color.replace(')',',0.08)').replace('rgb','rgba'):'transparent',borderWidth:2.5,tension:.4,fill,pointRadius:0,pointHoverRadius:5,borderDash:dash};
+}
+
+// ===== 판매장수 추이 =====
+function renderSales(agg){
+  dc('c-sales');
+  const labels=agg.map(r=>periodMode==='yearly'?r.date:fd(r.date));
+  const p=agg.map(r=>r.p),s1=agg.map(r=>r.s1),s2=agg.map(r=>r.s2);
+  const maxP=Math.max(...p),minP=p.filter(v=>v>0).length?Math.min(...p.filter(v=>v>0)):0;
+  const annotations={};
+  p.forEach((v,i)=>{
+    if(v===maxP)annotations['maxP']={type:'point',xValue:i,yValue:maxP,backgroundColor:C.pension,radius:5};
+    if(v===minP&&minP>0)annotations['minP']={type:'point',xValue:i,yValue:minP,backgroundColor:'#FCA5A5',radius:5};
+  });
+  charts['c-sales']=new Chart(document.getElementById('c-sales'),{
+    type:'line',
+    data:{labels,datasets:[
+      makeLineDS('연금',p,C.pension,true),
+      makeLineDS('스피또1000',s1,C.sp1000,true),
+      makeLineDS('스피또2000',s2,C.sp2000,true),
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.raw.toLocaleString()}장`}}},
+      scales:{x:{grid:{color:C.grid},ticks:{color:C.txt,maxTicksLimit:10,font:{size:11}}},
+              y:{grid:{color:C.grid},ticks:{color:C.txt,font:{size:11},callback:v=>v.toLocaleString()}}}}
+  });
+}
+
+// ===== 도넛 =====
+function renderDonut(raw){
+  dc('c-donut');
+  const tP=raw.reduce((s,r)=>s+(parseInt(r.pension_sales_count)||0)*1000,0);
+  const tS1=raw.reduce((s,r)=>s+(parseInt(r.instant1000_sales_amount)||0),0);
+  const tS2=raw.reduce((s,r)=>s+(parseInt(r.instant2000_sales_amount)||0),0);
+  const total=tP+tS1+tS2||1;
+  document.getElementById('donut-total').textContent=fmt(total)+'원';
+  charts['c-donut']=new Chart(document.getElementById('c-donut'),{
+    type:'doughnut',
+    data:{labels:['연금','스피또1000','스피또2000'],datasets:[{data:[tP,tS1,tS2],backgroundColor:[C.pension,C.sp1000,C.sp2000],borderWidth:0,hoverOffset:6}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${fmt(c.raw)}원`}}}}
+  });
+  document.getElementById('donut-legend').innerHTML=[
+    {l:'연금복권',v:tP,c:C.pension},
+    {l:'스피또1000',v:tS1,c:C.sp1000},
+    {l:'스피또2000',v:tS2,c:C.sp2000},
+  ].map(i=>`
+    <div class="dl-item">
+      <div class="dl-left"><div class="dl-dot" style="background:${i.c}"></div>${i.l}</div>
+      <div><span class="dl-val">${fmt(i.v)}원</span><span class="dl-pct">(${Math.round(i.v/total*100)}%)</span></div>
+    </div>
+  `).join('');
+}
+
+// ===== 요일별 =====
+function renderDay(raw){
+  dc('c-day');
+  const dm={},dcnt={};
+  raw.forEach(r=>{
+    const wd=new Date(r.closing_date).getDay();
+    const cnt=(parseInt(r.pension_sales_count)||0)+(parseInt(r.instant1000_sales_count)||0)+(parseInt(r.instant2000_sales_count)||0);
+    dm[wd]=(dm[wd]||0)+cnt;dcnt[wd]=(dcnt[wd]||0)+1;
+  });
+  const days=['일','월','화','수','목','금','토'];
+  const vals=days.map((_,i)=>dcnt[i]?Math.round(dm[i]/dcnt[i]):0);
+  const mx=Math.max(...vals)||1;
+  charts['c-day']=new Chart(document.getElementById('c-day'),{
+    type:'bar',
+    data:{labels:days,datasets:[{data:vals,backgroundColor:vals.map(v=>v===mx?C.sp1000:'#DBEAFE'),borderRadius:5,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` 평균 ${c.raw.toLocaleString()}장`}}},
+      scales:{x:{grid:{display:false},ticks:{color:C.txt,font:{size:12}}},
+              y:{grid:{color:C.grid},ticks:{color:C.txt,font:{size:11}}}}}
+  });
+}
+
+// ===== 근무자 랭킹 =====
+function renderRank(raw){
+  const wm={};
+  raw.forEach(r=>{const w=r.worker||'미상';wm[w]=(wm[w]||0)+(parseInt(r.pension_sales_count)||0)+(parseInt(r.instant1000_sales_count)||0)+(parseInt(r.instant2000_sales_count)||0);});
+  const sorted=Object.entries(wm).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const mx=sorted[0]?.[1]||1;
+  const cs=[C.sp1000,C.pension,C.sp2000,'#8B5CF6','#EF4444'];
+  document.getElementById('rank-list').innerHTML=sorted.map(([n,v],i)=>`
+    <div class="rank-item">
+      <div class="rank-no">${i+1}</div>
+      <div class="rank-name" title="${n}">${n}</div>
+      <div class="rank-bg"><div class="rank-fill" style="width:${Math.round(v/mx*100)}%;background:${cs[i]}"></div></div>
+      <div class="rank-val">${v.toLocaleString()}장</div>
+    </div>
+  `).join('');
+}
+
+// ===== 판매금액 누적 =====
+function renderAmt(agg){
+  dc('c-amt');
+  const labels=agg.map(r=>periodMode==='yearly'?r.date:fd(r.date));
+  charts['c-amt']=new Chart(document.getElementById('c-amt'),{
+    type:'bar',
+    data:{labels,datasets:[
+      {label:'연금',data:agg.map(r=>r.pa),backgroundColor:'rgba(245,158,11,0.85)',borderRadius:2,borderSkipped:false,stack:'s'},
+      {label:'스피또1000',data:agg.map(r=>r.s1a),backgroundColor:'rgba(79,70,229,0.85)',borderRadius:2,borderSkipped:false,stack:'s'},
+      {label:'스피또2000',data:agg.map(r=>r.s2a),backgroundColor:'rgba(16,185,129,0.85)',borderRadius:2,borderSkipped:false,stack:'s'},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${fmt(c.raw)}원`}}},
+      scales:{x:{stacked:true,grid:{display:false},ticks:{color:C.txt,maxTicksLimit:10,font:{size:11}}},
+              y:{stacked:true,grid:{color:C.grid},ticks:{color:C.txt,font:{size:11},callback:v=>fmt(v)}}}}
+  });
+}
+
+// ===== 당첨금 =====
+function renderPrize(agg){
+  dc('c-prize');
+  const labels=agg.map(r=>periodMode==='yearly'?r.date:fd(r.date));
+  charts['c-prize']=new Chart(document.getElementById('c-prize'),{
+    type:'line',
+    data:{labels,datasets:[makeLineDS('당첨금지급',agg.map(r=>r.prize),C.prize,true)]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` 지급: ${fmt(c.raw)}원`}}},
+      scales:{x:{grid:{display:false},ticks:{color:C.txt,maxTicksLimit:10,font:{size:11}}},
+              y:{grid:{color:C.grid},ticks:{color:C.txt,font:{size:11},callback:v=>fmt(v)}}}}
+  });
+}
+
+// ===== 스크래치 =====
+function renderScratch(agg){
+  dc('c-scratch');
+  const labels=agg.map(r=>periodMode==='yearly'?r.date:fd(r.date));
+  charts['c-scratch']=new Chart(document.getElementById('c-scratch'),{
+    type:'line',
+    data:{labels,datasets:[
+      makeLineDS('스피또1000',agg.map(r=>r.s1),C.sp1000),
+      makeLineDS('스피또2000',agg.map(r=>r.s2),C.sp2000,false,[5,3]),
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.raw.toLocaleString()}장`}}},
+      scales:{x:{grid:{display:false},ticks:{color:C.txt,maxTicksLimit:10,font:{size:11}}},
+              y:{grid:{color:C.grid},ticks:{color:C.txt,font:{size:11}}}}}
+  });
+}
+
+// ===== 연금 =====
+function renderPension(agg){
+  dc('c-pension');
+  const labels=agg.map(r=>periodMode==='yearly'?r.date:fd(r.date));
+  charts['c-pension']=new Chart(document.getElementById('c-pension'),{
+    type:'line',
+    data:{labels,datasets:[makeLineDS('연금',agg.map(r=>r.p),C.pension,true)]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` 연금: ${c.raw.toLocaleString()}장`}}},
+      scales:{x:{grid:{display:false},ticks:{color:C.txt,maxTicksLimit:10,font:{size:11}}},
+              y:{grid:{color:C.grid},ticks:{color:C.txt,font:{size:11}}}}}
+  });
+}
+
+// ===== 수수료 =====
+function renderFee(agg){
+  dc('c-fee');
+  const labels=agg.map(r=>periodMode==='yearly'?r.date:fd(r.date));
+  charts['c-fee']=new Chart(document.getElementById('c-fee'),{
+    type:'line',
+    data:{labels,datasets:[makeLineDS('수수료',agg.map(r=>r.fee),C.fee,true)]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` 수수료: ${fmt(c.raw)}원`}}},
+      scales:{x:{grid:{display:false},ticks:{color:C.txt,maxTicksLimit:10,font:{size:11}}},
+              y:{grid:{color:C.grid},ticks:{color:C.txt,font:{size:11},callback:v=>fmt(v)}}}}
+  });
+}
+
+// ===== 테이블 =====
+function renderTable(agg){
+  const tbody=document.getElementById('data-tbody');
+  const tfoot=document.getElementById('data-tfoot');
+  let totP=0,totS1=0,totS2=0,totAmt=0,totFee=0;
+  tbody.innerHTML=agg.map(r=>{
+    totP+=r.p;totS1+=r.s1;totS2+=r.s2;totAmt+=r.pa+r.s1a+r.s2a;totFee+=r.fee;
+    return`<tr>
+      <td>${r.date}</td>
+      <td>${r.p.toLocaleString()}</td>
+      <td>${r.s1.toLocaleString()}</td>
+      <td>${r.s2.toLocaleString()}</td>
+      <td><strong>${(r.p+r.s1+r.s2).toLocaleString()}</strong></td>
+      <td>${fmt(r.pa+r.s1a+r.s2a)}원</td>
+      <td>${fmt(r.fee)}원</td>
+    </tr>`;
+  }).join('');
+  tfoot.innerHTML=`<tr>
+    <td>합계</td>
+    <td>${totP.toLocaleString()}</td>
+    <td>${totS1.toLocaleString()}</td>
+    <td>${totS2.toLocaleString()}</td>
+    <td><strong>${(totP+totS1+totS2).toLocaleString()}</strong></td>
+    <td>${fmt(totAmt)}원</td>
+    <td>${fmt(totFee)}원</td>
+  </tr>`;
+  document.getElementById('table-range').textContent=`총 ${agg.length}건`;
+}
+
+// ===== 주문추천 =====
+function renderOrder(raw){
+  if(!raw.length)return;
+  const recent=raw.slice(-14);
+  const avgP=Math.round(recent.reduce((s,r)=>s+(parseInt(r.pension_sales_count)||0),0)/recent.length);
+  const avgS1=Math.round(recent.reduce((s,r)=>s+(parseInt(r.instant1000_sales_count)||0),0)/recent.length);
+  const avgS2=Math.round(recent.reduce((s,r)=>s+(parseInt(r.instant2000_sales_count)||0),0)/recent.length);
+  const last=raw[raw.length-1];
+  const remP=parseInt(last?.pension_sales_count)||0;
+  const remS1=parseInt(last?.instant1000_sales_count)||0;
+  const remS2=parseInt(last?.instant2000_sales_count)||0;
+  const orders=[
+    {prod:'연금복권',avg:avgP,rem:remP,unit:'장',price:1000,color:C.pension},
+    {prod:'스피또1000',avg:avgS1,rem:remS1,unit:'장',price:1000,color:C.sp1000},
+    {prod:'스피또2000',avg:avgS2,rem:remS2,unit:'장',price:2000,color:C.sp2000},
+  ];
+  document.getElementById('order-grid').innerHTML=orders.map(o=>{
+    const rec=Math.max(0,Math.ceil(o.avg*3-o.rem));
+    const days=o.avg>0?Math.round(o.rem/o.avg):99;
+    const pct=Math.min(100,Math.round(o.rem/(o.avg*7||1)*100));
+    return`<div style="border:1px solid #E8EEF4;border-radius:10px;padding:14px 16px;background:#FAFBFF">
+      <div style="font-size:12px;font-weight:700;color:#4A5568;margin-bottom:8px;display:flex;align-items:center;gap:5px">
+        <div style="width:8px;height:8px;border-radius:50%;background:${o.color}"></div>${o.prod}
+      </div>
+      <div><span style="font-size:26px;font-weight:700;color:${o.color}">${rec.toLocaleString()}</span><span style="font-size:12px;color:#A0AEC0;margin-left:3px">${o.unit} 추천</span></div>
+      <div style="font-size:11px;color:#A0AEC0;margin:4px 0 8px">일평균 ${o.avg}${o.unit} · 잔여 ${o.rem}${o.unit} · 소진 ${days}일</div>
+      <div style="height:4px;background:#EDF2F7;border-radius:3px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${o.color};border-radius:3px"></div></div>
+    </div>`;
+  }).join('');
+
+  dc('c-order-trend');
+  const agg=aggregate(recent);
+  const s=[...agg].sort((a,b)=>a.date>b.date?1:-1);
+  charts['c-order-trend']=new Chart(document.getElementById('c-order-trend'),{
+    type:'line',
+    data:{labels:s.map(r=>fd(r.date)),datasets:[
+      makeLineDS('연금',s.map(r=>r.p),C.pension),
+      makeLineDS('스피또1000',s.map(r=>r.s1),C.sp1000),
+      makeLineDS('스피또2000',s.map(r=>r.s2),C.sp2000),
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:11},padding:8}}},
+      scales:{x:{grid:{display:false},ticks:{color:C.txt,font:{size:11}}},y:{grid:{color:C.grid},ticks:{color:C.txt,font:{size:11}}}}}
+  });
+
+  document.getElementById('order-stats').innerHTML=[
+    {l:'연금 일평균',v:avgP+'장',c:C.pension},
+    {l:'스피또1000 일평균',v:avgS1+'장',c:C.sp1000},
+    {l:'스피또2000 일평균',v:avgS2+'장',c:C.sp2000},
+    {l:'분석 기간',v:recent.length+'일',c:'#CBD5E0'},
+    {l:'총 추천금액',v:fmt((Math.max(0,Math.ceil(avgP*3-remP))*1000)+(Math.max(0,Math.ceil(avgS1*3-remS1))*1000)+(Math.max(0,Math.ceil(avgS2*3-remS2))*2000))+'원',c:'#8B5CF6'},
+  ].map(i=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid #F7FAFC">
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#718096">
+        <div style="width:8px;height:8px;border-radius:2px;background:${i.c}"></div>${i.l}
+      </div>
+      <div style="font-size:13px;font-weight:700;color:#2D3748">${i.v}</div>
+    </div>
+  `).join('');
+}
+
+// ===== 재고 =====
+function renderInventory(raw){
+  if(!raw.length)return;
+  const last=[...raw].sort((a,b)=>a.closing_date>b.closing_date?-1:1)[0];
+  const remP=parseInt(last.pension_sales_count)||0;
+  const remS1=parseInt(last.instant1000_sales_count)||0;
+  const remS2=parseInt(last.instant2000_sales_count)||0;
+  const avgP=Math.round(raw.reduce((s,r)=>s+(parseInt(r.pension_sales_count)||0),0)/raw.length);
+  const avgS1=Math.round(raw.reduce((s,r)=>s+(parseInt(r.instant1000_sales_count)||0),0)/raw.length);
+  const avgS2=Math.round(raw.reduce((s,r)=>s+(parseInt(r.instant2000_sales_count)||0),0)/raw.length);
+
+  document.getElementById('kpi-inv').innerHTML=[
+    {l:'연금 잔여',v:remP.toLocaleString()+'장',c:C.pension},
+    {l:'스피또1000 잔여',v:remS1.toLocaleString()+'장',c:C.sp1000},
+    {l:'스피또2000 잔여',v:remS2.toLocaleString()+'장',c:C.sp2000},
+  ].map(k=>`
+    <div class="kpi" style="border-top-color:${k.c}">
+      <div class="kpi-lbl">${k.l}</div>
+      <div class="kpi-main">${k.v}</div>
+      <div class="kpi-sub2">최근 마감 기준</div>
+    </div>
+  `).join('');
+
+  const rows=[
+    {prod:'연금복권',rem:remP,avg:avgP,color:C.pension},
+    {prod:'스피또1000',rem:remS1,avg:avgS1,color:C.sp1000},
+    {prod:'스피또2000',rem:remS2,avg:avgS2,color:C.sp2000},
+  ];
+  document.getElementById('inv-tbody').innerHTML=rows.map(r=>{
+    const days=r.avg>0?Math.round(r.rem/r.avg):99;
+    const badge=days>5?['s-ok','충분']:days>2?['s-warn','보통']:['s-low','부족'];
+    return`<tr>
+      <td><div style="display:flex;align-items:center;gap:7px"><div style="width:10px;height:10px;border-radius:3px;background:${r.color}"></div>${r.prod}</div></td>
+      <td>-</td><td>-</td>
+      <td>${r.rem.toLocaleString()}장</td>
+      <td>${r.rem.toLocaleString()}장</td>
+      <td>${days}일</td>
+      <td><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:5px" class="${badge[0]}">${badge[1]}</span></td>
+    </tr>`;
+  }).join('');
+
+  dc('c-inv');
+  const agg=aggregate(raw.filter(r=>r.worker!=='시재'));
+  const s=agg.slice(-14);
+  charts['c-inv']=new Chart(document.getElementById('c-inv'),{
+    type:'line',
+    data:{labels:s.map(r=>fd(r.date)),datasets:[
+      makeLineDS('연금',s.map(r=>r.p),C.pension),
+      makeLineDS('스피또1000',s.map(r=>r.s1),C.sp1000),
+      makeLineDS('스피또2000',s.map(r=>r.s2),C.sp2000),
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:11},padding:8}}},
+      scales:{x:{grid:{display:false},ticks:{color:C.txt,font:{size:11}}},y:{grid:{color:C.grid},ticks:{color:C.txt,font:{size:11}}}}}
+  });
+}
+
+function renderAll(){
+  const raw=filtered();
+  if(!raw.length){document.getElementById('data-info').textContent='데이터 없음';return;}
+  const gb=getGroupBy();
+  const agg=aggregate(raw,gb);
+  const first=agg[0]?.date,last=agg[agg.length-1]?.date;
+  document.getElementById('data-info').textContent=`${agg.length}${gb==='date'?'일':gb==='month'?'개월':'년'} · ${first}~${last}`;
+  renderKPI(raw,agg);
+  renderSales(agg);
+  renderDonut(raw);
+  renderDay(raw);
+  renderRank(raw);
+  renderAmt(agg);
+  renderPrize(agg);
+  renderScratch(agg);
+  renderPension(agg);
+  renderFee(agg);
+  renderTable(agg);
+  renderOrder(raw);
+  renderInventory(raw);
+}
+
+async function load(){
+  try{
+    const r=await fetch(`/stats/list?store_id=${SID}&days=730`);
+    if(!r.ok)throw new Error('서버 오류 '+r.status);
+    allData=await r.json();
+    renderAll();
+  }catch(e){
+    document.getElementById('data-info').textContent='오류: '+e.message;
+  }
+}
+load();
+</script>
+</body>
+</html>
