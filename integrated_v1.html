@@ -1420,15 +1420,23 @@ async function loadStatsData(type){
   const infoEl=$(type+'DataInfo');
   if(infoEl)infoEl.textContent='로딩 중...';
   try{
-    const url=`/stats/list?store_id=${encodeURIComponent(SID)}&days=${sd.period}`;
+    const url=`/stats/list?store_id=${encodeURIComponent(SID)}&days=2920`;
     const res=await fetch(url);if(!res.ok)throw new Error('HTTP '+res.status);
     const raw=await res.json();
     if(!Array.isArray(raw)||!raw.length)throw new Error('empty');
-    // daily_stats 컬럼 → 탭용 구조로 변환 (날짜별 집계)
+    // 기간 필터링 (즉석 탭과 동일 방식)
+    const cutoff=new Date();cutoff.setDate(cutoff.getDate()-sd.period);cutoff.setHours(0,0,0,0);
+    const filtered=raw.filter(r=>{const d=new Date(String(r.closing_date||'').slice(0,10)+'T00:00:00');return d>=cutoff;});
+    if(!filtered.length)throw new Error('empty');
+    // daily_stats 컬럼 → 탭용 구조로 변환 (날짜별 집계, 중복 합산)
     const map={};
-    raw.forEach(r=>{
+    const seen=new Set();
+    filtered.forEach(r=>{
       const date=String(r.closing_date||'').slice(0,10);
       if(!date)return;
+      // 중복 행 제거 (같은 날짜+같은 값이면 skip)
+      const key=`${date}_${r.lotto_sales}_${r.toto_sales}`;
+      if(seen.has(key))return;seen.add(key);
       if(!map[date])map[date]={date,lotto:0,toto:0,instant:0,total:0,round:0};
       map[date].lotto+=sN(r.lotto_sales);
       map[date].toto+=sN(r.toto_sales);
