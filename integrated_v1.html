@@ -1418,23 +1418,19 @@ function statsFallback(period){
 async function loadStatsData(type){
   const sd=statsData[type];
   const infoEl=$(type+'DataInfo');
-  if(infoEl)infoEl.textContent='로딩 중...';
+  if(infoEl)infoEl.textContent='처리 중...';
   try{
-    const url=`/stats/list?store_id=${encodeURIComponent(SID)}&days=2920`;
-    const res=await fetch(url);if(!res.ok)throw new Error('HTTP '+res.status);
-    const raw=await res.json();
-    if(!Array.isArray(raw)||!raw.length)throw new Error('empty');
-    // 기간 필터링 (즉석 탭과 동일 방식)
-    const cutoff=new Date();cutoff.setDate(cutoff.getDate()-sd.period);cutoff.setHours(0,0,0,0);
-    const filtered=raw.filter(r=>{const d=new Date(String(r.closing_date||'').slice(0,10)+'T00:00:00');return d>=cutoff;});
-    if(!filtered.length)throw new Error('empty');
-    // daily_stats 컬럼 → 탭용 구조로 변환 (날짜별 집계, 중복 합산)
-    const map={};
-    const seen=new Set();
+    // 즉석 탭과 동일하게 allRows 사용 (이미 로드된 데이터)
+    const raw=allRows.filter(x=>String(x.worker||'').trim()!=='시재'&&x.closing_date);
+    if(!raw.length)throw new Error('데이터 없음');
+    // 기간 필터 (days 기준)
+    const anchor=raw.map(r=>new Date(String(r.closing_date).slice(0,10)+'T00:00:00')).sort((a,b)=>b-a)[0];
+    const cutoff=new Date(anchor);cutoff.setDate(anchor.getDate()-(sd.period-1));cutoff.setHours(0,0,0,0);
+    const filtered=raw.filter(r=>{const d=new Date(String(r.closing_date).slice(0,10)+'T00:00:00');return d>=cutoff;});
+    // 날짜별 집계 (중복 제거: 같은 날 동일값 skip)
+    const map={};const seen=new Set();
     filtered.forEach(r=>{
-      const date=String(r.closing_date||'').slice(0,10);
-      if(!date)return;
-      // 중복 행 제거 (같은 날짜+같은 값이면 skip)
+      const date=String(r.closing_date).slice(0,10);
       const key=`${date}_${r.lotto_sales}_${r.toto_sales}`;
       if(seen.has(key))return;seen.add(key);
       if(!map[date])map[date]={date,lotto:0,toto:0,instant:0,total:0,round:0};
@@ -1443,6 +1439,7 @@ async function loadStatsData(type){
       map[date].instant+=sN(r.instant_total_amount)||sN(r.instant1000_sales_amount)+sN(r.instant2000_sales_amount);
     });
     const sorted=Object.values(map).sort((a,b)=>a.date.localeCompare(b.date));
+    if(!sorted.length)throw new Error('empty');
     sorted.forEach((r,i)=>{
       r.total=r.lotto+r.toto+r.instant;
       const base=type==='toto'?r.toto:type==='lotto'?r.lotto:r.total;
@@ -1452,18 +1449,14 @@ async function loadStatsData(type){
       r.round=1160-sorted.length+i;
     });
     sd.rows=sorted;
-    sd.summary={
-      lotto_total:sorted.reduce((s,r)=>s+r.lotto,0),
-      toto_total:sorted.reduce((s,r)=>s+r.toto,0),
-      instant_total:sorted.reduce((s,r)=>s+r.instant,0)
-    };
+    sd.summary={lotto_total:sorted.reduce((s,r)=>s+r.lotto,0),toto_total:sorted.reduce((s,r)=>s+r.toto,0),instant_total:sorted.reduce((s,r)=>s+r.instant,0)};
     sd.summary.grand_total=sd.summary.lotto_total+sd.summary.toto_total+sd.summary.instant_total;
-    if(infoEl)infoEl.textContent=`연결됨 · 최근 ${sd.period}일 · ${sorted.length}건`;
+    if(infoEl)infoEl.textContent=`최근 ${sd.period}일 · ${sorted.length}건`;
   }catch(e){
     sd.rows=statsFallback(sd.period);
     sd.summary={lotto_total:sd.rows.reduce((s,r)=>s+sN(r.lotto),0),toto_total:sd.rows.reduce((s,r)=>s+sN(r.toto),0),instant_total:sd.rows.reduce((s,r)=>s+sN(r.instant),0)};
     sd.summary.grand_total=sd.summary.lotto_total+sd.summary.toto_total+sd.summary.instant_total;
-    if(infoEl)infoEl.textContent=`샘플 데이터 · 오류: ${e.message}`;
+    if(infoEl)infoEl.textContent=`샘플 데이터 · ${e.message}`;
   }
 }
 function sCB(){return{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{color:css('--muted'),boxWidth:10,font:{size:11,weight:'900'}}}},scales:{x:{grid:{display:false},ticks:{color:css('--muted'),font:{size:11},maxRotation:0}},y:{grid:{color:css('--grid')},ticks:{color:css('--muted'),font:{size:11},callback:v=>sFSh(v)}}}}}
