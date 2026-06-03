@@ -13,39 +13,6 @@
   --red:#EF4444;--green:#10B981;--amber:#F59E0B;
   --shadow:0 18px 48px rgba(15,23,42,.10);--shadow2:0 6px 18px rgba(15,23,42,.06);
   --grid:rgba(15,23,42,.075);--chip:#F8FAFC;--glass:rgba(255,255,255,.82);
-
-setTimeout(()=>{
-  a.forEach((x,i)=>{
-    const el=document.getElementById(`workerDonut_${i}`);
-    if(!el)return;
-
-    if(charts[`workerDonut_${i}`]){
-      charts[`workerDonut_${i}`].destroy();
-    }
-
-    charts[`workerDonut_${i}`]=new Chart(el,{
-      type:'doughnut',
-      data:{
-        labels:['연금','스피또1000','스피또2000'],
-        datasets:[{
-          data:[x[1].p,x[1].s1,x[1].s2],
-          backgroundColor:['#F97316','#2563EB','#7C3AED'],
-          borderWidth:0
-        }]
-      },
-      options:{
-        responsive:true,
-        maintainAspectRatio:false,
-        cutout:'65%',
-        plugins:{
-          legend:{display:false},
-          tooltip:{enabled:true}
-        }
-      }
-    });
-  });
-},50);
-
 }
 html[data-theme="dark"]{
   --bg:#0B1220;--panel:#111827;--panel2:#172033;--line:#25324A;
@@ -459,8 +426,7 @@ button{border:0;background:none;color:inherit;font-family:inherit;cursor:pointer
 @media(max-width:1100px){
   .order-prize-list{grid-template-columns:repeat(2,1fr)!important}
 }
-
-/* ===== 로또/토토/통합 매출 탭 공통 스타일 ===== */
+/* ===== 로또/토토/통합 매출 탭 ===== */
 .stats-periodbar{display:flex;align-items:center;gap:8px;background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:6px;width:max-content;box-shadow:var(--shadow2)}
 .stats-periodbar .stats-period-label{height:32px;display:flex;align-items:center;padding:0 10px;font-size:12px;font-weight:950;color:var(--text);white-space:nowrap}
 .stats-pp{height:32px;min-width:66px;padding:0 18px;border-radius:999px;border:1px solid transparent;background:var(--panel);color:var(--muted);font-size:12px;font-weight:950;transition:.15s}
@@ -468,7 +434,6 @@ button{border:0;background:none;color:inherit;font-family:inherit;cursor:pointer
 .stats-pp.active{background:linear-gradient(135deg,var(--indigo),var(--blue));border-color:transparent;color:#fff;box-shadow:0 10px 22px rgba(79,70,229,.22)}
 .stats-shell{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:14px 16px;box-shadow:var(--shadow2)}
 .stats-topline{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
-.stats-top-left{}
 .stats-page-title{font-size:18px;font-weight:950;letter-spacing:-.05em}
 .stats-page-desc{font-size:11px;color:var(--soft);font-weight:850;margin-top:3px}
 .stats-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
@@ -503,10 +468,6 @@ button{border:0;background:none;color:inherit;font-family:inherit;cursor:pointer
 .stats-table tr:last-child td{border-bottom:none}
 .stats-table tr:hover td{background:rgba(79,70,229,.04)}
 .stats-up{color:var(--red)!important}.stats-down{color:var(--blue)!important}.stats-flat{color:var(--muted)!important}
-.stats-loading-overlay{position:absolute;inset:0;background:rgba(245,247,251,.7);display:grid;place-items:center;z-index:10;border-radius:18px}
-html[data-theme="dark"] .stats-loading-overlay{background:rgba(11,18,32,.6)}
-.stats-spinner{width:36px;height:36px;border:3px solid var(--line);border-top-color:var(--indigo);border-radius:50%;animation:spin .8s linear infinite}
-/* 통합 특화 */
 .unified-hero{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .unified-hero-card{border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow2);position:relative;overflow:hidden;transition:.16s}
 .unified-hero-card:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
@@ -514,7 +475,6 @@ html[data-theme="dark"] .stats-loading-overlay{background:rgba(11,18,32,.6)}
 .unified-hero-label{font-size:11px;font-weight:950;color:var(--muted);margin-bottom:10px}
 .unified-hero-main{font-size:26px;font-weight:950;letter-spacing:-.05em;line-height:1}
 .unified-hero-sub{font-size:11px;color:var(--muted);font-weight:850;margin-top:7px;padding-top:7px;border-top:1px solid var(--line)}
-
 </style>
 </head>
 <body>
@@ -696,10 +656,7 @@ html[data-theme="dark"] .stats-loading-overlay{background:rgba(11,18,32,.6)}
     <section id="page-lotto" class="page hidden">
       <div class="stats-shell">
         <div class="stats-topline">
-          <div class="stats-top-left">
-            <div class="stats-page-title">🎱 로또 매출 통계</div>
-            <div class="stats-page-desc">회차별 판매금액 · 요일 분포 · 추이 분석</div>
-          </div>
+          <div><div class="stats-page-title">🎱 로또 매출 통계</div><div class="stats-page-desc">회차별 판매금액 · 요일 분포 · 추이 분석</div></div>
           <div class="stats-periodbar" id="lottoPeriodbar">
             <div class="stats-period-label">조회기간</div>
             <button class="stats-pp" data-stats-period="7">7일</button>
@@ -711,32 +668,19 @@ html[data-theme="dark"] .stats-loading-overlay{background:rgba(11,18,32,.6)}
         <div class="stats-kpi-grid" id="lottoKpiGrid"></div>
       </div>
       <div class="stats-chart-grid">
-        <div class="card">
-          <div class="card-hd"><div><div class="card-title">회차별 판매금액 추이</div><div class="card-desc">라인 차트 · 기간별 매출 변화</div></div><div class="more">로또</div></div>
-          <div class="sh300"><canvas id="cLottoMain"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="card-hd"><div><div class="card-title">요일별 매출 분포</div><div class="card-desc">최근 기간 요일 합산</div></div></div>
-          <div class="stats-donut-wrap">
-            <div class="stats-donut-box"><canvas id="cLottoDonut"></canvas><div class="stats-donut-center"><small>총매출</small><b id="lottoDonutTotal">-</b></div></div>
-            <div id="lottoDonutList" class="stats-donut-list"></div>
-          </div>
+        <div class="card"><div class="card-hd"><div><div class="card-title">회차별 판매금액 추이</div><div class="card-desc">라인 차트 · 기간별 매출 변화</div></div><div class="more">로또</div></div><div class="sh300"><canvas id="cLottoMain"></canvas></div></div>
+        <div class="card"><div class="card-hd"><div><div class="card-title">요일별 매출 분포</div><div class="card-desc">최근 기간 요일 합산</div></div></div>
+          <div class="stats-donut-wrap"><div class="stats-donut-box"><canvas id="cLottoDonut"></canvas><div class="stats-donut-center"><small>총매출</small><b id="lottoDonutTotal">-</b></div></div><div id="lottoDonutList" class="stats-donut-list"></div></div>
         </div>
       </div>
-      <div class="card">
-        <div class="card-hd"><div><div class="card-title">회차별 상세 매출</div><div class="card-desc">헤더 클릭 정렬</div></div><div class="more" id="lottoTableInfo">-</div></div>
-        <div class="stats-table-wrap">
-          <table class="stats-table">
-            <thead><tr>
-              <th onclick="statsSort('lotto','date')">날짜</th>
-              <th onclick="statsSort('lotto','round')">회차</th>
-              <th onclick="statsSort('lotto','lotto')">판매금액</th>
-              <th onclick="statsSort('lotto','diff')">전일대비</th>
-              <th onclick="statsSort('lotto','diff_pct')">증감률</th>
-            </tr></thead>
-            <tbody id="lottoTbody"></tbody>
-          </table>
-        </div>
+      <div class="card"><div class="card-hd"><div><div class="card-title">회차별 상세 매출</div><div class="card-desc">헤더 클릭 정렬</div></div><div class="more" id="lottoTableInfo">-</div></div>
+        <div class="stats-table-wrap"><table class="stats-table"><thead><tr>
+          <th onclick="statsSort('lotto','date')">날짜</th>
+          <th onclick="statsSort('lotto','round')">회차</th>
+          <th onclick="statsSort('lotto','lotto')">판매금액</th>
+          <th onclick="statsSort('lotto','diff')">전일대비</th>
+          <th onclick="statsSort('lotto','diff_pct')">증감률</th>
+        </tr></thead><tbody id="lottoTbody"></tbody></table></div>
       </div>
     </section>
 
@@ -744,10 +688,7 @@ html[data-theme="dark"] .stats-loading-overlay{background:rgba(11,18,32,.6)}
     <section id="page-toto" class="page hidden">
       <div class="stats-shell">
         <div class="stats-topline">
-          <div class="stats-top-left">
-            <div class="stats-page-title">⚽ 토토 매출 통계</div>
-            <div class="stats-page-desc">날짜별 판매금액 · 종목별 분석 · 주차별 추이</div>
-          </div>
+          <div><div class="stats-page-title">⚽ 토토 매출 통계</div><div class="stats-page-desc">날짜별 판매금액 · 주차별 추이</div></div>
           <div class="stats-periodbar" id="totoPeriodbar">
             <div class="stats-period-label">조회기간</div>
             <button class="stats-pp" data-stats-period="7">7일</button>
@@ -759,31 +700,18 @@ html[data-theme="dark"] .stats-loading-overlay{background:rgba(11,18,32,.6)}
         <div class="stats-kpi-grid" id="totoKpiGrid"></div>
       </div>
       <div class="stats-chart-grid">
-        <div class="card">
-          <div class="card-hd"><div><div class="card-title">날짜별 토토 매출 추이</div><div class="card-desc">바 차트 · 기간별 매출</div></div><div class="more">토토</div></div>
-          <div class="sh300"><canvas id="cTotoMain"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="card-hd"><div><div class="card-title">요일별 매출 분포</div><div class="card-desc">최근 기간 요일 합산</div></div></div>
-          <div class="stats-donut-wrap">
-            <div class="stats-donut-box"><canvas id="cTotoDonut"></canvas><div class="stats-donut-center"><small>총매출</small><b id="totoDonutTotal">-</b></div></div>
-            <div id="totoDonutList" class="stats-donut-list"></div>
-          </div>
+        <div class="card"><div class="card-hd"><div><div class="card-title">날짜별 토토 매출 추이</div><div class="card-desc">바 차트 · 기간별 매출</div></div><div class="more">토토</div></div><div class="sh300"><canvas id="cTotoMain"></canvas></div></div>
+        <div class="card"><div class="card-hd"><div><div class="card-title">요일별 매출 분포</div><div class="card-desc">최근 기간 요일 합산</div></div></div>
+          <div class="stats-donut-wrap"><div class="stats-donut-box"><canvas id="cTotoDonut"></canvas><div class="stats-donut-center"><small>총매출</small><b id="totoDonutTotal">-</b></div></div><div id="totoDonutList" class="stats-donut-list"></div></div>
         </div>
       </div>
-      <div class="card">
-        <div class="card-hd"><div><div class="card-title">날짜별 토토 상세</div><div class="card-desc">헤더 클릭 정렬</div></div><div class="more" id="totoTableInfo">-</div></div>
-        <div class="stats-table-wrap">
-          <table class="stats-table">
-            <thead><tr>
-              <th onclick="statsSort('toto','date')">날짜</th>
-              <th onclick="statsSort('toto','toto')">판매금액</th>
-              <th onclick="statsSort('toto','diff')">전일대비</th>
-              <th onclick="statsSort('toto','diff_pct')">증감률</th>
-            </tr></thead>
-            <tbody id="totoTbody"></tbody>
-          </table>
-        </div>
+      <div class="card"><div class="card-hd"><div><div class="card-title">날짜별 토토 상세</div><div class="card-desc">헤더 클릭 정렬</div></div><div class="more" id="totoTableInfo">-</div></div>
+        <div class="stats-table-wrap"><table class="stats-table"><thead><tr>
+          <th onclick="statsSort('toto','date')">날짜</th>
+          <th onclick="statsSort('toto','toto')">판매금액</th>
+          <th onclick="statsSort('toto','diff')">전일대비</th>
+          <th onclick="statsSort('toto','diff_pct')">증감률</th>
+        </tr></thead><tbody id="totoTbody"></tbody></table></div>
       </div>
     </section>
 
@@ -791,10 +719,7 @@ html[data-theme="dark"] .stats-loading-overlay{background:rgba(11,18,32,.6)}
     <section id="page-unified" class="page hidden">
       <div class="stats-shell">
         <div class="stats-topline">
-          <div class="stats-top-left">
-            <div class="stats-page-title">📈 통합 매출 통계</div>
-            <div class="stats-page-desc">로또 + 토토 + 즉석 · 전체 한눈에</div>
-          </div>
+          <div><div class="stats-page-title">📈 통합 매출 통계</div><div class="stats-page-desc">로또 + 토토 + 즉석 · 전체 한눈에</div></div>
           <div class="stats-periodbar" id="unifiedPeriodbar">
             <div class="stats-period-label">조회기간</div>
             <button class="stats-pp" data-stats-period="7">7일</button>
@@ -806,16 +731,9 @@ html[data-theme="dark"] .stats-loading-overlay{background:rgba(11,18,32,.6)}
         <div class="unified-hero" id="unifiedHero"></div>
       </div>
       <div class="stats-chart-grid">
-        <div class="card">
-          <div class="card-hd"><div><div class="card-title">기간별 3종 매출 추이</div><div class="card-desc">로또 · 토토 · 즉석 누적 바 차트</div></div></div>
-          <div class="sh300"><canvas id="cUnifiedMain"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="card-hd"><div><div class="card-title">매출 비중</div><div class="card-desc">3종 합산 기준</div></div></div>
-          <div class="stats-donut-wrap">
-            <div class="stats-donut-box"><canvas id="cUnifiedDonut"></canvas><div class="stats-donut-center"><small>총합계</small><b id="unifiedDonutTotal">-</b></div></div>
-            <div id="unifiedDonutList" class="stats-donut-list"></div>
-          </div>
+        <div class="card"><div class="card-hd"><div><div class="card-title">기간별 3종 매출 추이</div><div class="card-desc">로또 · 토토 · 즉석 누적 바 차트</div></div></div><div class="sh300"><canvas id="cUnifiedMain"></canvas></div></div>
+        <div class="card"><div class="card-hd"><div><div class="card-title">매출 비중</div><div class="card-desc">3종 합산 기준</div></div></div>
+          <div class="stats-donut-wrap"><div class="stats-donut-box"><canvas id="cUnifiedDonut"></canvas><div class="stats-donut-center"><small>총합계</small><b id="unifiedDonutTotal">-</b></div></div><div id="unifiedDonutList" class="stats-donut-list"></div></div>
         </div>
       </div>
       <div class="stats-mini-grid">
@@ -823,22 +741,16 @@ html[data-theme="dark"] .stats-loading-overlay{background:rgba(11,18,32,.6)}
         <div class="card compact-card"><div class="card-hd"><div><div class="card-title">⚽ 토토 추이</div><div class="card-desc">판매금액</div></div></div><div class="sh170"><canvas id="cUnifiedToto"></canvas></div></div>
         <div class="card compact-card"><div class="card-hd"><div><div class="card-title">🎟️ 즉석 추이</div><div class="card-desc">판매금액</div></div></div><div class="sh170"><canvas id="cUnifiedInstant"></canvas></div></div>
       </div>
-      <div class="card">
-        <div class="card-hd"><div><div class="card-title">날짜별 통합 매출</div><div class="card-desc">헤더 클릭 정렬 · 로또/토토/즉석/합계</div></div><div class="more" id="unifiedTableInfo">-</div></div>
-        <div class="stats-table-wrap">
-          <table class="stats-table">
-            <thead><tr>
-              <th onclick="statsSort('unified','date')">날짜</th>
-              <th onclick="statsSort('unified','lotto')">🎱 로또</th>
-              <th onclick="statsSort('unified','toto')">⚽ 토토</th>
-              <th onclick="statsSort('unified','instant')">🎟️ 즉석</th>
-              <th onclick="statsSort('unified','total')">합계</th>
-              <th onclick="statsSort('unified','diff')">전일대비</th>
-              <th onclick="statsSort('unified','diff_pct')">증감률</th>
-            </tr></thead>
-            <tbody id="unifiedTbody"></tbody>
-          </table>
-        </div>
+      <div class="card"><div class="card-hd"><div><div class="card-title">날짜별 통합 매출</div><div class="card-desc">헤더 클릭 정렬</div></div><div class="more" id="unifiedTableInfo">-</div></div>
+        <div class="stats-table-wrap"><table class="stats-table"><thead><tr>
+          <th onclick="statsSort('unified','date')">날짜</th>
+          <th onclick="statsSort('unified','lotto')">🎱 로또</th>
+          <th onclick="statsSort('unified','toto')">⚽ 토토</th>
+          <th onclick="statsSort('unified','instant')">🎟️ 즉석</th>
+          <th onclick="statsSort('unified','total')">합계</th>
+          <th onclick="statsSort('unified','diff')">전일대비</th>
+          <th onclick="statsSort('unified','diff_pct')">증감률</th>
+        </tr></thead><tbody id="unifiedTbody"></tbody></table></div>
       </div>
     </section>
 
@@ -1444,10 +1356,10 @@ function updatePeriodbarVisibility(){
   if(activeTab==='order'){
     if(bar)bar.style.display='none';
     if(orderBar)orderBar.style.display='flex';
-  } else if(isStats){
+  }else if(isStats){
     if(bar)bar.style.display='none';
     if(orderBar)orderBar.style.display='none';
-  } else {
+  }else{
     if(bar)bar.style.display='flex';
     if(orderBar)orderBar.style.display='none';
   }
@@ -1457,7 +1369,7 @@ function bind(){
   document.querySelectorAll('.order-pp').forEach(b=>b.onclick=()=>{orderWeeksPeriod=parseInt(b.dataset.orderWeeks,10)||6;document.querySelectorAll('.order-pp').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderOrder(validRows(),true);setTimeout(()=>charts.cOrderMain?.resize(),30)});
   document.querySelectorAll('.order-product-tab').forEach(b=>b.onclick=()=>{orderActiveProduct=b.dataset.orderProduct||'s1';document.querySelectorAll('.order-product-tab').forEach(x=>x.classList.toggle('active',x===b));renderOrder(validRows(),true);setTimeout(()=>charts.cOrderMain?.resize(),30)});
   const refresh=$('orderPrizeRefresh');if(refresh)refresh.onclick=()=>fetchPrizeStatus(true);
-  document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{activeTab=b.dataset.tab;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));['sales','order','lotto','toto','unified'].forEach(t=>$('page-'+t)&&$('page-'+t).classList.toggle('hidden',t!==activeTab));updatePeriodbarVisibility();if(activeTab==='order')initOrderTab();if(activeTab==='lotto')initStatsTab('lotto');if(activeTab==='toto')initStatsTab('toto');if(activeTab==='unified')initStatsTab('unified');setTimeout(()=>Object.values(charts).forEach(c=>c.resize()),30)});
+  document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{activeTab=b.dataset.tab;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));['sales','order','lotto','toto','unified'].forEach(t=>$('page-'+t)&&$('page-'+t).classList.toggle('hidden',t!==activeTab));updatePeriodbarVisibility();if(activeTab==='order')initOrderTab();if(activeTab==='lotto')initStatsTab('lotto');if(activeTab==='toto')initStatsTab('toto');if(activeTab==='unified')initStatsTab('unified');setTimeout(()=>Object.values(charts).forEach(c=>c?.resize&&c.resize()),30)});
   updatePeriodbarVisibility();
   $('themeBtn').onclick=()=>{const next=theme()==='dark'?'light':'dark';document.documentElement.dataset.theme=next;localStorage.setItem('premiumTheme',next);$('themeBtn').textContent=next==='dark'?'☀️ 라이트모드':'🌙 다크모드';renderAll()};
 }
@@ -1480,216 +1392,141 @@ async function load(){
     $('dataInfo').textContent='렌더링 오류: '+e.message;
   }
 }
-}
 /* ===== 로또/토토/통합 매출 탭 JS ===== */
-const STATS_API='https://lottomanager.duckdns.org';
 const statsData={lotto:{rows:[],summary:{},period:30,sortKey:'',sortDir:1},toto:{rows:[],summary:{},period:30,sortKey:'',sortDir:1},unified:{rows:[],summary:{},period:30,sortKey:'',sortDir:1}};
-
-function statsNum(v){return Number(v)||0}
-function statsFmt(n){return Math.round(statsNum(n)).toLocaleString('ko-KR')}
-function statsFmtWon(n){return statsFmt(n)+'원'}
-function statsFmtShort(n){n=statsNum(n);if(n>=100000000)return(n/100000000).toFixed(1)+'억';if(n>=10000)return Math.round(n/10000).toLocaleString('ko-KR')+'만';return statsFmt(n)}
-function statsDiffClass(v){return statsNum(v)>0?'stats-up':statsNum(v)<0?'stats-down':'stats-flat'}
-function statsDayName(s){const d=new Date(String(s||'').slice(0,10)+'T00:00:00');return['일','월','화','수','목','금','토'][d.getDay()]||'-'}
-function statsFmtPct(n){return(statsNum(n)>0?'+':'')+statsNum(n).toFixed(1)+'%'}
-
+function sN(v){return Number(v)||0}
+function sF(n){return Math.round(sN(n)).toLocaleString('ko-KR')}
+function sFW(n){return sF(n)+'원'}
+function sFSh(n){n=sN(n);if(n>=100000000)return(n/100000000).toFixed(1)+'억';if(n>=10000)return Math.round(n/10000).toLocaleString('ko-KR')+'만';return sF(n)}
+function sDC(v){return sN(v)>0?'stats-up':sN(v)<0?'stats-down':'stats-flat'}
+function sDN(s){const d=new Date(String(s||'').slice(0,10)+'T00:00:00');return['일','월','화','수','목','금','토'][d.getDay()]||'-'}
+function sFP(n){return(sN(n)>0?'+':'')+sN(n).toFixed(1)+'%'}
 function statsFallback(period){
   const arr=[];const today=new Date('2026-06-03T00:00:00');
   for(let i=period-1;i>=0;i--){
     const d=new Date(today);d.setDate(today.getDate()-i);
     const k=d.toISOString().slice(0,10);
-    const wave=Math.sin((period-i)/4);
-    const lotto=Math.round(1350000+(period-i)*28000+wave*160000);
+    const lotto=Math.round(1350000+(period-i)*28000+Math.sin((period-i)/4)*160000);
     const toto=Math.round(420000+(period-i)*9000+Math.cos((period-i)/5)*80000);
     const instant=Math.round(520000+(period-i)*9000+Math.sin((period-i)/3)*60000);
     const total=lotto+toto+instant;
-    const prevLotto=i<period-1?Math.round(1350000+(period-i-1)*28000+Math.sin((period-i-1)/4)*160000):lotto;
-    arr.push({date:k,round:1160-i,lotto,toto,instant,total,subject:['축구','야구','농구'][i%3],diff:lotto-prevLotto,diff_pct:prevLotto?parseFloat(((lotto-prevLotto)/prevLotto*100).toFixed(1)):0});
+    const prevL=i<period-1?Math.round(1350000+(period-i-1)*28000+Math.sin((period-i-1)/4)*160000):lotto;
+    arr.push({date:k,round:1160-i,lotto,toto,instant,total,diff:lotto-prevL,diff_pct:prevL?parseFloat(((lotto-prevL)/prevL*100).toFixed(1)):0});
   }
   return arr;
 }
-
 async function loadStatsData(type){
   const sd=statsData[type];
   const infoEl=$(type+'DataInfo');
   if(infoEl)infoEl.textContent='로딩 중...';
   try{
-    const typeParam=type==='unified'?'':type;
-    const url=`${STATS_API}/stats/view?store_id=${encodeURIComponent(SID)}&period=${sd.period}${typeParam?'&type='+typeParam:''}`;
-    const res=await fetch(url);
-    if(!res.ok)throw new Error('HTTP '+res.status);
+    const tp=type==='unified'?'':type;
+    const url=`https://lottomanager.duckdns.org/stats/view?store_id=${encodeURIComponent(SID)}&period=${sd.period}${tp?'&type='+tp:''}`;
+    const res=await fetch(url);if(!res.ok)throw new Error('HTTP '+res.status);
     const data=await res.json();
-    sd.summary=data.summary||{};
-    sd.rows=Array.isArray(data.daily)?data.daily:[];
+    sd.summary=data.summary||{};sd.rows=Array.isArray(data.daily)?data.daily:[];
     if(!sd.rows.length)throw new Error('empty');
     if(infoEl)infoEl.textContent=`API 연결 · 최근 ${sd.period}일 · ${sd.rows.length}건`;
   }catch(e){
     sd.rows=statsFallback(sd.period);
-    sd.summary={
-      lotto_total:sd.rows.reduce((s,r)=>s+statsNum(r.lotto),0),
-      toto_total:sd.rows.reduce((s,r)=>s+statsNum(r.toto),0),
-      instant_total:sd.rows.reduce((s,r)=>s+statsNum(r.instant),0)
-    };
+    sd.summary={lotto_total:sd.rows.reduce((s,r)=>s+sN(r.lotto),0),toto_total:sd.rows.reduce((s,r)=>s+sN(r.toto),0),instant_total:sd.rows.reduce((s,r)=>s+sN(r.instant),0)};
     sd.summary.grand_total=sd.summary.lotto_total+sd.summary.toto_total+sd.summary.instant_total;
     if(infoEl)infoEl.textContent=`샘플 데이터 · API 확인 필요`;
   }
 }
+function sCB(){return{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{color:css('--muted'),boxWidth:10,font:{size:11,weight:'900'}}}},scales:{x:{grid:{display:false},ticks:{color:css('--muted'),font:{size:11},maxRotation:0}},y:{grid:{color:css('--grid')},ticks:{color:css('--muted'),font:{size:11},callback:v=>sFSh(v)}}}}}
+function statsSort(type,key){const sd=statsData[type];if(sd.sortKey===key)sd.sortDir*=-1;else{sd.sortKey=key;sd.sortDir=1;}if(type==='lotto')renderLottoTable();else if(type==='toto')renderTotoTable();else renderUnifiedTable();}
+function sDotHtml(color){return`<i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};margin-right:5px"></i>`}
+const DCOLS=['#4F46E5','#2563EB','#7C3AED','#10B981','#F97316','#F59E0B','#EF4444'];
+const TCOLS=['#F97316','#FB923C','#FDBA74','#10B981','#2563EB','#7C3AED','#EF4444'];
+const DAYS=['월','화','수','목','금','토','일'];
 
-function statsChartBase(){
-  return{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-    plugins:{legend:{display:true,labels:{color:css('--muted'),boxWidth:10,font:{size:11,weight:'900'}}}},
-    scales:{x:{grid:{display:false},ticks:{color:css('--muted'),font:{size:11},maxRotation:0}},
-      y:{grid:{color:css('--grid')},ticks:{color:css('--muted'),font:{size:11},callback:v=>statsFmtShort(v)}}}};
-}
-
-function statsSort(type,key){
-  const sd=statsData[type];
-  if(sd.sortKey===key)sd.sortDir*=-1;else{sd.sortKey=key;sd.sortDir=1;}
-  if(type==='lotto')renderLottoTable();
-  else if(type==='toto')renderTotoTable();
-  else renderUnifiedTable();
-}
-
-/* ---- 로또 탭 렌더 ---- */
 function renderLotto(){
   const sd=statsData.lotto;const rows=sd.rows;
-  const total=rows.reduce((s,r)=>s+statsNum(r.lotto),0);
-  const thisWeek=rows.slice(-7).reduce((s,r)=>s+statsNum(r.lotto),0);
-  const prevWeek=rows.slice(-14,-7).reduce((s,r)=>s+statsNum(r.lotto),0);
-  const diffPct=prevWeek?((thisWeek-prevWeek)/prevWeek*100):0;
+  const total=rows.reduce((s,r)=>s+sN(r.lotto),0);
+  const thisW=rows.slice(-7).reduce((s,r)=>s+sN(r.lotto),0);
+  const prevW=rows.slice(-14,-7).reduce((s,r)=>s+sN(r.lotto),0);
+  const dp=prevW?((thisW-prevW)/prevW*100):0;
   const avg=Math.round(total/(rows.length||1));
-  const kpis=[
-    ['총판매금액',statsFmtWon(total),`최근 ${sd.period}일 합산`,'#4F46E5','💰'],
-    ['이번주 매출',statsFmtWon(thisWeek),'최근 7일','#10B981','📈'],
-    ['전주대비',statsFmtPct(diffPct),`전주 ${statsFmtShort(prevWeek)}원`,diffPct>=0?'#EF4444':'#2563EB','↕️'],
-    ['일평균 매출',statsFmtWon(avg),`${rows.length}일 기준`,'#F97316','📊']
-  ];
-  $('lottoKpiGrid').innerHTML=kpis.map(k=>`<div class="stats-kpi-card"><div class="stats-kpi-bar" style="background:${k[3]}"></div><div class="stats-kpi-head"><div class="stats-kpi-label">${k[0]}</div><div class="stats-kpi-icon" style="background:${k[3]}18;color:${k[3]}">${k[4]}</div></div><div class="stats-kpi-main" style="color:${k[3]}">${k[1]}</div><div class="stats-kpi-sub">${k[2]}</div></div>`).join('');
-
+  $('lottoKpiGrid').innerHTML=[['총판매금액',sFW(total),`최근 ${sd.period}일`,'#4F46E5','💰'],['이번주 매출',sFW(thisW),'최근 7일','#10B981','📈'],['전주대비',sFP(dp),`전주 ${sFSh(prevW)}원`,dp>=0?'#EF4444':'#2563EB','↕️'],['일평균',sFW(avg),`${rows.length}일 기준`,'#F97316','📊']].map(k=>`<div class="stats-kpi-card"><div class="stats-kpi-bar" style="background:${k[3]}"></div><div class="stats-kpi-head"><div class="stats-kpi-label">${k[0]}</div><div class="stats-kpi-icon" style="background:${k[3]}18;color:${k[3]}">${k[4]}</div></div><div class="stats-kpi-main" style="color:${k[3]}">${k[1]}</div><div class="stats-kpi-sub">${k[2]}</div></div>`).join('');
   destroy('cLottoMain');destroy('cLottoDonut');
-  const opts=statsChartBase();
-  charts.cLottoMain=new Chart($('cLottoMain'),{type:'line',data:{
-    labels:rows.map(r=>`${r.date?.slice(5)||''}(${statsDayName(r.date)})`),
-    datasets:[{label:'로또 판매금액',data:rows.map(r=>statsNum(r.lotto)),borderColor:'#4F46E5',backgroundColor:'rgba(79,70,229,.12)',borderWidth:2.5,tension:.28,fill:true,pointRadius:2.5,pointBackgroundColor:'#4F46E5'}]
-  },options:opts});
-
-  const days=['월','화','수','목','금','토','일'],sum={월:0,화:0,수:0,목:0,금:0,토:0,일:0};
-  rows.forEach(r=>sum[statsDayName(r.date)]+=statsNum(r.lotto));
-  const vals=days.map(d=>sum[d]),tot=vals.reduce((a,b)=>a+b,0)||1;
-  $('lottoDonutTotal').textContent=statsFmtShort(tot);
-  charts.cLottoDonut=new Chart($('cLottoDonut'),{type:'doughnut',data:{labels:days,datasets:[{data:vals,backgroundColor:['#4F46E5','#2563EB','#7C3AED','#10B981','#F97316','#F59E0B','#EF4444'],borderColor:css('--panel'),borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false}}}});
-  $('lottoDonutList').innerHTML=days.map((d,i)=>`<div class="stats-donut-row"><span><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${['#4F46E5','#2563EB','#7C3AED','#10B981','#F97316','#F59E0B','#EF4444'][i]};margin-right:5px"></i>${d}요일</span><b>${statsFmtShort(vals[i])}<br>${Math.round(vals[i]/tot*100)}%</b></div>`).join('');
-
+  charts.cLottoMain=new Chart($('cLottoMain'),{type:'line',data:{labels:rows.map(r=>`${(r.date||'').slice(5)}(${sDN(r.date)})`),datasets:[{label:'로또 판매금액',data:rows.map(r=>sN(r.lotto)),borderColor:'#4F46E5',backgroundColor:'rgba(79,70,229,.12)',borderWidth:2.5,tension:.28,fill:true,pointRadius:2.5,pointBackgroundColor:'#4F46E5'}]},options:sCB()});
+  const sum={};DAYS.forEach(d=>sum[d]=0);rows.forEach(r=>sum[sDN(r.date)]+=sN(r.lotto));
+  const vals=DAYS.map(d=>sum[d]),tot=vals.reduce((a,b)=>a+b,0)||1;
+  $('lottoDonutTotal').textContent=sFSh(tot);
+  charts.cLottoDonut=new Chart($('cLottoDonut'),{type:'doughnut',data:{labels:DAYS,datasets:[{data:vals,backgroundColor:DCOLS,borderColor:css('--panel'),borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false}}}});
+  $('lottoDonutList').innerHTML=DAYS.map((d,i)=>`<div class="stats-donut-row"><span>${sDotHtml(DCOLS[i])}${d}요일</span><b>${sFSh(vals[i])}<br>${Math.round(vals[i]/tot*100)}%</b></div>`).join('');
   renderLottoTable();
 }
 function renderLottoTable(){
   const sd=statsData.lotto;let rows=[...sd.rows];
-  if(sd.sortKey)rows.sort((a,b)=>{const av=a[sd.sortKey],bv=b[sd.sortKey];return(typeof av==='string'?String(av).localeCompare(String(bv)):statsNum(av)-statsNum(bv))*sd.sortDir});
+  if(sd.sortKey)rows.sort((a,b)=>{const av=a[sd.sortKey],bv=b[sd.sortKey];return(typeof av==='string'?String(av).localeCompare(String(bv)):sN(av)-sN(bv))*sd.sortDir});
   $('lottoTableInfo').textContent=rows.length+'건';
-  $('lottoTbody').innerHTML=rows.map(r=>`<tr><td>${r.date||'-'}(${statsDayName(r.date)})</td><td>${r.round||'-'}회</td><td>${statsFmtWon(r.lotto)}</td><td class="${statsDiffClass(r.diff)}">${statsNum(r.diff)>0?'+':''}${statsFmtWon(r.diff)}</td><td class="${statsDiffClass(r.diff_pct)}">${statsFmtPct(r.diff_pct)}</td></tr>`).join('');
+  $('lottoTbody').innerHTML=rows.map(r=>`<tr><td>${r.date||'-'}(${sDN(r.date)})</td><td>${r.round||'-'}회</td><td>${sFW(r.lotto)}</td><td class="${sDC(r.diff)}">${sN(r.diff)>0?'+':''}${sFW(r.diff)}</td><td class="${sDC(r.diff_pct)}">${sFP(r.diff_pct)}</td></tr>`).join('');
 }
 
-/* ---- 토토 탭 렌더 ---- */
 function renderToto(){
   const sd=statsData.toto;const rows=sd.rows;
-  const total=rows.reduce((s,r)=>s+statsNum(r.toto),0);
-  const thisWeek=rows.slice(-7).reduce((s,r)=>s+statsNum(r.toto),0);
-  const prevWeek=rows.slice(-14,-7).reduce((s,r)=>s+statsNum(r.toto),0);
-  const diffPct=prevWeek?((thisWeek-prevWeek)/prevWeek*100):0;
+  const total=rows.reduce((s,r)=>s+sN(r.toto),0);
+  const thisW=rows.slice(-7).reduce((s,r)=>s+sN(r.toto),0);
+  const prevW=rows.slice(-14,-7).reduce((s,r)=>s+sN(r.toto),0);
+  const dp=prevW?((thisW-prevW)/prevW*100):0;
   const avg=Math.round(total/(rows.length||1));
-  const kpis=[
-    ['총판매금액',statsFmtWon(total),`최근 ${sd.period}일 합산`,'#F97316','⚽'],
-    ['이번주 매출',statsFmtWon(thisWeek),'최근 7일','#10B981','📈'],
-    ['전주대비',statsFmtPct(diffPct),`전주 ${statsFmtShort(prevWeek)}원`,diffPct>=0?'#EF4444':'#2563EB','↕️'],
-    ['일평균 매출',statsFmtWon(avg),`${rows.length}일 기준`,'#7C3AED','📊']
-  ];
-  $('totoKpiGrid').innerHTML=kpis.map(k=>`<div class="stats-kpi-card"><div class="stats-kpi-bar" style="background:${k[3]}"></div><div class="stats-kpi-head"><div class="stats-kpi-label">${k[0]}</div><div class="stats-kpi-icon" style="background:${k[3]}18;color:${k[3]}">${k[4]}</div></div><div class="stats-kpi-main" style="color:${k[3]}">${k[1]}</div><div class="stats-kpi-sub">${k[2]}</div></div>`).join('');
-
+  $('totoKpiGrid').innerHTML=[['총판매금액',sFW(total),`최근 ${sd.period}일`,'#F97316','⚽'],['이번주 매출',sFW(thisW),'최근 7일','#10B981','📈'],['전주대비',sFP(dp),`전주 ${sFSh(prevW)}원`,dp>=0?'#EF4444':'#2563EB','↕️'],['일평균',sFW(avg),`${rows.length}일 기준`,'#7C3AED','📊']].map(k=>`<div class="stats-kpi-card"><div class="stats-kpi-bar" style="background:${k[3]}"></div><div class="stats-kpi-head"><div class="stats-kpi-label">${k[0]}</div><div class="stats-kpi-icon" style="background:${k[3]}18;color:${k[3]}">${k[4]}</div></div><div class="stats-kpi-main" style="color:${k[3]}">${k[1]}</div><div class="stats-kpi-sub">${k[2]}</div></div>`).join('');
   destroy('cTotoMain');destroy('cTotoDonut');
-  const opts=statsChartBase();
-  charts.cTotoMain=new Chart($('cTotoMain'),{type:'bar',data:{
-    labels:rows.map(r=>`${r.date?.slice(5)||''}(${statsDayName(r.date)})`),
-    datasets:[{label:'토토 판매금액',data:rows.map(r=>statsNum(r.toto)),backgroundColor:'rgba(249,115,22,.75)',borderRadius:6,borderSkipped:false}]
-  },options:opts});
-
-  const days=['월','화','수','목','금','토','일'],sum={월:0,화:0,수:0,목:0,금:0,토:0,일:0};
-  rows.forEach(r=>sum[statsDayName(r.date)]+=statsNum(r.toto));
-  const vals=days.map(d=>sum[d]),tot=vals.reduce((a,b)=>a+b,0)||1;
-  $('totoDonutTotal').textContent=statsFmtShort(tot);
-  charts.cTotoDonut=new Chart($('cTotoDonut'),{type:'doughnut',data:{labels:days,datasets:[{data:vals,backgroundColor:['#F97316','#FB923C','#FDBA74','#10B981','#2563EB','#7C3AED','#EF4444'],borderColor:css('--panel'),borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false}}}});
-  $('totoDonutList').innerHTML=days.map((d,i)=>`<div class="stats-donut-row"><span><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${['#F97316','#FB923C','#FDBA74','#10B981','#2563EB','#7C3AED','#EF4444'][i]};margin-right:5px"></i>${d}요일</span><b>${statsFmtShort(vals[i])}<br>${Math.round(vals[i]/tot*100)}%</b></div>`).join('');
-
+  charts.cTotoMain=new Chart($('cTotoMain'),{type:'bar',data:{labels:rows.map(r=>`${(r.date||'').slice(5)}(${sDN(r.date)})`),datasets:[{label:'토토 판매금액',data:rows.map(r=>sN(r.toto)),backgroundColor:'rgba(249,115,22,.75)',borderRadius:6,borderSkipped:false}]},options:sCB()});
+  const sum={};DAYS.forEach(d=>sum[d]=0);rows.forEach(r=>sum[sDN(r.date)]+=sN(r.toto));
+  const vals=DAYS.map(d=>sum[d]),tot=vals.reduce((a,b)=>a+b,0)||1;
+  $('totoDonutTotal').textContent=sFSh(tot);
+  charts.cTotoDonut=new Chart($('cTotoDonut'),{type:'doughnut',data:{labels:DAYS,datasets:[{data:vals,backgroundColor:TCOLS,borderColor:css('--panel'),borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false}}}});
+  $('totoDonutList').innerHTML=DAYS.map((d,i)=>`<div class="stats-donut-row"><span>${sDotHtml(TCOLS[i])}${d}요일</span><b>${sFSh(vals[i])}<br>${Math.round(vals[i]/tot*100)}%</b></div>`).join('');
   renderTotoTable();
 }
 function renderTotoTable(){
   const sd=statsData.toto;let rows=[...sd.rows];
-  if(sd.sortKey)rows.sort((a,b)=>{const av=a[sd.sortKey],bv=b[sd.sortKey];return(typeof av==='string'?String(av).localeCompare(String(bv)):statsNum(av)-statsNum(bv))*sd.sortDir});
+  if(sd.sortKey)rows.sort((a,b)=>{const av=a[sd.sortKey],bv=b[sd.sortKey];return(typeof av==='string'?String(av).localeCompare(String(bv)):sN(av)-sN(bv))*sd.sortDir});
   $('totoTableInfo').textContent=rows.length+'건';
-  $('totoTbody').innerHTML=rows.map(r=>`<tr><td>${r.date||'-'}(${statsDayName(r.date)})</td><td>${statsFmtWon(r.toto)}</td><td class="${statsDiffClass(r.diff)}">${statsNum(r.diff)>0?'+':''}${statsFmtWon(r.diff)}</td><td class="${statsDiffClass(r.diff_pct)}">${statsFmtPct(r.diff_pct)}</td></tr>`).join('');
+  $('totoTbody').innerHTML=rows.map(r=>`<tr><td>${r.date||'-'}(${sDN(r.date)})</td><td>${sFW(r.toto)}</td><td class="${sDC(r.diff)}">${sN(r.diff)>0?'+':''}${sFW(r.diff)}</td><td class="${sDC(r.diff_pct)}">${sFP(r.diff_pct)}</td></tr>`).join('');
 }
 
-/* ---- 통합 탭 렌더 ---- */
 function renderUnified(){
-  const sd=statsData.unified;const rows=sd.rows;
-  const sm=sd.summary;
-  const lt=statsNum(sm.lotto_total),tt=statsNum(sm.toto_total),it=statsNum(sm.instant_total),gt=statsNum(sm.grand_total)||lt+tt+it;
-  const heros=[
-    ['🎱 로또 매출',lt,'#4F46E5'],
-    ['⚽ 토토 매출',tt,'#F97316'],
-    ['🎟️ 즉석 매출',it,'#10B981'],
-    ['📊 총 합계',gt,'#7C3AED']
-  ];
-  $('unifiedHero').innerHTML=heros.map(h=>`<div class="unified-hero-card"><div class="unified-hero-bar" style="background:${h[2]}"></div><div class="unified-hero-label">${h[0]}</div><div class="unified-hero-main" style="color:${h[2]}">${statsFmtShort(h[1])}원</div><div class="unified-hero-sub">기간 합계 ${statsFmt(h[1])}원</div></div>`).join('');
-
+  const sd=statsData.unified;const rows=sd.rows;const sm=sd.summary;
+  const lt=sN(sm.lotto_total),tt=sN(sm.toto_total),it=sN(sm.instant_total),gt=sN(sm.grand_total)||lt+tt+it;
+  $('unifiedHero').innerHTML=[['🎱 로또 매출',lt,'#4F46E5'],['⚽ 토토 매출',tt,'#F97316'],['🎟️ 즉석 매출',it,'#10B981'],['📊 총 합계',gt,'#7C3AED']].map(h=>`<div class="unified-hero-card"><div class="unified-hero-bar" style="background:${h[2]}"></div><div class="unified-hero-label">${h[0]}</div><div class="unified-hero-main" style="color:${h[2]}">${sFSh(h[1])}원</div><div class="unified-hero-sub">합계 ${sF(h[1])}원</div></div>`).join('');
   destroy('cUnifiedMain');destroy('cUnifiedDonut');destroy('cUnifiedLotto');destroy('cUnifiedToto');destroy('cUnifiedInstant');
-  const opts=statsChartBase();
-  const stackOpts={...opts,scales:{x:{stacked:true,grid:{display:false},ticks:{color:css('--muted'),font:{size:11},maxRotation:0}},y:{stacked:true,grid:{color:css('--grid')},ticks:{color:css('--muted'),font:{size:11},callback:v=>statsFmtShort(v)}}}};
-  stackOpts.plugins={...opts.plugins};
-  charts.cUnifiedMain=new Chart($('cUnifiedMain'),{type:'bar',data:{
-    labels:rows.map(r=>`${r.date?.slice(5)||''}(${statsDayName(r.date)})`),
-    datasets:[
-      {label:'로또',data:rows.map(r=>statsNum(r.lotto)),backgroundColor:'rgba(79,70,229,.80)',stack:'s',borderRadius:2},
-      {label:'토토',data:rows.map(r=>statsNum(r.toto)),backgroundColor:'rgba(249,115,22,.80)',stack:'s',borderRadius:2},
-      {label:'즉석',data:rows.map(r=>statsNum(r.instant)),backgroundColor:'rgba(16,185,129,.80)',stack:'s',borderRadius:2}
-    ]
-  },options:stackOpts});
-
-  const donutVals=[lt,tt,it],donutLabels=['로또','토토','즉석'],donutColors=['#4F46E5','#F97316','#10B981'];
-  $('unifiedDonutTotal').textContent=statsFmtShort(gt);
-  charts.cUnifiedDonut=new Chart($('cUnifiedDonut'),{type:'doughnut',data:{labels:donutLabels,datasets:[{data:donutVals,backgroundColor:donutColors,borderColor:css('--panel'),borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false}}}});
-  $('unifiedDonutList').innerHTML=donutLabels.map((l,i)=>`<div class="stats-donut-row"><span><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${donutColors[i]};margin-right:5px"></i>${l}</span><b>${statsFmtShort(donutVals[i])}<br>${gt?Math.round(donutVals[i]/gt*100):0}%</b></div>`).join('');
-
-  const miniOpts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:css('--muted'),font:{size:10},maxRotation:0,maxTicksLimit:6}},y:{grid:{color:css('--grid')},ticks:{color:css('--muted'),font:{size:10},callback:v=>statsFmtShort(v)}}}};
-  const miniLabels=rows.map(r=>r.date?.slice(5)||'');
-  charts.cUnifiedLotto=new Chart($('cUnifiedLotto'),{type:'line',data:{labels:miniLabels,datasets:[{data:rows.map(r=>statsNum(r.lotto)),borderColor:'#4F46E5',backgroundColor:'rgba(79,70,229,.1)',borderWidth:2,tension:.3,fill:true,pointRadius:0}]},options:miniOpts});
-  charts.cUnifiedToto=new Chart($('cUnifiedToto'),{type:'line',data:{labels:miniLabels,datasets:[{data:rows.map(r=>statsNum(r.toto)),borderColor:'#F97316',backgroundColor:'rgba(249,115,22,.1)',borderWidth:2,tension:.3,fill:true,pointRadius:0}]},options:miniOpts});
-  charts.cUnifiedInstant=new Chart($('cUnifiedInstant'),{type:'line',data:{labels:miniLabels,datasets:[{data:rows.map(r=>statsNum(r.instant)),borderColor:'#10B981',backgroundColor:'rgba(16,185,129,.1)',borderWidth:2,tension:.3,fill:true,pointRadius:0}]},options:miniOpts});
-
+  const so={...sCB(),scales:{x:{stacked:true,grid:{display:false},ticks:{color:css('--muted'),font:{size:11},maxRotation:0}},y:{stacked:true,grid:{color:css('--grid')},ticks:{color:css('--muted'),font:{size:11},callback:v=>sFSh(v)}}}};
+  charts.cUnifiedMain=new Chart($('cUnifiedMain'),{type:'bar',data:{labels:rows.map(r=>`${(r.date||'').slice(5)}(${sDN(r.date)})`),datasets:[{label:'로또',data:rows.map(r=>sN(r.lotto)),backgroundColor:'rgba(79,70,229,.80)',stack:'s',borderRadius:2},{label:'토토',data:rows.map(r=>sN(r.toto)),backgroundColor:'rgba(249,115,22,.80)',stack:'s',borderRadius:2},{label:'즉석',data:rows.map(r=>sN(r.instant)),backgroundColor:'rgba(16,185,129,.80)',stack:'s',borderRadius:2}]},options:so});
+  const dv=[lt,tt,it],dl=['로또','토토','즉석'],dc=['#4F46E5','#F97316','#10B981'];
+  $('unifiedDonutTotal').textContent=sFSh(gt);
+  charts.cUnifiedDonut=new Chart($('cUnifiedDonut'),{type:'doughnut',data:{labels:dl,datasets:[{data:dv,backgroundColor:dc,borderColor:css('--panel'),borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false}}}});
+  $('unifiedDonutList').innerHTML=dl.map((l,i)=>`<div class="stats-donut-row"><span>${sDotHtml(dc[i])}${l}</span><b>${sFSh(dv[i])}<br>${gt?Math.round(dv[i]/gt*100):0}%</b></div>`).join('');
+  const mo={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:css('--muted'),font:{size:10},maxRotation:0,maxTicksLimit:7}},y:{grid:{color:css('--grid')},ticks:{color:css('--muted'),font:{size:10},callback:v=>sFSh(v)}}}};
+  const ml=rows.map(r=>(r.date||'').slice(5));
+  charts.cUnifiedLotto=new Chart($('cUnifiedLotto'),{type:'line',data:{labels:ml,datasets:[{data:rows.map(r=>sN(r.lotto)),borderColor:'#4F46E5',backgroundColor:'rgba(79,70,229,.1)',borderWidth:2,tension:.3,fill:true,pointRadius:0}]},options:mo});
+  charts.cUnifiedToto=new Chart($('cUnifiedToto'),{type:'line',data:{labels:ml,datasets:[{data:rows.map(r=>sN(r.toto)),borderColor:'#F97316',backgroundColor:'rgba(249,115,22,.1)',borderWidth:2,tension:.3,fill:true,pointRadius:0}]},options:mo});
+  charts.cUnifiedInstant=new Chart($('cUnifiedInstant'),{type:'line',data:{labels:ml,datasets:[{data:rows.map(r=>sN(r.instant)),borderColor:'#10B981',backgroundColor:'rgba(16,185,129,.1)',borderWidth:2,tension:.3,fill:true,pointRadius:0}]},options:mo});
   renderUnifiedTable();
 }
 function renderUnifiedTable(){
   const sd=statsData.unified;let rows=[...sd.rows];
-  if(sd.sortKey)rows.sort((a,b)=>{const av=a[sd.sortKey],bv=b[sd.sortKey];return(typeof av==='string'?String(av).localeCompare(String(bv)):statsNum(av)-statsNum(bv))*sd.sortDir});
+  if(sd.sortKey)rows.sort((a,b)=>{const av=a[sd.sortKey],bv=b[sd.sortKey];return(typeof av==='string'?String(av).localeCompare(String(bv)):sN(av)-sN(bv))*sd.sortDir});
   $('unifiedTableInfo').textContent=rows.length+'건';
-  $('unifiedTbody').innerHTML=rows.map(r=>`<tr><td>${r.date||'-'}(${statsDayName(r.date)})</td><td>${statsFmtWon(r.lotto)}</td><td>${statsFmtWon(r.toto)}</td><td>${statsFmtWon(r.instant)}</td><td style="font-weight:950">${statsFmtWon(r.total)}</td><td class="${statsDiffClass(r.diff)}">${statsNum(r.diff)>0?'+':''}${statsFmtWon(r.diff)}</td><td class="${statsDiffClass(r.diff_pct)}">${statsFmtPct(r.diff_pct)}</td></tr>`).join('');
+  $('unifiedTbody').innerHTML=rows.map(r=>`<tr><td>${r.date||'-'}(${sDN(r.date)})</td><td>${sFW(r.lotto)}</td><td>${sFW(r.toto)}</td><td>${sFW(r.instant)}</td><td style="font-weight:950">${sFW(r.total)}</td><td class="${sDC(r.diff)}">${sN(r.diff)>0?'+':''}${sFW(r.diff)}</td><td class="${sDC(r.diff_pct)}">${sFP(r.diff_pct)}</td></tr>`).join('');
 }
 
+const _statsInited={};
 async function initStatsTab(type){
   await loadStatsData(type);
-  if(type==='lotto')renderLotto();
-  else if(type==='toto')renderToto();
-  else renderUnified();
-  // 기간 버튼 바인딩
-  const barId=type+'Periodbar';
-  document.querySelectorAll(`#${barId} .stats-pp`).forEach(b=>b.onclick=async()=>{
+  if(type==='lotto')renderLotto();else if(type==='toto')renderToto();else renderUnified();
+  if(_statsInited[type])return;_statsInited[type]=true;
+  document.querySelectorAll(`#${type}Periodbar .stats-pp`).forEach(b=>b.onclick=async()=>{
     statsData[type].period=parseInt(b.dataset.statsPeriod,10)||30;
-    document.querySelectorAll(`#${barId} .stats-pp`).forEach(x=>x.classList.toggle('active',x===b));
+    document.querySelectorAll(`#${type}Periodbar .stats-pp`).forEach(x=>x.classList.toggle('active',x===b));
     await loadStatsData(type);
     if(type==='lotto')renderLotto();else if(type==='toto')renderToto();else renderUnified();
     setTimeout(()=>Object.values(charts).forEach(c=>c?.resize&&c.resize()),30);
   });
 }
-
 load();
 </script>
 </body>
