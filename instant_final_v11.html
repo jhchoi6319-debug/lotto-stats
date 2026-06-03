@@ -1227,7 +1227,8 @@ function renderAll(){
   renderLine('cScratch',agg,[baseLine('스피또1000',agg.map(r=>r.s1),COLORS.s1),baseLine('스피또2000',agg.map(r=>r.s2),COLORS.s2,false,[5,4])]);
   renderLine('cPrize',agg,[baseLine('당첨금',agg.map(r=>r.instantAmt),COLORS.red,true)],v=>fmtShort(v));
   renderLine('cFee',agg,[baseLine('즉석수수료',agg.map(r=>r.instantFee),COLORS.s2,true)],v=>fmtShort(v));
-  renderDailyTable(agg);renderOrder(rows);
+  renderDailyTable(agg);
+  if(activeTab==='order')renderOrder(rows);
 }
 function updatePeriodbarVisibility(){
   const bar=document.querySelector('.periodbar:not(#orderPeriodbar)');
@@ -1251,7 +1252,23 @@ function bind(){
 }
 async function load(){
   bind();const saved=localStorage.getItem('premiumTheme')||'light';document.documentElement.dataset.theme=saved;$('themeBtn').textContent=saved==='dark'?'☀️ 라이트모드':'🌙 다크모드';
-  try{const res=await fetch(`/stats/list?store_id=${encodeURIComponent(SID)}&days=2920`);if(!res.ok)throw new Error('서버 오류 '+res.status);allRows=await res.json();$('storeName').textContent=(allRows[0]?.store_name||SID);renderAll()}catch(e){$('dataInfo').textContent='오류: '+e.message;$('storeName').textContent=SID+' · 연결 실패'}
+  try{
+    const res=await fetch(`/stats/list?store_id=${encodeURIComponent(SID)}&days=2920`);
+    if(!res.ok)throw new Error('서버 오류 '+res.status);
+    allRows=await res.json();
+    $('storeName').textContent=(allRows[0]?.store_name||SID);
+  }catch(e){
+    $('dataInfo').textContent='오류: '+e.message;
+    $('storeName').textContent=SID+' · 연결 실패';
+    return;
+  }
+  try{
+    renderAll();
+  }catch(e){
+    console.error('renderAll 오류:', e);
+    $('dataInfo').textContent='렌더링 오류: '+e.message;
+  }
+}
 }
 load();
 </script>
