@@ -61,22 +61,32 @@ button{font-family:inherit;border:0;background:none;cursor:pointer;color:inherit
 
   <div class="content">
     <section id="page-sales" class="page">
-      <!-- 1. KPI -->
       <div class="kpi-strip" id="kpiStrip"></div>
 
-      <!-- 2. 메인 판매 추이 -->
       <div class="card">
-        <div class="card-hd"><div><div class="card-title">일별 판매장수 추이</div><div class="card-desc">날짜별 합산 판매장수 · 막대 + 기간 평균선</div></div><button class="more">전체합산</button></div>
+        <div class="card-hd">
+          <div>
+            <div class="card-title">일별 판매량 추이</div>
+            <div class="card-desc">
+              <span style="display:inline-flex;align-items:center;gap:4px">
+                <span style="width:10px;height:10px;border-radius:2px;background:#7C3AED;display:inline-block"></span> 장수 있음(장수 기준)
+              </span>
+              &nbsp;
+              <span style="display:inline-flex;align-items:center;gap:4px">
+                <span style="width:10px;height:10px;border-radius:2px;background:#F97316;display:inline-block"></span> 과거데이터(즉석매출 만원)
+              </span>
+            </div>
+          </div>
+          <button class="more">전체합산</button>
+        </div>
         <div class="h260"><canvas id="cSalesMix"></canvas></div>
       </div>
 
-      <!-- 3. 주식형 증감 테이블 -->
       <div class="card">
         <div class="card-hd"><div><div class="card-title">일별 판매량 및 판매대금</div><div class="card-desc">전일대비 ▲ 상승 / ▼ 하락 · 장수와 금액 변동을 주식표처럼 표시</div></div><div id="dailyTableInfo" class="more">-</div></div>
         <div class="table-wrap"><table class="data-table market-table"><thead><tr><th>날짜</th><th>판매량</th><th>전일대비</th><th>판매대금</th><th>전일대비</th></tr></thead><tbody id="dailyTbody"></tbody><tfoot id="dailyTfoot"></tfoot></table></div>
       </div>
 
-      <!-- 4. 매출 관련 -->
       <div class="row-main">
         <div class="card">
           <div class="card-hd"><div><div class="card-title">상품별 매출 비중</div><div class="card-desc">연금×1,000원 + 스피또1000 + 스피또2000</div></div></div>
@@ -85,7 +95,6 @@ button{font-family:inherit;border:0;background:none;cursor:pointer;color:inherit
         <div class="card"><div class="card-hd"><div><div class="card-title">판매금액 누적 막대</div><div class="card-desc">상품별 스택</div></div></div><div class="h220"><canvas id="cAmount"></canvas></div></div>
       </div>
 
-      <!-- 5. 분석 관련 -->
       <div class="row-2">
         <div class="card">
           <div class="card-hd"><div><div class="card-title">요일별 평균 판매장수</div><div class="card-desc">최고 요일 강조 · 점선 표시</div></div></div>
@@ -94,21 +103,18 @@ button{font-family:inherit;border:0;background:none;cursor:pointer;color:inherit
         <div class="card"><div class="card-hd"><div><div class="card-title">근무자별 판매량 TOP 5</div><div class="card-desc">시재 제외 · 합산</div></div></div><div id="rankList" class="rank-list"></div></div>
       </div>
 
-      <!-- 6. 상품별 추이 -->
       <div class="row-2">
         <div class="card"><div class="card-hd"><div><div class="card-title">연금복권 일별 추이</div><div class="card-desc">판매장수</div></div></div><div class="h170"><canvas id="cPension"></canvas></div></div>
         <div class="card"><div class="card-hd"><div><div class="card-title">스크래치 일별 추이</div><div class="card-desc">스피또1000 / 2000</div></div></div><div class="h170"><canvas id="cScratch"></canvas></div></div>
       </div>
 
-      <!-- 7. 정산 관련 -->
       <div class="row-2">
         <div class="card"><div class="card-hd"><div><div class="card-title">당첨금 지급 추이</div><div class="card-desc">instant_total_amount 기준</div></div></div><div class="h170"><canvas id="cPrize"></canvas></div></div>
         <div class="card"><div class="card-hd"><div><div class="card-title">총 수수료 추이</div><div class="card-desc">일별 합산</div></div></div><div class="h170"><canvas id="cFee"></canvas></div></div>
       </div>
 
-      <!-- 8. 상세 데이터 -->
       <div class="card"><div class="card-hd"><div><div class="card-title">상세 판매 데이터</div><div class="card-desc">closing_date 기준 합산 완료 데이터</div></div><div id="detailInfo" class="more">-</div></div><div class="table-wrap"><table class="data-table"><thead><tr><th>날짜</th><th>연금(장)</th><th>스피또1000(장)</th><th>스피또2000(장)</th><th>총합(장)</th><th>판매금액</th><th>수수료</th></tr></thead><tbody id="detailTbody"></tbody><tfoot id="detailTfoot"></tfoot></table></div></div>
-      <div class="note">* 모든 데이터는 worker가 “시재”인 행을 제외하고, closing_date 기준으로 합산됩니다.</div>
+      <div class="note">* 모든 데이터는 worker가 "시재"인 행을 제외하고, closing_date 기준으로 합산됩니다.</div>
     </section>
 
     <section id="page-order" class="page hidden">
@@ -121,10 +127,11 @@ button{font-family:inherit;border:0;background:none;cursor:pointer;color:inherit
       <div class="row-main"><div class="card"><div class="card-hd"><div><div class="card-title">상품별 재고·잔여 현황</div><div class="card-desc">현재 API 필드 기준: 최근 일자 판매량을 잔여 참고값으로 표시</div></div></div><div class="table-wrap"><table class="data-table"><thead><tr><th>상품</th><th>출근재고</th><th>마감재고</th><th>판매</th><th>잔여</th><th>소진예상</th><th>상태</th></tr></thead><tbody id="invTbody"></tbody></table></div></div><div class="card"><div class="card-hd"><div><div class="card-title">재고 추이</div><div class="card-desc">최근 14일 판매량 기준</div></div></div><div class="h220"><canvas id="cInv"></canvas></div></div></div>
     </section>
   </div>
+
 <script>
 const SID = new URLSearchParams(location.search).get('store_id') || 'store001';
 let allRows=[], period='month', charts={}, activeTab='sales';
-const COLORS={all:'#4F46E5',p:'#F97316',s1:'#2563EB',s2:'#7C3AED',red:'#EF4444',green:'#10B981'};
+const COLORS={all:'#4F46E5',p:'#F97316',s1:'#2563EB',s2:'#7C3AED',red:'#EF4444',green:'#10B981',orange:'#F97316',purple:'#7C3AED'};
 const $=id=>document.getElementById(id);
 const num=v=>parseInt(v,10)||0;
 const fmt=n=>num(n).toLocaleString('ko-KR');
@@ -140,8 +147,11 @@ Chart.defaults.font.family="'Malgun Gothic','Apple SD Gothic Neo',Arial,sans-ser
 Chart.defaults.font.weight='700';
 Chart.defaults.plugins.tooltip.backgroundColor='rgba(15,23,42,.92)';
 Chart.defaults.plugins.tooltip.padding=12;Chart.defaults.plugins.tooltip.cornerRadius=10;
-const valueLabelPlugin={id:'valueLabel',afterDatasetsDraw(chart,args,opts){if(!opts?.enabled)return;const {ctx}=chart;ctx.save();ctx.font='800 10px Malgun Gothic';ctx.textAlign='center';ctx.fillStyle=css('--text');const meta=chart.getDatasetMeta(opts.datasetIndex??0);meta.data.forEach((bar,i)=>{const v=chart.data.datasets[opts.datasetIndex??0].data[i];if(v>0)ctx.fillText(fmt(v),bar.x,bar.y-6)});ctx.restore();}};
-const avgLineLabelPlugin={id:'avgLineLabel',afterDraw(chart,args,opts){if(!opts?.enabled)return;const ds=chart.data.datasets.find(d=>d.yAxisID==='avg');if(!ds)return;const v=ds.data[0];const y=chart.scales.y.getPixelForValue(v);const x=chart.chartArea.right-6;const {ctx}=chart;ctx.save();ctx.fillStyle=COLORS.s1;ctx.font='900 11px Malgun Gothic';ctx.textAlign='right';ctx.fillText('일평균 '+fmt(Math.round(v))+'장',x,y-8);ctx.restore();}};
+const valueLabelPlugin={id:'valueLabel',afterDatasetsDraw(chart,args,opts){if(!opts?.enabled)return;const {ctx}=chart;ctx.save();ctx.font='800 10px Malgun Gothic';ctx.textAlign='center';ctx.fillStyle=css('--text');
+  // 두 데이터셋(장수 있음=0, 매출 만원=1) 모두 라벨 표시
+  [0,1].forEach(di=>{const meta=chart.getDatasetMeta(di);meta.data.forEach((bar,i)=>{const v=chart.data.datasets[di].data[i];if(v>0)ctx.fillText(fmt(Math.round(v)),bar.x,bar.y-6)});});
+  ctx.restore();}};
+const avgLineLabelPlugin={id:'avgLineLabel',afterDraw(chart,args,opts){if(!opts?.enabled)return;const ds=chart.data.datasets.find(d=>d.yAxisID==='avg');if(!ds)return;const v=ds.data[0];const y=chart.scales.y.getPixelForValue(v);const x=chart.chartArea.right-6;const {ctx}=chart;ctx.save();ctx.fillStyle=COLORS.s1;ctx.font='900 11px Malgun Gothic';ctx.textAlign='right';ctx.fillText('일평균 '+fmt(Math.round(v)),x,y-8);ctx.restore();}};
 Chart.register(valueLabelPlugin,avgLineLabelPlugin);
 function parseLocalDate(value){
   const s=String(value||'').slice(0,10);
@@ -154,8 +164,6 @@ function endOfDay(d){const x=new Date(d);x.setHours(23,59,59,999);return x;}
 function startOfDay(d){const x=new Date(d);x.setHours(0,0,0,0);return x;}
 function validRows(){return allRows.filter(x=>String(x.worker||'').trim()!=='시재' && parseLocalDate(x.closing_date));}
 function anchorDate(){
-  // 서버/브라우저 날짜와 DB의 최신 closing_date가 다를 때 이번주/이번달이 비는 문제 방지.
-  // 실제 운영 중이면 최신 closing_date가 보통 오늘이므로 조건 요구사항과 동일하게 동작한다.
   const rows=validRows();
   if(!rows.length)return endOfDay(new Date());
   const latest=rows.map(r=>parseLocalDate(r.closing_date)).sort((a,b)=>b-a)[0];
@@ -193,8 +201,119 @@ function baseLine(label,data,color,fill=false,dash=[]){return{label,data,borderC
 function scales(yCb){const t=chartTheme();return{x:{grid:{color:t.grid},ticks:{color:t.text,maxTicksLimit:12,font:{size:11}}},y:{grid:{color:t.grid},ticks:{color:t.text,font:{size:11},callback:yCb||((v)=>fmt(v))}}}}
 function bookText(total,unit){const b=Math.floor(total/unit),r=total%unit;return `${fmt(b)}권 ${r}장`}
 function renderKpi(rows,agg){const days=agg.length||1,tP=rows.reduce((s,r)=>s+num(r.pension_sales_count),0),tS1=rows.reduce((s,r)=>s+num(r.instant1000_sales_count),0),tS2=rows.reduce((s,r)=>s+num(r.instant2000_sales_count),0),tAmt=rows.reduce((s,r)=>s+num(r.instant_total_amount),0),tFee=rows.reduce((s,r)=>s+num(r.total_fee),0),tot=tP+tS1+tS2;const pB=Math.floor(tP/50),s1B=Math.floor(tS1/200),s2B=Math.floor(tS2/100),totB=pB+s1B+s2B;const data=[['연금복권',bookText(tP,50),`총 ${fmt(tP)}장`,`일평균 ${bookText(Math.round(tP/days),50)} · ${fmt(Math.round(tP/days))}장`,COLORS.p,'🎫'],['스피또1000',bookText(tS1,200),`총 ${fmt(tS1)}장`,`일평균 ${bookText(Math.round(tS1/days),200)} · ${fmt(Math.round(tS1/days))}장`,COLORS.s1,'🎟️'],['스피또2000',bookText(tS2,100),`총 ${fmt(tS2)}장`,`일평균 ${bookText(Math.round(tS2/days),100)} · ${fmt(Math.round(tS2/days))}장`,COLORS.s2,'🎪'],['일평균 합계',fmt(Math.round(tot/days))+'장/일',`총 ${fmt(tot)}장`,`${totB}권 합산`,COLORS.all,'📊'],['즉석 총매출',fmtWon(tAmt),`일평균 ${fmtWon(Math.round(tAmt/days))}`,'즉석복권 기준',COLORS.all,'💰'],['총 수수료',fmtWon(tFee),`일평균 ${fmtWon(Math.round(tFee/days))}`,'총수수료 합산',COLORS.s2,'📈']];$('kpiStrip').innerHTML=data.map(k=>`<div class="kpi"><div class="kpi-bar" style="background:${k[4]}"></div><div class="kpi-head"><div class="kpi-label">${k[0]}</div><div class="kpi-icon" style="background:${k[4]}18;color:${k[4]}">${k[5]}</div></div><div class="kpi-main" style="color:${k[4]}">${k[1]}</div><div class="kpi-sub"><b>${k[2]}</b><br>${k[3]}</div></div>`).join('');}
-function renderSalesMix(agg){destroy('cSalesMix');const hasCount=agg.some(r=>r.total>0);const vals=agg.map(r=>r.total>0?r.total:null);const amtVals=agg.map(r=>r.total===0&&r.instantAmt>0?Math.round(r.instantAmt/10000):null);const avg=agg.filter(r=>r.total>0).reduce((s,r)=>s+r.total,0)/(agg.filter(r=>r.total>0).length||1);charts.cSalesMix=new Chart($('cSalesMix'),{type:'bar',data:{labels:agg.map(r=>dateLabel(r.date)),datasets:[{type:'bar',label:'판매량(장)',data:vals,backgroundColor:COLORS.all+'99',borderRadius:8,borderSkipped:false},{type:'bar',label:'즉석매출(만원)',data:amtVals,backgroundColor:COLORS.p+'88',borderRadius:8,borderSkipped:false},{type:'line',label:'일평균',data:agg.map(()=>avg>0?avg:null),borderColor:COLORS.s1,borderWidth:2,borderDash:[6,4],pointRadius:0,tension:0,yAxisID:'avg'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:css('--muted'),boxWidth:10,font:{size:11}}},avgLineLabel:{enabled:true},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(Math.round(c.raw||0))+(c.dataset.label.includes('만원')?'만원':'장')}}},scales:{...scales(),avg:{display:false,position:'right',min:0,max:Math.max(...agg.map(r=>r.total||r.instantAmt/10000||0),avg)*1.18}}}})}}
-function renderDailyTable(agg){let html='',sumQ=0,sumA=0;const pct=(d,p)=>p?`${Math.abs((d/p)*100).toFixed(1)}%`:'-';const cls=v=>v==null?'flat':v>0?'up':v<0?'down':'flat';const tri=v=>v==null?'━':v>0?'▲':v<0?'▼':'━';const trend=(v,prev,unit='')=>{if(v==null)return `<div class="trend-cell flat"><span class="tri flat">━</span><span class="chg-main">기준일</span></div>`;const c=cls(v),abs=Math.abs(v);return `<div class="trend-cell ${c}"><span class="tri ${c}">${tri(v)}</span><span class="chg-main">${v>0?'+':'-'}${fmt(abs)}${unit}</span><span class="chg-pct">${pct(v,prev)}</span></div>`};agg.forEach((r,i)=>{const prev=agg[i-1];const dq=prev?r.total-prev.total:null;const curMan=toMan(r.amount);const prevMan=prev?toMan(prev.amount):null;const da=prev?curMan-prevMan:null;html+=`<tr><td>${r.date}</td><td><b>${fmt(r.total)}장</b></td><td>${trend(dq,prev?.total,'장')}</td><td><b>${fmt(curMan)}만원</b></td><td>${trend(da,prevMan,'만원')}</td></tr>`;sumQ+=r.total;sumA+=curMan;});$('dailyTbody').innerHTML=html;$('dailyTfoot').innerHTML=`<tr><td>합계 / 평균</td><td>${fmt(sumQ)}장</td><td>일평균 ${fmt(Math.round(sumQ/(agg.length||1)))}장</td><td>${fmt(sumA)}만원</td><td>일평균 ${fmt(Math.round(sumA/(agg.length||1)))}만원</td></tr>`;$('dailyTableInfo').textContent=`${agg.length}건`;}
+
+// ─────────────────────────────────────────────────────────────
+// renderSalesMix: 핵심 수정 함수
+//   - 장수 있는 행(total > 0)  → dataHasSales[i] = total,  dataNoSales[i] = null
+//   - 장수 없는 행(total === 0) → dataHasSales[i] = null,   dataNoSales[i] = toMan(instantAmt)
+//   - 두 데이터셋을 같은 x축에 스택 없이 겹쳐서 렌더링
+// ─────────────────────────────────────────────────────────────
+function renderSalesMix(agg){
+  destroy('cSalesMix');
+
+  const labels = agg.map(r => dateLabel(r.date));
+
+  // 장수 있는 구간: 보라색(purple), 없는 구간: 주황색(orange)
+  const dataHasSales = agg.map(r => r.total > 0 ? r.total : null);
+  const dataNoSales  = agg.map(r => r.total === 0 ? toMan(r.instantAmt) : null);
+
+  // 평균은 장수 있는 데이터만으로 계산 (없으면 전체 매출만원 평균)
+  const hasSalesAgg = agg.filter(r => r.total > 0);
+  const noSalesAgg  = agg.filter(r => r.total === 0);
+  const avgSales = hasSalesAgg.length
+    ? hasSalesAgg.reduce((s,r)=>s+r.total,0) / hasSalesAgg.length
+    : null;
+  const avgAmt = noSalesAgg.length
+    ? noSalesAgg.reduce((s,r)=>s+toMan(r.instantAmt),0) / noSalesAgg.length
+    : null;
+
+  // y축 최대값: 두 시리즈 모두 고려
+  const allVals = [
+    ...agg.map(r => r.total > 0 ? r.total : 0),
+    ...agg.map(r => r.total === 0 ? toMan(r.instantAmt) : 0),
+    avgSales||0, avgAmt||0
+  ];
+  const yMax = (Math.max(...allVals) || 1) * 1.25;
+
+  // 평균선 데이터 — 장수 있는 구간 평균만 표시 (장수 없는 구간은 null)
+  const avgLineData = avgSales != null
+    ? agg.map(r => r.total > 0 ? avgSales : null)
+    : null;
+
+  const datasets = [
+    {
+      type: 'bar',
+      label: '판매장수',
+      data: dataHasSales,
+      backgroundColor: COLORS.purple + 'BB',
+      borderRadius: 8,
+      borderSkipped: false,
+      spanGaps: false,
+    },
+    {
+      type: 'bar',
+      label: '즉석매출(만원, 과거)',
+      data: dataNoSales,
+      backgroundColor: COLORS.orange + 'BB',
+      borderRadius: 8,
+      borderSkipped: false,
+      spanGaps: false,
+    },
+  ];
+
+  if (avgLineData) {
+    datasets.push({
+      type: 'line',
+      label: '장수 평균',
+      data: avgLineData,
+      borderColor: COLORS.s1,
+      borderWidth: 2,
+      borderDash: [6,4],
+      pointRadius: 0,
+      tension: 0,
+      yAxisID: 'avg',
+      spanGaps: false,
+    });
+  }
+
+  charts.cSalesMix = new Chart($('cSalesMix'), {
+    type: 'bar',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          labels: { color: css('--muted'), boxWidth: 10, font: { size: 11 } }
+        },
+        valueLabel: { enabled: true },
+        avgLineLabel: { enabled: avgSales != null },
+        tooltip: {
+          callbacks: {
+            label: c => {
+              if (c.datasetIndex === 0) return `판매장수: ${fmt(Math.round(c.raw||0))}장`;
+              if (c.datasetIndex === 1) return `즉석매출(과거): ${fmt(Math.round(c.raw||0))}만원`;
+              return `${c.dataset.label}: ${fmt(Math.round(c.raw||0))}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { color: css('--grid') }, ticks: { color: css('--muted'), maxTicksLimit: 12, font: { size: 11 } } },
+        y: {
+          grid: { color: css('--grid') },
+          ticks: { color: css('--muted'), font: { size: 11 }, callback: v => fmt(v) },
+          max: yMax
+        },
+        avg: { display: false, position: 'right', min: 0, max: yMax }
+      }
+    }
+  });
+}
+// ─────────────────────────────────────────────────────────────
+
+function renderDailyTable(agg){let html='',sumQ=0,sumA=0;const pct=(d,p)=>p?`${Math.abs((d/p)*100).toFixed(1)}%`:'-';const cls=v=>v==null?'flat':v>0?'up':v<0?'down':'flat';const tri=v=>v==null?'━':v>0?'▲':v<0?'▼':'━';const trend=(v,prev,unit='')=>{if(v==null)return `<div class="trend-cell flat"><span class="tri flat">━</span><span class="chg-main">기준일</span></div>`;const c=cls(v),abs=Math.abs(v);return `<div class="trend-cell ${c}"><span class="tri ${c}">${tri(v)}</span><span class="chg-main">${v>0?'+':'-'}${fmt(abs)}${unit}</span><span class="chg-pct">${pct(v,prev)}</span></div>`};agg.forEach((r,i)=>{const prev=agg[i-1];const dq=prev?r.total-prev.total:null;const curMan=toMan(r.amount);const prevMan=prev?toMan(prev.amount):null;const da=prev?curMan-prevMan:null;html+=`<tr><td>${r.date}</td><td><b>${r.total>0?fmt(r.total)+'장':toMan(r.instantAmt)+'만원(과거)'}</b></td><td>${trend(dq,prev?.total,'장')}</td><td><b>${fmt(curMan)}만원</b></td><td>${trend(da,prevMan,'만원')}</td></tr>`;sumQ+=r.total;sumA+=curMan;});$('dailyTbody').innerHTML=html;$('dailyTfoot').innerHTML=`<tr><td>합계 / 평균</td><td>${fmt(sumQ)}장</td><td>일평균 ${fmt(Math.round(sumQ/(agg.length||1)))}장</td><td>${fmt(sumA)}만원</td><td>일평균 ${fmt(Math.round(sumA/(agg.length||1)))}만원</td></tr>`;$('dailyTableInfo').textContent=`${agg.length}건`;}
 function renderDonut(rows){destroy('cDonut');const p=rows.reduce((s,r)=>s+num(r.pension_sales_count)*1000,0),s1=rows.reduce((s,r)=>s+num(r.instant1000_sales_amount),0),s2=rows.reduce((s,r)=>s+num(r.instant2000_sales_amount),0),total=p+s1+s2||1;$('donutTotal').textContent=fmtShort(total)+'원';charts.cDonut=new Chart($('cDonut'),{type:'doughnut',data:{labels:['연금','스피또1000','스피또2000'],datasets:[{data:[p,s1,s2],backgroundColor:[COLORS.p,COLORS.s1,COLORS.s2],borderColor:css('--panel'),borderWidth:4,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'70%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.label}: ${fmtWon(c.raw)} (${Math.round(c.raw/total*100)}%)`}}}}});$('donutList').innerHTML=[['연금복권',p,COLORS.p],['스피또1000',s1,COLORS.s1],['스피또2000',s2,COLORS.s2]].map(x=>`<div class="donut-row"><span><i class="dot" style="background:${x[2]}"></i>${x[0]}</span><b>${fmtShort(x[1])}원 · ${Math.round(x[1]/total*100)}%</b></div>`).join('')}
 function renderWeekday(rows){destroy('cWeekday');const sums=Array(7).fill(0),cnt=Array(7).fill(0);rows.forEach(r=>{const d=parseLocalDate(r.closing_date).getDay();sums[d]+=num(r.pension_sales_count)+num(r.instant1000_sales_count)+num(r.instant2000_sales_count);cnt[d]++;});const vals=sums.map((s,i)=>cnt[i]?Math.round(s/cnt[i]):0),mx=Math.max(...vals),days=['일','월','화','수','목','금','토'];charts.cWeekday=new Chart($('cWeekday'),{type:'bar',data:{labels:days,datasets:[{label:'요일평균',data:vals,backgroundColor:vals.map(v=>v===mx?COLORS.all:COLORS.all+'44'),borderRadius:8,borderSkipped:false},{type:'line',label:'최고요일',data:vals.map(()=>mx),borderColor:COLORS.all,borderDash:[5,4],pointRadius:0,tension:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:scales(v=>fmt(v)+'장')}})}
 function renderRank(rows){const m={};rows.forEach(r=>{const w=r.worker||'미상';m[w]=(m[w]||0)+num(r.pension_sales_count)+num(r.instant1000_sales_count)+num(r.instant2000_sales_count)});const a=Object.entries(m).sort((x,y)=>y[1]-x[1]).slice(0,5),mx=a[0]?.[1]||1;$('rankList').innerHTML=a.map((x,i)=>`<div class="rank-item"><div class="rank-no">${i+1}</div><div class="rank-name" title="${x[0]}">${x[0]}</div><div class="rank-bg"><div class="rank-fill" style="width:${x[1]/mx*100}%;background:${[COLORS.all,COLORS.s1,COLORS.p,COLORS.s2,COLORS.red][i]}"></div></div><div class="rank-val">${fmt(x[1])}장</div></div>`).join('')||'<div class="note">데이터 없음</div>'}
