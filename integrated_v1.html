@@ -657,11 +657,14 @@ button{border:0;background:none;color:inherit;font-family:inherit;cursor:pointer
       <div class="stats-shell">
         <div class="stats-topline">
           <div><div class="stats-page-title">🎱 로또 매출 통계</div><div class="stats-page-desc">회차별 판매금액 · 요일 분포 · 추이 분석</div></div>
-          <div class="stats-periodbar" id="lottoPeriodbar">
-            <div class="stats-period-label">조회기간</div>
-            <button class="stats-pp" data-stats-period="7">7일</button>
-            <button class="stats-pp active" data-stats-period="30">30일</button>
-            <button class="stats-pp" data-stats-period="90">90일</button>
+          <div class="periodbar" id="lottoPeriodbar" style="margin:0">
+            <div class="pb-label">조회기간</div>
+            <button class="pp" data-stats-period="week">이번 주</button>
+            <button class="pp" data-stats-period="lastweek">지난 주</button>
+            <button class="pp active" data-stats-period="month">이번 달</button>
+            <button class="pp" data-stats-period="90">최근 90일</button>
+            <button class="pp" data-stats-period="monthly">월별 전체</button>
+            <button class="pp" data-stats-period="yearly">연도별</button>
             <div class="data-badge" id="lottoDataInfo">로딩 중...</div>
           </div>
         </div>
@@ -689,11 +692,14 @@ button{border:0;background:none;color:inherit;font-family:inherit;cursor:pointer
       <div class="stats-shell">
         <div class="stats-topline">
           <div><div class="stats-page-title">⚽ 토토 매출 통계</div><div class="stats-page-desc">날짜별 판매금액 · 주차별 추이</div></div>
-          <div class="stats-periodbar" id="totoPeriodbar">
-            <div class="stats-period-label">조회기간</div>
-            <button class="stats-pp" data-stats-period="7">7일</button>
-            <button class="stats-pp active" data-stats-period="30">30일</button>
-            <button class="stats-pp" data-stats-period="90">90일</button>
+          <div class="periodbar" id="totoPeriodbar" style="margin:0">
+            <div class="pb-label">조회기간</div>
+            <button class="pp" data-stats-period="week">이번 주</button>
+            <button class="pp" data-stats-period="lastweek">지난 주</button>
+            <button class="pp active" data-stats-period="month">이번 달</button>
+            <button class="pp" data-stats-period="90">최근 90일</button>
+            <button class="pp" data-stats-period="monthly">월별 전체</button>
+            <button class="pp" data-stats-period="yearly">연도별</button>
             <div class="data-badge" id="totoDataInfo">로딩 중...</div>
           </div>
         </div>
@@ -720,11 +726,14 @@ button{border:0;background:none;color:inherit;font-family:inherit;cursor:pointer
       <div class="stats-shell">
         <div class="stats-topline">
           <div><div class="stats-page-title">📈 통합 매출 통계</div><div class="stats-page-desc">로또 + 토토 + 즉석 · 전체 한눈에</div></div>
-          <div class="stats-periodbar" id="unifiedPeriodbar">
-            <div class="stats-period-label">조회기간</div>
-            <button class="stats-pp" data-stats-period="7">7일</button>
-            <button class="stats-pp active" data-stats-period="30">30일</button>
-            <button class="stats-pp" data-stats-period="90">90일</button>
+          <div class="periodbar" id="unifiedPeriodbar" style="margin:0">
+            <div class="pb-label">조회기간</div>
+            <button class="pp" data-stats-period="week">이번 주</button>
+            <button class="pp" data-stats-period="lastweek">지난 주</button>
+            <button class="pp active" data-stats-period="month">이번 달</button>
+            <button class="pp" data-stats-period="90">최근 90일</button>
+            <button class="pp" data-stats-period="monthly">월별 전체</button>
+            <button class="pp" data-stats-period="yearly">연도별</button>
             <div class="data-badge" id="unifiedDataInfo">로딩 중...</div>
           </div>
         </div>
@@ -1393,7 +1402,7 @@ async function load(){
   }
 }
 /* ===== 로또/토토/통합 매출 탭 JS ===== */
-const statsData={lotto:{rows:[],summary:{},period:30,sortKey:'',sortDir:1},toto:{rows:[],summary:{},period:30,sortKey:'',sortDir:1},unified:{rows:[],summary:{},period:30,sortKey:'',sortDir:1}};
+const statsData={lotto:{rows:[],summary:{},period:'month',sortKey:'',sortDir:1},toto:{rows:[],summary:{},period:'month',sortKey:'',sortDir:1},unified:{rows:[],summary:{},period:'month',sortKey:'',sortDir:1}};
 function sN(v){return Number(v)||0}
 function sF(n){return Math.round(sN(n)).toLocaleString('ko-KR')}
 function sFW(n){return sF(n)+'원'}
@@ -1420,40 +1429,42 @@ async function loadStatsData(type){
   const infoEl=$(type+'DataInfo');
   if(infoEl)infoEl.textContent='처리 중...';
   try{
-    // 즉석 탭과 동일하게 allRows 사용 (이미 로드된 데이터)
-    const raw=allRows.filter(x=>String(x.worker||'').trim()!=='시재'&&x.closing_date);
+    // 즉석 탭과 완전 동일: validRows() + getRange() 사용
+    const raw=validRows();
     if(!raw.length)throw new Error('데이터 없음');
-    // 기간 필터 (days 기준)
-    const anchor=raw.map(r=>new Date(String(r.closing_date).slice(0,10)+'T00:00:00')).sort((a,b)=>b-a)[0];
-    const cutoff=new Date(anchor);cutoff.setDate(anchor.getDate()-(sd.period-1));cutoff.setHours(0,0,0,0);
-    const filtered=raw.filter(r=>{const d=new Date(String(r.closing_date).slice(0,10)+'T00:00:00');return d>=cutoff;});
-    // 날짜별 집계 (중복 제거: 같은 날 동일값 skip)
+    const r=getRange(sd.period);
+    const filtered=r?raw.filter(x=>{const d=parseLocalDate(x.closing_date);return d&&d>=r.from&&d<=r.to;}):raw;
+    if(!filtered.length)throw new Error('기간 내 데이터 없음');
+    // 날짜/월/년 집계 (월별전체=month, 연도별=year, 나머지=date)
+    const gbMode=sd.period==='monthly'?'month':sd.period==='yearly'?'year':'date';
     const map={};const seen=new Set();
     filtered.forEach(r=>{
-      const date=String(r.closing_date).slice(0,10);
-      const key=`${date}_${r.lotto_sales}_${r.toto_sales}`;
-      if(seen.has(key))return;seen.add(key);
-      if(!map[date])map[date]={date,lotto:0,toto:0,instant:0,total:0,round:0};
-      map[date].lotto+=sN(r.lotto_sales);
-      map[date].toto+=sN(r.toto_sales);
-      map[date].instant+=sN(r.instant_total_amount)||sN(r.instant1000_sales_amount)+sN(r.instant2000_sales_amount);
+      const cd=String(r.closing_date||'').slice(0,10);
+      const key=gbMode==='month'?cd.slice(0,7):gbMode==='year'?cd.slice(0,4):cd;
+      const dedupKey=`${key}_${r.lotto_sales}_${r.toto_sales}`;
+      if(seen.has(dedupKey))return;seen.add(dedupKey);
+      if(!map[key])map[key]={date:key,lotto:0,toto:0,instant:0,total:0};
+      map[key].lotto+=sN(r.lotto_sales);
+      map[key].toto+=sN(r.toto_sales);
+      map[key].instant+=sN(r.instant_total_amount)||sN(r.instant1000_sales_amount)+sN(r.instant2000_sales_amount);
     });
     const sorted=Object.values(map).sort((a,b)=>a.date.localeCompare(b.date));
-    if(!sorted.length)throw new Error('empty');
-    sorted.forEach((r,i)=>{
-      r.total=r.lotto+r.toto+r.instant;
-      const base=type==='toto'?r.toto:type==='lotto'?r.lotto:r.total;
+    if(!sorted.length)throw new Error('집계 결과 없음');
+    sorted.forEach((row,i)=>{
+      row.total=row.lotto+row.toto+row.instant;
+      const base=type==='toto'?row.toto:type==='lotto'?row.lotto:row.total;
       const prev=i>0?(type==='toto'?sorted[i-1].toto:type==='lotto'?sorted[i-1].lotto:sorted[i-1].total):base;
-      r.diff=base-prev;
-      r.diff_pct=prev?parseFloat(((r.diff/prev)*100).toFixed(1)):0;
-      r.round=1160-sorted.length+i;
+      row.diff=base-prev;
+      row.diff_pct=prev?parseFloat(((row.diff/prev)*100).toFixed(1)):0;
+      row.round=1160-sorted.length+i;
     });
     sd.rows=sorted;
     sd.summary={lotto_total:sorted.reduce((s,r)=>s+r.lotto,0),toto_total:sorted.reduce((s,r)=>s+r.toto,0),instant_total:sorted.reduce((s,r)=>s+r.instant,0)};
     sd.summary.grand_total=sd.summary.lotto_total+sd.summary.toto_total+sd.summary.instant_total;
-    if(infoEl)infoEl.textContent=`최근 ${sd.period}일 · ${sorted.length}건`;
+    const unit=gbMode==='month'?'개월':gbMode==='year'?'년':'일';
+    if(infoEl)infoEl.textContent=`${sorted[0]?.date||''} ~ ${sorted[sorted.length-1]?.date||''} · ${sorted.length}${unit}`;
   }catch(e){
-    sd.rows=statsFallback(sd.period);
+    sd.rows=statsFallback(30);
     sd.summary={lotto_total:sd.rows.reduce((s,r)=>s+sN(r.lotto),0),toto_total:sd.rows.reduce((s,r)=>s+sN(r.toto),0),instant_total:sd.rows.reduce((s,r)=>s+sN(r.instant),0)};
     sd.summary.grand_total=sd.summary.lotto_total+sd.summary.toto_total+sd.summary.instant_total;
     if(infoEl)infoEl.textContent=`샘플 데이터 · ${e.message}`;
@@ -1543,10 +1554,11 @@ const _statsInited={};
 async function initStatsTab(type){
   await loadStatsData(type);
   if(type==='lotto')renderLotto();else if(type==='toto')renderToto();else renderUnified();
-  if(_statsInited[type])return;_statsInited[type]=true;
-  document.querySelectorAll(`#${type}Periodbar .stats-pp`).forEach(b=>b.onclick=async()=>{
-    statsData[type].period=parseInt(b.dataset.statsPeriod,10)||30;
-    document.querySelectorAll(`#${type}Periodbar .stats-pp`).forEach(x=>x.classList.toggle('active',x===b));
+  if(_statsInited[type])return;
+  _statsInited[type]=true;
+  document.querySelectorAll(`#${type}Periodbar .pp`).forEach(b=>b.onclick=async()=>{
+    statsData[type].period=b.dataset.statsPeriod;
+    document.querySelectorAll(`#${type}Periodbar .pp`).forEach(x=>x.classList.toggle('active',x===b));
     await loadStatsData(type);
     if(type==='lotto')renderLotto();else if(type==='toto')renderToto();else renderUnified();
     setTimeout(()=>Object.values(charts).forEach(c=>c?.resize&&c.resize()),30);
