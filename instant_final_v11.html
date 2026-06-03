@@ -1215,13 +1215,7 @@ function initOrderTab(){
 }
 
 
-function renderInventory(rows){
-  const a=aggregate(rows,'date').slice(-14),last=a[a.length-1]||{p:0,s1:0,s2:0},av=k=>Math.round(a.reduce((s,r)=>s+r[k],0)/(a.length||1));
-  const items=[['연금복권',last.p,av('p'),COLORS.p],['스피또1000',last.s1,av('s1'),COLORS.s1],['스피또2000',last.s2,av('s2'),COLORS.s2]];
-  $('invKpi').innerHTML=items.map(x=>`<div class="kpi"><div class="kpi-bar" style="background:${x[3]}"></div><div class="kpi-head"><div class="kpi-label">${x[0]} 참고잔여</div><div class="kpi-icon" style="background:${x[3]}18;color:${x[3]}">●</div></div><div class="kpi-main" style="color:${x[3]}">${fmt(x[1])}장</div><div class="kpi-sub">최근 집계일 기준</div></div>`).join('');
-  $('invTbody').innerHTML=items.map(x=>{const d=x[2]?Math.round(x[1]/x[2]):99,st=d>5?'충분':d>2?'보통':'부족';return`<tr><td>${x[0]}</td><td>-</td><td>-</td><td>${fmt(x[1])}</td><td>${fmt(x[1])}</td><td>${d}일</td><td class="${st==='부족'?'down':st==='보통'?'flat':'up'}">${st}</td></tr>`}).join('');
-  renderLine('cInv',a,[baseLine('연금',a.map(r=>r.p),COLORS.p),baseLine('스피또1000',a.map(r=>r.s1),COLORS.s1),baseLine('스피또2000',a.map(r=>r.s2),COLORS.s2)]);
-}
+
 
 function renderAll(){
   const rows=filteredRows(),agg=aggregate(rows,gb());
@@ -1233,7 +1227,7 @@ function renderAll(){
   renderLine('cScratch',agg,[baseLine('스피또1000',agg.map(r=>r.s1),COLORS.s1),baseLine('스피또2000',agg.map(r=>r.s2),COLORS.s2,false,[5,4])]);
   renderLine('cPrize',agg,[baseLine('당첨금',agg.map(r=>r.instantAmt),COLORS.red,true)],v=>fmtShort(v));
   renderLine('cFee',agg,[baseLine('즉석수수료',agg.map(r=>r.instantFee),COLORS.s2,true)],v=>fmtShort(v));
-  renderDailyTable(agg);renderOrder(rows);renderInventory(rows);
+  renderDailyTable(agg);renderOrder(rows);
 }
 function updatePeriodbarVisibility(){
   const bar=document.querySelector('.periodbar:not(#orderPeriodbar)');
