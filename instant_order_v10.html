@@ -286,33 +286,20 @@ button{border:0;background:none;color:inherit;font-family:inherit;cursor:pointer
 .order-ai-msg.danger{border-left:4px solid var(--red)}
 .order-ai-msg.ai{border-left:4px solid var(--purple)}
 @keyframes orderFadeUp{to{opacity:1;transform:translateY(0)}}
-.order-prize-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
-.order-prize-title{font-size:15px;font-weight:950;letter-spacing:-.04em}
-.order-prize-desc{font-size:11px;color:var(--soft);font-weight:850;margin-top:3px}
+.order-prize-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.order-prize-title{font-size:17px;font-weight:950;letter-spacing:-.05em}
+.order-prize-desc{font-size:11px;color:var(--soft);font-weight:850;margin-top:4px}
 .order-prize-actions{display:flex;align-items:center;gap:8px}
-.order-update-time{border:1px solid var(--line);background:var(--chip);border-radius:6px;padding:5px 9px;font-size:11px;font-weight:950;color:var(--muted);white-space:nowrap}
-
-/* 트레이딩 패널 - 2열 그리드 */
-.order-prize-list{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.order-prize-col{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel)}
-.order-prize-col-head{background:var(--panel2);border-bottom:1px solid var(--line);padding:8px 12px;display:flex;align-items:center;gap:8px}
-.order-prize-col-name{font-size:13px;font-weight:950;letter-spacing:-.03em}
-.order-prize-row{display:flex;flex-direction:column;gap:0;border-bottom:1px solid var(--line);padding:10px 12px}
-.order-prize-row:last-child{border-bottom:none}
-.order-prize-row-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-.order-prize-issue{font-size:22px;font-weight:950;letter-spacing:-.06em;color:var(--text);line-height:1}
-.order-prize-issue small{font-size:12px;font-weight:800;color:var(--muted);margin-left:3px}
-.order-prize-badge{border-radius:5px;padding:4px 9px;font-size:11px;font-weight:950;border:1px solid transparent}
-.order-prize-badge.safe{color:#059669;border-color:rgba(16,185,129,.3);background:rgba(16,185,129,.1)}
-.order-prize-badge.warn{color:#D97706;border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.1)}
-.order-prize-badge.danger{color:#DC2626;border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.1)}
-.order-prize-row-stats{display:flex;align-items:center;gap:10px}
-.order-prize-stat{display:flex;flex-direction:column;gap:2px}
-.order-prize-stat-label{font-size:9px;font-weight:900;color:var(--soft);text-transform:uppercase;letter-spacing:.04em}
-.order-prize-stat-val{font-size:13px;font-weight:950;color:var(--text)}
-.order-prize-rate-bar{height:4px;background:var(--line);border-radius:2px;margin-top:6px;overflow:hidden}
-.order-prize-rate-fill{height:100%;border-radius:2px;transition:width .4s}
-.order-prize-empty{grid-column:1/-1;border:1px dashed var(--line);border-radius:10px;padding:18px;text-align:center;color:var(--muted);font-size:12px;font-weight:850;background:var(--chip)}
+.order-update-time{border:1px solid var(--line);background:var(--chip);border-radius:999px;padding:7px 10px;font-size:11px;font-weight:950;color:var(--muted);white-space:nowrap}
+.order-prize-list{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.order-prize-row{display:grid;grid-template-columns:92px 1fr;gap:10px;align-items:center;border:1px solid var(--line);background:linear-gradient(180deg,var(--panel),var(--panel2));border-radius:16px;padding:11px 12px;box-shadow:var(--shadow2)}
+.order-prize-prod{font-size:12px;font-weight:950;color:var(--text)}
+.order-prize-info{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:11px;font-weight:900;color:var(--muted)}
+.order-prize-badge{border-radius:999px;padding:4px 8px;font-size:10.5px;font-weight:950;border:1px solid var(--line);background:var(--chip)}
+.order-prize-badge.safe{color:var(--green);border-color:rgba(16,185,129,.28);background:rgba(16,185,129,.09)}
+.order-prize-badge.warn{color:#D97706;border-color:rgba(245,158,11,.32);background:rgba(245,158,11,.10)}
+.order-prize-badge.danger{color:var(--red);border-color:rgba(239,68,68,.28);background:rgba(239,68,68,.09)}
+.order-prize-empty{grid-column:1/-1;border:1px dashed var(--line);border-radius:16px;padding:18px;text-align:center;color:var(--muted);font-size:12px;font-weight:850;background:var(--chip)}
 .order-detail-box{border:1px solid var(--line);border-radius:18px;background:var(--panel);box-shadow:var(--shadow2);overflow:hidden}
 .order-detail-box summary{list-style:none;cursor:pointer;padding:15px 17px;font-size:15px;font-weight:950;display:flex;align-items:center;justify-content:space-between;gap:10px}
 .order-detail-box summary::-webkit-details-marker{display:none}
@@ -343,6 +330,25 @@ button{border:0;background:none;color:inherit;font-family:inherit;cursor:pointer
 .order-kpi-card{min-height:128px;padding:14px 15px 12px;border-radius:16px}
 .order-kpi-main{font-size:34px!important}
 .order-kpi-sub{font-size:10.5px;padding-top:8px;margin-top:8px}
+.order-prize-list{grid-template-columns:1fr 1fr;gap:8px}
+.order-prize-row{
+  border-radius:14px;
+  padding:10px 11px;
+  background:linear-gradient(180deg,#fff,#fafafa);
+}
+.order-prize-prod{
+  font-size:15px;
+  font-weight:950;
+  letter-spacing:-0.05em;
+}
+.order-prize-info{
+  gap:6px;
+  font-size:10.5px;
+}
+.order-prize-badge{
+  font-size:10px;
+  padding:3px 7px;
+}
 .order-ai-panel{
   min-height:318px;
   display:flex;
@@ -409,6 +415,49 @@ button{border:0;background:none;color:inherit;font-family:inherit;cursor:pointer
   font-size:10px;
   color:var(--muted);
   font-weight:850;
+}
+
+
+/* ===== 주문량 추천 탭 V10 최종 패치 ===== */
+.order-periodbar{justify-content:flex-start;margin-right:auto}
+.order-prize-card{order:2}
+.order-control-card{order:3}
+.order-detail-box{order:4}
+.order-prize-list{
+  display:grid!important;
+  grid-template-columns:repeat(4,1fr)!important;
+  gap:10px!important;
+}
+.order-prize-row{
+  display:flex!important;
+  flex-direction:column;
+  justify-content:space-between;
+  min-height:166px!important;
+  border-radius:16px!important;
+  padding:12px 12px 11px!important;
+  position:relative;
+  overflow:hidden;
+}
+.order-prize-row.safe{border-color:rgba(16,185,129,.24);background:linear-gradient(180deg,rgba(16,185,129,.08),var(--panel))}
+.order-prize-row.warn{border-color:rgba(245,158,11,.28);background:linear-gradient(180deg,rgba(245,158,11,.10),var(--panel))}
+.order-prize-row.danger{border-color:rgba(239,68,68,.28);background:linear-gradient(180deg,rgba(239,68,68,.10),var(--panel))}
+.order-prize-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:5px}
+.order-prize-prod-small{font-size:11px;font-weight:950;color:var(--muted)}
+.order-prize-top strong{font-size:28px;font-weight:950;line-height:1;letter-spacing:-.07em;color:var(--text)}
+.order-prize-gauge-wrap{display:grid;place-items:center;margin:0 0 3px}
+.order-prize-gauge{width:124px;height:76px;display:block}
+.order-gauge-text{font-size:22px;font-weight:950;fill:var(--text);font-family:'Malgun Gothic','Apple SD Gothic Neo',Arial,sans-serif}
+.order-prize-bottom{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:10.5px;font-weight:900;color:var(--muted);border-top:1px solid var(--line);padding-top:8px}
+.order-chart-overlay{display:none!important}
+.order-panel-head{min-height:32px!important}
+.order-panel-title{font-size:18px}
+.order-detail-box{border:1px solid var(--line);border-radius:18px;background:var(--panel);box-shadow:var(--shadow2);overflow:hidden}
+.order-detail-title{padding:15px 17px;font-size:15px;font-weight:950;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line)}
+.order-detail-title span{font-size:11px;color:var(--muted);font-weight:850;margin-left:auto}
+.order-detail-box summary{display:none!important}
+.order-detail-box.always-open .order-detail-inner{padding:14px;display:flex;flex-direction:column;gap:12px}
+@media(max-width:1100px){
+  .order-prize-list{grid-template-columns:repeat(2,1fr)!important}
 }
 
 </style>
@@ -529,7 +578,24 @@ button{border:0;background:none;color:inherit;font-family:inherit;cursor:pointer
         <div class="order-kpi-grid" id="orderKpiStrip"></div>
       </div>
 
-      <div class="order-control-card">
+      <div class="order-prize-card">
+        <div class="order-prize-head">
+          <div>
+            <div class="order-prize-title">📡 실시간 회차 현황</div>
+            <div class="order-prize-desc">출고율 · 1등 잔여 · 2등 잔여 기준으로 발주 가능 회차를 판단합니다.</div>
+          </div>
+          <div class="order-prize-actions">
+            <button class="more" id="orderPrizeRefresh">새로고침</button>
+            <div class="order-update-time" id="orderPrizeUpdated">🔄 대기 중</div>
+          </div>
+        </div>
+        <div class="order-prize-list" id="orderPrizeList">
+          <div class="order-prize-empty">회차 현황을 불러오는 중입니다.</div>
+        </div>
+      </div>
+
+      
+<div class="order-control-card">
         <div class="order-product-tabs" id="orderProductTabs">
           <button class="order-product-tab" data-order-product="p">🎫 연금복권</button>
           <button class="order-product-tab active" data-order-product="s1">🎟️ 스피또1000</button>
@@ -549,7 +615,7 @@ button{border:0;background:none;color:inherit;font-family:inherit;cursor:pointer
                 <span id="orderHolidayBadge">공휴일 없음</span>
               </div>
             </div>
-            <div class="order-chart-box"><div class="order-chart-overlay" id="orderChartOverlay"></div><canvas id="cOrderMain"></canvas></div>
+            <div class="order-chart-box"><canvas id="cOrderMain"></canvas></div>
           </div>
 
           <div class="order-ai-panel">
@@ -558,24 +624,8 @@ button{border:0;background:none;color:inherit;font-family:inherit;cursor:pointer
         </div>
       </div>
 
-      <div class="order-prize-card">
-        <div class="order-prize-head">
-          <div>
-            <div class="order-prize-title">📡 실시간 회차 현황</div>
-            <div class="order-prize-desc">출고율 · 1등 잔여 · 2등 잔여 기준으로 발주 가능 회차를 판단합니다.</div>
-          </div>
-          <div class="order-prize-actions">
-            <button class="more" id="orderPrizeRefresh">새로고침</button>
-            <div class="order-update-time" id="orderPrizeUpdated">🔄 대기 중</div>
-          </div>
-        </div>
-        <div class="order-prize-list" id="orderPrizeList">
-          <div class="order-prize-empty">회차 현황을 불러오는 중입니다.</div>
-        </div>
-      </div>
-
-      <details class="order-detail-box">
-        <summary>🛡️ 운영 상세정보 <span>재고 위험도 · 예상 소진일 · 최근 판매속도 · 평균 판매량</span></summary>
+      <div class="order-detail-box always-open">
+        <div class="order-detail-title">🛡️ 운영 상세정보 <span>재고 위험도 · 예상 소진일 · 최근 판매속도 · 평균 판매량</span></div>
         <div class="order-detail-inner">
           <div class="card">
             <div class="card-hd">
@@ -588,7 +638,7 @@ button{border:0;background:none;color:inherit;font-family:inherit;cursor:pointer
             <div class="order-risk-grid" id="orderRiskGrid"></div>
           </div>
         </div>
-      </details>
+      </div>
     </section>
 
 
@@ -891,6 +941,12 @@ function formatR2Text(v){
   const cleaned=s.replace(/\s+/g,'').replaceAll('매/','/').replace(/매$/,'');
   return cleaned.includes('/')?cleaned+'매':cleaned;
 }
+function formatR2Text(v){
+  const s=String(v??'').trim();
+  if(!s)return'-';
+  const cleaned=s.replace(/\s+/g,'').replaceAll('매/','/').replace(/매$/,'');
+  return cleaned.includes('/')?cleaned+'매':cleaned;
+}
 function normalizePrizeStatus(raw){
   const src=Array.isArray(raw)?raw:(raw?.data||raw?.items||raw?.rows||raw?.results||[]);
   const mapped=src.map(x=>{
@@ -911,7 +967,6 @@ function normalizePrizeStatus(raw){
     let status='safe', labelText='안전';
     if(firstRemain===0){status='danger';labelText='금지';}
     else if(firstRemain<=3||releaseRate>=70){status='warn';labelText='신중';}
-    else if(releaseRate<50&&firstRemain>=4){status='safe';labelText=releaseRate===0?'신규':'안전';}
     else {status='safe';labelText='안전';}
 
     return{api,issue,releaseRate,firstRemain,secondText,dt,status,label:labelText};
@@ -932,18 +987,20 @@ function latestPrizeStatus(p){
   const arr=prizeStatusForProduct(p);
   return arr.length?arr[0]:null;
 }
+function latestPrizeStatus(p){
+  const arr=prizeStatusForProduct(p);
+  return arr.length?arr[0]:null;
+}
 function productDecision(p,actual,predWeeks){
   const latest=latestPrizeStatus(p);
   if(latest){
     if(latest.firstRemain===0)return{tone:'danger',badge:'🔴 보류',text:'보류'};
     if(latest.firstRemain<=3||latest.releaseRate>=70)return{tone:'warn',badge:'🟡 신중',text:'신중'};
   }
-
   const totalPred=predWeeks.reduce((s,w)=>s+w[p.key],0);
   const totalActual=actual.reduce((s,w)=>s+w[p.key],0);
   const avgActual=totalActual/(actual.length||1);
   const tr=trendAdjust(actual,p.key);
-
   if(totalPred<=0&&totalActual<=0)return{tone:'warn',badge:'🟡 신중',text:'신중'};
   if(tr.text==='하락 추세'&&totalPred<avgActual*.85)return{tone:'warn',badge:'🟡 신중',text:'신중'};
   return{tone:'safe',badge:'🟢 발주 권장',text:'발주 권장'};
@@ -973,12 +1030,16 @@ function renderOrderChart(id,product,weeks){
   const labels=weeks.map(w=>[`${w.idx}주차`,w.range]);
   const actualData=weeks.map(w=>w.predicted?null:w[product.key]);
   const predData=weeks.map(w=>w.predicted?w[product.key]:null);
-  const maxVal=Math.max(10,...weeks.map(w=>w[product.key]));
+  const actualVals=weeks.filter(w=>!w.predicted).map(w=>w[product.key]);
+  const avgVal=Math.round(actualVals.reduce((s,v)=>s+v,0)/(actualVals.length||1));
+  const avgData=weeks.map(()=>avgVal);
+  const maxVal=Math.max(10,...weeks.map(w=>w[product.key]),avgVal);
   const canvas=$(id);if(!canvas)return;
   charts[id]=new Chart(canvas,{type:'bar',data:{labels,datasets:[
     {label:'실제',data:actualData,backgroundColor:product.color,borderColor:product.color,borderWidth:1,borderRadius:10,borderSkipped:false},
-    {label:'AI 예측',data:predData,backgroundColor:'rgba(124,58,237,.24)',borderColor:'rgba(124,58,237,.62)',borderWidth:2,borderDash:[5,4],borderRadius:10,borderSkipped:false}
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},orderBarLabel:{enabled:true},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${bookText(c.raw||0,product.unit)} (${fmt(c.raw||0)}장)`}}},scales:{x:{grid:{display:false},ticks:{color:css('--muted'),font:{size:10},maxRotation:0,minRotation:0,autoSkip:false},padding:4},y:{beginAtZero:true,suggestedMax:maxVal*1.35,grid:{color:css('--grid')},ticks:{color:css('--muted'),font:{size:10},callback:v=>fmt(v)+'장'}}}}});
+    {label:'AI 예측',data:predData,backgroundColor:'rgba(124,58,237,.24)',borderColor:'rgba(124,58,237,.62)',borderWidth:2,borderDash:[5,4],borderRadius:10,borderSkipped:false},
+    {type:'line',label:'평균',data:avgData,borderColor:'#2563EB',borderDash:[5,4],borderWidth:2,pointRadius:0,tension:0}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:css('--muted'),boxWidth:10,font:{size:10,weight:'900'}}},orderBarLabel:{enabled:true},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${bookText(c.raw||0,product.unit)} (${fmt(c.raw||0)}장)`}}},scales:{x:{grid:{display:false},ticks:{color:css('--muted'),maxRotation:0,minRotation:0,font:{size:10}}},y:{beginAtZero:true,suggestedMax:maxVal*1.35,grid:{color:css('--grid')},ticks:{color:css('--muted'),font:{size:10},callback:v=>fmt(v)+'장'}}}}});
   charts[id].$orderLabelText=(v)=>bookText(num(v),product.unit);
   charts[id].$orderHolidays=weeks.map(w=>w.holidays.length>0);
 }
@@ -1006,7 +1067,7 @@ function renderOrderKpis(actual,predWeeks){
 function renderOrderAi(product,actual,predWeeks,chartWeeks,animate=true){
   const box=$('orderAiBox');if(!box)return;
   if(orderAiTimer){clearTimeout(orderAiTimer);orderAiTimer=null;}
-  if(animate)box.innerHTML='<div class="order-ai-loading">📊 AI 분석 중...</div>';
+  if(animate)box.innerHTML='<div class="order-ai-loading">📊 발주 분석 중...</div>';
 
   const renderResult=()=>{
     const tr=trendAdjust(actual,product.key);
@@ -1024,7 +1085,7 @@ function renderOrderAi(product,actual,predWeeks,chartWeeks,animate=true){
     const roundTone=danger?'danger':warn?'warn':'safe';
     const hText=holidaySent.length?holidaySent.join('<br>'):'예측 주차 공휴일 영향 없음';
     box.innerHTML=`<div class="order-ai-result">
-      <div class="order-ai-card-title">📊 AI 분석 완료 · ${product.name}</div>
+      <div class="order-ai-card-title">📊 발주 분석 완료 · ${product.name}</div>
       <div class="order-ai-msg ${tr.tone}" style="animation-delay:0s">${tr.emoji} <strong>판매량 ${tr.text}</strong></div>
       <div class="order-ai-msg warn" style="animation-delay:.1s">🎌 ${hText}</div>
       <div class="order-ai-msg ${roundTone}" style="animation-delay:.2s">${danger?'🔴':warn?'🟡':'🟢'} ${roundLine}</div>
@@ -1034,61 +1095,45 @@ function renderOrderAi(product,actual,predWeeks,chartWeeks,animate=true){
   if(animate)orderAiTimer=setTimeout(renderResult,700);else renderResult();
 }
 
+function gaugeColor(status){
+  if(status==='danger')return'#EF4444';
+  if(status==='warn')return'#F59E0B';
+  return'#10B981';
+}
+function prizeGaugeSvg(rate,status){
+  const r=Math.max(0,Math.min(100,num(rate)));
+  const dash=125.6;
+  const offset=dash*(1-r/100);
+  const color=gaugeColor(status);
+  return `<svg class="order-prize-gauge" viewBox="0 0 120 70" aria-label="출고율 ${r}%">
+    <path d="M20 60 A40 40 0 0 1 100 60" fill="none" stroke="var(--line)" stroke-width="12" stroke-linecap="round"/>
+    <path d="M20 60 A40 40 0 0 1 100 60" fill="none" stroke="${color}" stroke-width="12" stroke-linecap="round" stroke-dasharray="${dash}" stroke-dashoffset="${offset}"/>
+    <text x="60" y="50" text-anchor="middle" class="order-gauge-text">${r}%</text>
+  </svg>`;
+}
 function renderPrizeStatus(){
   const list=$('orderPrizeList');if(!list)return;
   if(orderPrizeLoading){list.innerHTML='<div class="order-prize-empty">📡 회차 현황을 불러오는 중입니다.</div>';return;}
   if(!orderPrizeStatus.length){list.innerHTML='<div class="order-prize-empty">회차 현황 데이터가 없습니다. 새로고침을 눌러 다시 확인하세요.</div>';return;}
-
-  // 스1000 / 스2000 분리
-  const sp1000=orderPrizeStatus.filter(s=>s.api==='sp1000').sort((a,b)=>b.issue-a.issue);
-  const sp2000=orderPrizeStatus.filter(s=>s.api==='sp2000').sort((a,b)=>b.issue-a.issue);
-
-  function rateColor(rate){
-    if(rate>=80)return'#DC2626';
-    if(rate>=60)return'#D97706';
-    return'#059669';
-  }
-  function colHtml(label,color,rows){
-    const rowsHtml=rows.map(s=>{
-      const badgeClass=s.status==='danger'?'danger':s.status==='warn'?'warn':'safe';
-      const badgeText=s.status==='danger'?'🔴 금지':s.status==='warn'?'🟡 신중':'🟢 안전';
-      const rc=rateColor(s.releaseRate);
-      return`<div class="order-prize-row">
-        <div class="order-prize-row-top">
-          <div class="order-prize-issue">${s.issue}<small>회차</small></div>
-          <span class="order-prize-badge ${badgeClass}">${badgeText}</span>
-        </div>
-        <div class="order-prize-row-stats">
-          <div class="order-prize-stat">
-            <div class="order-prize-stat-label">출고율</div>
-            <div class="order-prize-stat-val" style="color:${rc}">${s.releaseRate}%</div>
-          </div>
-          <div class="order-prize-stat">
-            <div class="order-prize-stat-label">1등 잔여</div>
-            <div class="order-prize-stat-val">${s.firstRemain}개</div>
-          </div>
-          <div class="order-prize-stat">
-            <div class="order-prize-stat-label">2등 잔여</div>
-            <div class="order-prize-stat-val" style="font-size:11px">${s.secondText||'-'}</div>
-          </div>
-        </div>
-        <div class="order-prize-rate-bar">
-          <div class="order-prize-rate-fill" style="width:${Math.min(100,s.releaseRate)}%;background:${rc}"></div>
-        </div>
-      </div>`;
-    }).join('');
-    return`<div class="order-prize-col">
-      <div class="order-prize-col-head">
-        <div style="width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0"></div>
-        <div class="order-prize-col-name">${label}</div>
-      </div>
-      ${rowsHtml}
-    </div>`;
-  }
-
-  list.innerHTML=
-    colHtml('스피또1000','#2563EB',sp1000)+
-    colHtml('스피또2000','#7C3AED',sp2000);
+  const labelName=api=>api==='sp1000'?'스1000':'스2000';
+  const ordered=[...orderPrizeStatus].sort((a,b)=>{
+    const o={sp1000:0,sp2000:1};
+    const g=(o[a.api]??9)-(o[b.api]??9);
+    if(g!==0)return g;
+    return num(b.issue)-num(a.issue);
+  });
+  list.innerHTML=ordered.map(s=>`<div class="order-prize-row ${s.status}">
+    <div class="order-prize-top">
+      <span class="order-prize-prod-small">${labelName(s.api)}</span>
+      <strong>${s.issue}회차</strong>
+    </div>
+    <div class="order-prize-gauge-wrap">${prizeGaugeSvg(s.releaseRate,s.status)}</div>
+    <div class="order-prize-bottom">
+      <span class="order-prize-badge ${s.status}">${s.status==='danger'?'🔴':s.status==='warn'?'🟡':'🟢'} ${s.label}</span>
+      <span>1등 <b>${fmt(s.firstRemain)}개</b></span>
+      <span>2등 <b>${s.secondText||'-'}</b></span>
+    </div>
+  </div>`).join('');
 }
 async function fetchPrizeStatus(force=false){
   if(orderPrizeLoading)return;
@@ -1120,18 +1165,10 @@ function renderOrder(rows,animateAi=false){
   const {actual,predWeeks,chartWeeks}=orderForecastData();
   renderOrderKpis(actual,predWeeks);
   const p=orderProduct(orderActiveProduct);
-  if($('orderChartTitle'))$('orderChartTitle').textContent=`${p.emoji} ${p.name} 1~${orderWeeksPeriod}주 판매량`;
+  if($('orderChartTitle'))$('orderChartTitle').textContent=`${p.name}`;
   if($('orderChartDesc'))$('orderChartDesc').textContent=`1~${Math.max(1,orderWeeksPeriod-2)}주 실제 · ${Math.max(2,orderWeeksPeriod-1)}~${orderWeeksPeriod}주 AI 예측`;
   const h=chartWeeks.filter(w=>w.holidays.length).map(w=>`${w.idx}주차 ${w.holidays.map(x=>x.label).join(', ')}`).join(' · ');
   if($('orderHolidayBadge'))$('orderHolidayBadge').textContent=h?`🎌 ${h}`:'공휴일 없음';
-  const totalPred=predWeeks.reduce((s,w)=>s+w[p.key],0);
-  if($('orderChartOverlay')){
-    $('orderChartOverlay').innerHTML=`
-      <div class="ov1">AI Forecast</div>
-      <div class="ov2">${fmt(totalPred)}장</div>
-      <div class="ov3">추천 발주 ${bookText(totalPred,p.unit)}</div>
-    `;
-  }
 
   renderOrderChart('cOrderMain',p,chartWeeks);
   renderOrderAi(p,actual,predWeeks,chartWeeks,animateAi);
@@ -1154,12 +1191,12 @@ function renderOrder(rows,animateAi=false){
       return`<div class="order-risk-card">
         <div class="order-risk-bar" style="background:${p.color}"></div>
         <div class="order-risk-title"><b style="color:${p.color}">${p.emoji} ${p.name}</b><span class="order-risk-badge" style="color:${rl.color}">${rl.text}</span></div>
-        <div class="order-risk-main" style="color:${p.color}">${fmt(cur)}장</div>
+        <div class="order-risk-main" style="color:${p.color}">${bookText(cur,p.unit)}</div>
         <div class="order-risk-list">
           <div class="order-risk-row"><span>예상 소진일</span><b>${days}일</b></div>
           <div class="order-risk-row"><span>최근 판매속도</span><b>${recentSpeed}</b></div>
-          <div class="order-risk-row"><span>평균 판매량</span><b>${fmt(avg)}장</b></div>
-          <div class="order-risk-row"><span>2주 예상소진</span><b>${fmt(exp14)}장</b></div>
+          <div class="order-risk-row"><span>평균 판매량</span><b>${bookText(avg,p.unit)}</b></div>
+          <div class="order-risk-row"><span>2주 예상소진</span><b>${bookText(exp14,p.unit)}</b></div>
         </div>
         <div class="order-risk-note">⚠ 현재잔여는 마감재고 연동 예정 · 현재는 최근 마감일 참고값 표시</div>
       </div>`;
