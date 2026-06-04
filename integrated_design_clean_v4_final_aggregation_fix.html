@@ -1,0 +1,1951 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1213, initial-scale=1.0" />
+<title>복권판매점 통합 관제 시스템</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#F5F7FB;--panel:#FFFFFF;--panel2:#F8FAFC;--line:#E5EAF3;
+  --text:#0F172A;--muted:#64748B;--soft:#94A3B8;--thead:#F8FAFC;
+  --indigo:#4F46E5;--blue:#2563EB;--purple:#7C3AED;--orange:#F97316;
+  --red:#EF4444;--green:#10B981;--amber:#F59E0B;
+  --shadow:0 18px 48px rgba(15,23,42,.10);--shadow2:0 6px 18px rgba(15,23,42,.06);
+  --grid:rgba(15,23,42,.075);--chip:#F8FAFC;--glass:rgba(255,255,255,.82);
+}
+html[data-theme="dark"]{
+  --bg:#0B1220;--panel:#111827;--panel2:#172033;--line:#25324A;
+  --text:#E5E7EB;--muted:#A7B0C2;--soft:#718096;--thead:#172033;
+  --shadow:0 22px 56px rgba(0,0,0,.35);--shadow2:0 8px 22px rgba(0,0,0,.26);
+  --grid:rgba(226,232,240,.10);--chip:#172033;--glass:rgba(17,24,39,.82);
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Malgun Gothic','Apple SD Gothic Neo',Arial,sans-serif}
+body{width:1213px;min-height:100vh;background:
+  radial-gradient(circle at 8% 0%,rgba(79,70,229,.13),transparent 28%),
+  radial-gradient(circle at 86% 3%,rgba(37,99,235,.12),transparent 24%),
+  var(--bg);color:var(--text);font-size:13px;overflow-x:hidden}
+button{border:0;background:none;color:inherit;font-family:inherit;cursor:pointer}
+.topbar{height:66px;background:var(--glass);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:30;box-shadow:var(--shadow2)}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{width:40px;height:40px;border-radius:15px;background:linear-gradient(135deg,var(--indigo),var(--blue));box-shadow:0 12px 28px rgba(79,70,229,.28);display:grid;place-items:center;color:white;font-weight:950}
+.brand-title{font-size:20px;font-weight:950;letter-spacing:-.06em}.brand-sub{font-size:11px;color:var(--muted);font-weight:850;margin-top:2px}
+.tab-group{display:flex;gap:8px;align-items:center}.tab{height:39px;padding:0 18px;border:1px solid var(--line);border-radius:12px;background:var(--panel);font-size:13px;font-weight:900;color:var(--muted);box-shadow:var(--shadow2);transition:.16s}
+.tab:hover{transform:translateY(-1px);box-shadow:var(--shadow)}.tab.active{background:linear-gradient(135deg,var(--indigo),var(--blue));border-color:transparent;color:white}
+.top-right{display:flex;align-items:center;gap:9px}.store{height:38px;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:0 13px;display:flex;align-items:center;color:var(--muted);font-size:12px;font-weight:900}
+.theme-btn{height:38px;padding:0 13px;border:1px solid var(--line);border-radius:12px;background:var(--chip);font-size:12px;font-weight:950;box-shadow:var(--shadow2)}
+.periodbar{margin:14px 20px 0;background:var(--glass);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:18px;padding:10px 14px;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow2)}
+.pb-label{font-size:12px;font-weight:950;margin-right:5px}.pp{height:34px;padding:0 17px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--muted);font-size:12px;font-weight:950;transition:.15s}
+.pp:hover{color:var(--indigo);border-color:#A5B4FC}.pp.active{background:linear-gradient(135deg,var(--indigo),var(--purple));border-color:transparent;color:#fff;box-shadow:0 10px 22px rgba(79,70,229,.22)}
+.data-badge{margin-left:auto;border:1px solid rgba(16,185,129,.35);background:rgba(16,185,129,.10);color:#059669;border-radius:12px;padding:9px 13px;font-size:12px;font-weight:950;white-space:nowrap}
+.content{padding:14px 20px 30px;display:flex;flex-direction:column;gap:13px}.page{display:flex;flex-direction:column;gap:13px}.hidden{display:none!important}
+
+.hero{display:grid;grid-template-columns:1.18fr .82fr;gap:12px}
+.hero-card{background:linear-gradient(135deg,rgba(79,70,229,.97),rgba(37,99,235,.92));color:#fff;border-radius:20px;padding:20px 22px;box-shadow:0 22px 55px rgba(79,70,229,.26);overflow:hidden;position:relative}
+.hero-card:after{content:"";position:absolute;right:-55px;top:-70px;width:210px;height:210px;border-radius:50%;background:rgba(255,255,255,.13)}
+.hero-title{font-size:16px;font-weight:950;letter-spacing:-.04em}.hero-main{font-size:38px;font-weight:950;letter-spacing:-.07em;margin-top:14px}
+.hero-sub{font-size:12px;font-weight:850;color:rgba(255,255,255,.78);margin-top:8px}
+.hero-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:18px}.hero-mini{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:11px}.hero-mini small{display:block;font-size:10px;color:rgba(255,255,255,.72);font-weight:900}.hero-mini b{display:block;margin-top:6px;font-size:17px}
+.insight-card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:17px 18px;box-shadow:var(--shadow2)}
+.insight-title{font-size:14px;font-weight:950;letter-spacing:-.04em;margin-bottom:12px}.insight-list{display:flex;flex-direction:column;gap:10px}
+.insight-item{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:9px}.insight-item:last-child{border-bottom:0;padding-bottom:0}
+.insight-item span{font-size:12px;color:var(--muted);font-weight:850}.insight-item b{font-size:13px;font-weight:950}
+
+.kpi-strip{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}.kpi{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:15px 14px 13px;box-shadow:var(--shadow2);position:relative;overflow:hidden;transition:.16s}.kpi:hover,.card:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
+.kpi-bar{position:absolute;left:0;right:0;top:0;height:4px}.kpi-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.kpi-label{font-size:11px;color:var(--muted);font-weight:950}.kpi-icon{width:34px;height:34px;border-radius:13px;display:grid;place-items:center;font-size:17px}
+.kpi-main{font-size:22px;font-weight:950;line-height:1;letter-spacing:-.05em}.kpi-sub{margin-top:9px;padding-top:10px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);font-weight:850;line-height:1.75}.kpi-sub b{color:var(--text)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:15px 16px;box-shadow:var(--shadow2);transition:.16s}.card-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}.card-title{font-size:15px;font-weight:950;letter-spacing:-.05em}.card-desc{font-size:11px;color:var(--soft);font-weight:850;margin-top:4px}.more{border:1px solid var(--line);background:var(--chip);border-radius:9px;padding:6px 10px;font-size:11px;color:var(--muted);font-weight:950}
+.row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}.trend-zone{display:grid;grid-template-columns:1.08fr 1.92fr;gap:12px}.mini-chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.h300{height:300px;position:relative}.h220{height:220px;position:relative}.h170{height:170px;position:relative}.h140{height:140px;position:relative}.compact-card{padding:12px 13px;overflow:hidden}.compact-card .card-hd{margin-bottom:8px}.compact-card .card-title{font-size:13px}.compact-card .card-desc{font-size:10px}
+.donut-wrap{display:grid;grid-template-columns:150px 1fr;gap:13px;align-items:center}.donut-box{width:150px;height:150px;position:relative}.donut-center{position:absolute;inset:0;display:grid;place-items:center;text-align:center;pointer-events:none}.donut-center small{display:block;color:var(--soft);font-size:10px;font-weight:900}.donut-center b{display:block;font-size:15px;margin-top:3px}
+.donut-list{display:flex;flex-direction:column;gap:8px}.donut-row{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding:6px 0;font-weight:900;gap:8px}.donut-row span{display:flex;align-items:center;gap:7px;color:var(--muted);white-space:nowrap}.donut-row b{text-align:right;font-size:11.5px}.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.rank-list{display:flex;flex-direction:column;gap:10px;margin-top:4px}.rank-item{display:grid;grid-template-columns:24px 76px 1fr 62px;gap:7px;align-items:center}.rank-no{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:rgba(79,70,229,.12);color:var(--indigo);font-size:10px;font-weight:950}.rank-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;font-weight:950}.rank-bg{height:7px;background:var(--line);border-radius:99px;overflow:hidden}.rank-fill{height:100%;border-radius:99px}.rank-val{text-align:right;color:var(--muted);font-size:10.5px;font-weight:900}.rank-detail{grid-column:2/5;color:var(--soft);font-size:10px;font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rank-detail b{color:var(--text)}
+.worker-mini-wrap{display:grid;grid-template-columns:1fr 118px;gap:10px;align-items:center;margin-top:8px}
+.worker-donut-box{width:108px;height:108px;position:relative;margin:0 auto}
+.worker-donut-center{position:absolute;inset:0;display:grid;place-items:center;text-align:center;pointer-events:none}
+.worker-donut-center small{display:block;color:var(--soft);font-size:9.5px;font-weight:900}
+.worker-donut-center b{display:block;color:var(--text);font-size:13px;font-weight:950;margin-top:2px}
+.worker-share-list{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.worker-share-row{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:5px;font-size:10.5px;font-weight:900;color:var(--muted)}
+.worker-share-row:last-child{border-bottom:none}
+.worker-share-row b{color:var(--text)}
+.worker-rank-compact .rank-list{gap:7px}
+.worker-rank-compact .rank-item{grid-template-columns:22px 52px 1fr;gap:6px}
+.worker-rank-compact .rank-val{font-size:10px}
+
+.table-wrap{overflow:hidden;border:1px solid var(--line);border-radius:14px}.data-table{width:100%;border-collapse:collapse}.data-table th{background:var(--thead);border-bottom:1px solid var(--line);color:var(--muted);font-size:11px;font-weight:950;padding:11px 10px;text-align:right;white-space:nowrap}.data-table th:first-child{text-align:left}.data-table td{border-bottom:1px solid var(--line);padding:10px;text-align:right;color:var(--text);font-size:12px;font-weight:800;white-space:nowrap}.data-table td:first-child{text-align:left;font-weight:950}.data-table tr:hover td{background:rgba(79,70,229,.045)}.data-table tfoot td{background:var(--thead);font-weight:950;border-top:1px solid var(--line);border-bottom:none}
+.up{color:var(--red)!important}.down{color:var(--blue)!important}.flat{color:var(--muted)!important}.trend-cell{display:flex;justify-content:flex-end;align-items:center;gap:6px}.tri{font-weight:950;margin-left:4px}.weekend-sun{color:var(--red)!important}.weekend-sat{color:var(--blue)!important}.weekend-row-sun td{background:rgba(239,68,68,.045)}.weekend-row-sat td{background:rgba(37,99,235,.045)}
+.order-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.order-card{border:1px solid var(--line);border-radius:17px;background:linear-gradient(180deg,var(--panel),var(--panel2));padding:18px;box-shadow:var(--shadow2)}.order-title{font-size:12px;color:var(--muted);font-weight:950}.order-main{margin-top:9px;font-size:31px;font-weight:950;letter-spacing:-.05em}.order-sub{margin-top:6px;color:var(--muted);font-size:12px;font-weight:850;line-height:1.65}.prog-bg{height:7px;background:var(--line);border-radius:99px;margin-top:13px;overflow:hidden}.prog-fill{height:100%;border-radius:99px}.note{font-size:11px;color:var(--soft);text-align:center;font-weight:800;margin-top:2px}
+
+.rank-donut-wrap{display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)}
+.rank-donut-canvas{width:90px;height:90px;position:relative;flex:0 0 90px}
+.rank-donut-canvas canvas{width:90px!important;height:90px!important}
+.rank-donut-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:10px;font-weight:900;color:var(--muted);pointer-events:none}
+.rank-donut-center b{font-size:13px;color:var(--text)}
+.rank-donut-detail{display:flex;flex-direction:column;gap:6px;font-size:10px;font-weight:900;min-width:92px}
+.rank-donut-detail div{display:flex;align-items:center;justify-content:space-between}
+.rank-donut-detail i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+
+
+.order-risk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.order-risk-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow2);position:relative;overflow:hidden}
+.order-risk-card:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
+.order-risk-bar{position:absolute;top:0;left:0;right:0;height:4px}
+.order-risk-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.order-risk-title b{font-size:15px;font-weight:950;letter-spacing:-.04em}
+.order-risk-badge{font-size:11px;font-weight:950;border-radius:999px;padding:5px 9px;background:var(--chip);border:1px solid var(--line)}
+.order-risk-main{font-size:25px;font-weight:950;letter-spacing:-.05em;margin-bottom:10px}
+.order-risk-list{display:flex;flex-direction:column;gap:7px}
+.order-risk-row{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:6px;font-size:11px;font-weight:900;color:var(--muted)}
+.order-risk-row:last-child{border-bottom:none}
+.order-risk-row b{color:var(--text)}
+.order-risk-note{margin-top:10px;font-size:10.5px;font-weight:850;color:var(--soft);line-height:1.45}
+.order-reco-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.order-reco-card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:18px;padding:17px;box-shadow:var(--shadow2)}
+.order-reco-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.order-reco-head b{font-size:15px;font-weight:950}
+.order-reco-main{font-size:28px;font-weight:950;letter-spacing:-.06em;margin:8px 0}
+.order-reco-sub{font-size:12px;color:var(--muted);font-weight:900;line-height:1.65}
+.order-reco-amount{margin-top:10px;border-top:1px solid var(--line);padding-top:10px;font-size:12px;font-weight:950;display:flex;justify-content:space-between}
+.prize-panel{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.prize-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow2)}
+.prize-title{font-size:15px;font-weight:950;margin-bottom:10px}
+.prize-input-row{display:flex;align-items:center;gap:8px}
+.prize-input{height:40px;width:92px;border:1px solid var(--line);background:var(--chip);border-radius:12px;color:var(--text);font-size:18px;font-weight:950;text-align:center;outline:none}
+.prize-result{flex:1;border:1px solid var(--line);background:var(--chip);border-radius:12px;padding:10px 12px;font-size:12px;font-weight:950}
+.final-reco-box{background:linear-gradient(135deg,rgba(79,70,229,.10),rgba(37,99,235,.08));border:1px solid rgba(79,70,229,.22);border-radius:18px;padding:17px 18px;box-shadow:var(--shadow2)}
+.final-reco-title{font-size:16px;font-weight:950;margin-bottom:12px}
+.final-reco-list{display:flex;flex-direction:column;gap:10px}
+.final-reco-item{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 13px;font-size:12px;font-weight:850;line-height:1.55}
+.final-reco-item b{font-size:14px;font-weight:950}
+.risk-high{color:var(--red)!important}
+.risk-mid{color:#D97706!important}
+.risk-low{color:var(--green)!important}
+
+.order-periodbar{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.order-periodbar .order-period-label{font-size:12px;font-weight:950;color:var(--muted);margin-right:4px}
+.order-pp{height:34px;padding:0 18px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--muted);font-size:12px;font-weight:950;box-shadow:var(--shadow2);transition:.15s}
+.order-pp:hover{transform:translateY(-1px);color:var(--purple);border-color:#C4B5FD}
+.order-pp.active{background:linear-gradient(135deg,var(--indigo),var(--purple));border-color:transparent;color:#fff;box-shadow:0 10px 22px rgba(124,58,237,.22)}
+.order-chart-stack{display:flex;flex-direction:column;gap:12px}
+.order-forecast-card{border:1px solid var(--line);border-radius:17px;background:linear-gradient(180deg,var(--panel),var(--panel2));padding:15px 16px 13px;box-shadow:var(--shadow2)}
+.order-forecast-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:12px;font-weight:950;gap:12px}
+.order-forecast-head b{font-size:14px;font-weight:950}
+.order-forecast-head span{font-size:11px;color:var(--muted);font-weight:950;background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:5px 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:580px}
+.order-ai-list{display:flex;flex-direction:column;gap:10px}
+.order-ai-item{border:1px solid var(--line);border-left:4px solid var(--purple);border-radius:14px;background:var(--panel2);padding:13px 14px;font-size:12px;font-weight:850;color:var(--muted);line-height:1.75}
+.order-ai-item b{display:block;color:var(--text);font-size:14px;font-weight:950;margin-bottom:3px}
+.order-ai-item strong{color:var(--text);font-weight:950}
+.order-detail-box{border:1px solid var(--line);border-radius:18px;background:var(--panel);box-shadow:var(--shadow2);overflow:hidden}
+.order-detail-box summary{list-style:none;cursor:pointer;padding:15px 17px;font-size:15px;font-weight:950;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.order-detail-box summary::-webkit-details-marker{display:none}
+.order-detail-box summary:after{content:'펼치기';font-size:11px;font-weight:950;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:6px 10px;background:var(--chip)}
+.order-detail-box[open] summary:after{content:'접기'}
+.order-detail-box summary span{font-size:11px;color:var(--muted);font-weight:850;margin-left:auto}
+.order-detail-inner{padding:0 14px 14px;display:flex;flex-direction:column;gap:12px}
+
+
+
+/* ===== 주문량 추천 탭 V6: 1213px 최적화 실전 레이아웃 ===== */
+#page-order{gap:12px}
+.order-shell{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:14px 16px;box-shadow:var(--shadow2)}
+.order-topline{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.order-top-title{font-size:16px;font-weight:950;letter-spacing:-.05em}
+.order-top-desc{font-size:11px;color:var(--soft);font-weight:850;margin-top:3px}
+.order-periodbar{display:flex;align-items:center;gap:8px;background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:6px;width:max-content;box-shadow:var(--shadow2)}
+.order-periodbar .order-period-label{height:32px;display:flex;align-items:center;padding:0 10px;font-size:12px;font-weight:950;color:var(--text);white-space:nowrap}
+.order-pp{height:32px;min-width:66px;padding:0 18px;border-radius:999px;border:1px solid transparent;background:var(--panel);color:var(--muted);font-size:12px;font-weight:950;transition:.15s}
+.order-pp:hover{transform:translateY(-1px);color:var(--purple);border-color:#C4B5FD}
+.order-pp.active{background:linear-gradient(135deg,var(--indigo),var(--purple));border-color:transparent;color:#fff;box-shadow:0 10px 22px rgba(124,58,237,.22)}
+.order-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.order-kpi-card{position:relative;overflow:hidden;background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:18px;padding:18px 18px 15px;box-shadow:var(--shadow2);min-height:138px;transition:.16s}
+.order-kpi-card:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
+.order-kpi-card:after{content:"";position:absolute;right:-42px;top:-44px;width:155px;height:155px;border-radius:50%;opacity:.55;background:radial-gradient(circle,rgba(124,58,237,.13),transparent 68%)}
+.order-kpi-bar{position:absolute;left:0;right:0;top:0;height:4px}
+.order-kpi-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;position:relative;z-index:1}
+.order-kpi-title{font-size:15px;font-weight:950;letter-spacing:-.05em;color:var(--text)}
+.order-kpi-icon{width:38px;height:38px;border-radius:15px;display:grid;place-items:center;font-size:20px;font-weight:950;box-shadow:var(--shadow2)}
+.order-kpi-main{position:relative;z-index:1;font-size:42px!important;font-weight:950!important;line-height:1;letter-spacing:-.07em;margin-bottom:12px;white-space:nowrap}
+.order-kpi-sub{position:relative;z-index:1;margin-top:8px;padding-top:10px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);font-weight:850;line-height:1.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.order-kpi-sub b{color:var(--text)}
+.order-legend{display:flex;align-items:center;gap:14px;justify-content:flex-end;font-size:11px;color:var(--muted);font-weight:950;white-space:nowrap}
+.order-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.order-forecast-stack{display:flex;flex-direction:column;gap:10px}
+.order-forecast-card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:14px 14px 13px;box-shadow:var(--shadow2);transition:.16s}
+.order-forecast-card:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
+.order-forecast-grid{display:grid;grid-template-columns:minmax(0,1.82fr) minmax(265px,.78fr);gap:13px;align-items:stretch}
+.order-chart-panel{min-width:0;border-right:1px solid var(--line);padding-right:12px}
+.order-forecast-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:12px}
+.order-forecast-head b{font-size:15px;font-weight:950;letter-spacing:-.05em;white-space:nowrap}
+.order-forecast-head span{font-size:10.5px;color:var(--muted);font-weight:950;background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:5px 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:390px}
+.order-chart-box{height:205px;position:relative}
+.order-ai-box{border:1px solid var(--line);border-radius:17px;background:linear-gradient(180deg,var(--panel2),var(--panel));padding:14px 15px;min-height:100%;display:flex;flex-direction:column;justify-content:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
+.order-ai-title{font-size:17px;font-weight:950;letter-spacing:-.04em;margin-bottom:9px;color:var(--text)}
+.order-ai-lines{display:flex;flex-direction:column;gap:7px}
+.order-ai-line{display:flex;gap:7px;align-items:flex-start;font-size:12px;line-height:1.55;color:var(--muted);font-weight:850}
+.order-ai-dot{flex:0 0 18px;width:18px;height:18px;border-radius:7px;display:grid;place-items:center;font-size:11px;color:#fff;font-weight:950;margin-top:1px}
+.order-ai-line strong{color:var(--text);font-weight:950}
+.order-ai-reco{margin-top:10px;border-top:1px dashed var(--line);padding-top:10px;font-size:13px;font-weight:950;line-height:1.5}
+.order-detail-box{border:1px solid var(--line);border-radius:20px;background:var(--panel);box-shadow:var(--shadow2);overflow:hidden}
+.order-detail-box summary{list-style:none;cursor:pointer;padding:15px 17px;font-size:15px;font-weight:950;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.order-detail-box summary::-webkit-details-marker{display:none}
+.order-detail-box summary:after{content:'펼치기';font-size:11px;font-weight:950;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:6px 10px;background:var(--chip)}
+.order-detail-box[open] summary:after{content:'접기'}
+.order-detail-box summary span{font-size:11px;color:var(--muted);font-weight:850;margin-left:auto}
+.order-detail-inner{padding:0 14px 14px;display:flex;flex-direction:column;gap:12px}
+@media(max-width:900px){.order-kpi-grid{grid-template-columns:1fr}.order-forecast-grid{grid-template-columns:1fr}.order-chart-panel{border-right:0;border-bottom:1px solid var(--line);padding-right:0;padding-bottom:12px}.order-legend{justify-content:flex-start;flex-wrap:wrap}.order-kpi-main{font-size:36px!important}}
+
+
+/* ===== 주문량 추천 탭 V7: 로또 발주 AI 관제실 ===== */
+#page-order{gap:12px}
+.order-ai-shell,.order-control-card,.order-prize-card{
+  background:var(--panel);border:1px solid var(--line);border-radius:22px;
+  padding:16px 18px;box-shadow:var(--shadow2);position:relative;overflow:hidden;
+}
+.order-ai-shell:before{
+  content:"";position:absolute;right:-90px;top:-110px;width:280px;height:280px;border-radius:50%;
+  background:radial-gradient(circle,rgba(124,58,237,.14),transparent 66%);pointer-events:none;
+}
+.order-ai-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px;position:relative;z-index:1}
+.order-ai-eyebrow{font-size:10px;font-weight:950;color:var(--purple);letter-spacing:.12em;margin-bottom:4px}
+.order-ai-title-main{font-size:22px;font-weight:950;letter-spacing:-.06em}
+.order-ai-desc{font-size:11px;color:var(--soft);font-weight:850;margin-top:4px}
+.order-periodbar{display:flex;align-items:center;gap:8px;background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:6px;width:max-content;box-shadow:var(--shadow2);position:relative;z-index:1}
+.order-periodbar .order-period-label{height:32px;display:flex;align-items:center;padding:0 10px;font-size:12px;font-weight:950;color:var(--text);white-space:nowrap}
+.order-pp{height:32px;min-width:66px;padding:0 18px;border-radius:999px;border:1px solid transparent;background:var(--panel);color:var(--muted);font-size:12px;font-weight:950;transition:.15s}
+.order-pp:hover{transform:translateY(-1px);color:var(--purple);border-color:#C4B5FD}
+.order-pp.active{background:linear-gradient(135deg,var(--indigo),var(--purple));border-color:transparent;color:#fff;box-shadow:0 10px 22px rgba(124,58,237,.22)}
+.order-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;position:relative;z-index:1}
+.order-kpi-card{position:relative;overflow:hidden;background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:19px;padding:17px 17px 14px;box-shadow:var(--shadow2);min-height:148px;transition:.16s}
+.order-kpi-card:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
+.order-kpi-card:after{content:"";position:absolute;right:-46px;top:-48px;width:155px;height:155px;border-radius:50%;opacity:.6;background:radial-gradient(circle,rgba(124,58,237,.14),transparent 68%)}
+.order-kpi-bar{position:absolute;left:0;right:0;top:0;height:4px}
+.order-kpi-head{display:flex;align-items:center;justify-content:space-between;gap:10px;position:relative;z-index:1;margin-bottom:13px}
+.order-kpi-title{font-size:15px;font-weight:950;letter-spacing:-.05em;color:var(--text)}
+.order-kpi-icon{width:38px;height:38px;border-radius:15px;display:grid;place-items:center;font-size:20px;font-weight:950;box-shadow:var(--shadow2)}
+.order-kpi-main{position:relative;z-index:1;font-size:40px!important;font-weight:950!important;line-height:1;letter-spacing:-.07em;margin-bottom:10px;white-space:nowrap}
+.order-kpi-sub{position:relative;z-index:1;margin-top:8px;padding-top:10px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);font-weight:850;line-height:1.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.order-kpi-badge{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:4px 8px;font-size:10.5px;font-weight:950;margin-right:6px;border:1px solid var(--line);background:var(--chip)}
+.order-kpi-badge.safe{color:var(--green);border-color:rgba(16,185,129,.28);background:rgba(16,185,129,.09)}
+.order-kpi-badge.warn{color:#D97706;border-color:rgba(245,158,11,.32);background:rgba(245,158,11,.10)}
+.order-kpi-badge.danger{color:var(--red);border-color:rgba(239,68,68,.28);background:rgba(239,68,68,.09)}
+.order-product-tabs{display:flex;align-items:center;gap:8px;margin-bottom:13px}
+.order-product-tab{height:38px;padding:0 18px;border:1px solid var(--line);background:var(--chip);border-radius:999px;color:var(--muted);font-size:12px;font-weight:950;transition:.16s}
+.order-product-tab:hover{transform:translateY(-1px);box-shadow:var(--shadow2);color:var(--purple)}
+.order-product-tab.active{background:linear-gradient(135deg,var(--indigo),var(--purple));border-color:transparent;color:white;box-shadow:0 10px 22px rgba(79,70,229,.20)}
+.order-analysis-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,1fr);gap:14px;align-items:stretch}
+.order-chart-panel{min-width:0;border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,var(--panel),var(--panel2));padding:14px}
+.order-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px}
+.order-panel-title{font-size:16px;font-weight:950;letter-spacing:-.05em}
+.order-panel-desc{font-size:11px;color:var(--soft);font-weight:850;margin-top:3px}
+.order-legend{display:flex;align-items:center;gap:10px;justify-content:flex-end;font-size:10.5px;color:var(--muted);font-weight:950;white-space:nowrap;flex-wrap:wrap}
+.order-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.order-chart-box{height:260px;position:relative}
+.order-ai-panel{border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,var(--panel2),var(--panel));padding:15px;min-height:100%;box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
+.order-ai-loading{height:100%;min-height:235px;display:grid;place-items:center;text-align:center;color:var(--purple);font-size:18px;font-weight:950;letter-spacing:-.04em}
+.order-ai-result{display:flex;flex-direction:column;gap:10px}
+.order-ai-card-title{font-size:19px;font-weight:950;letter-spacing:-.05em;margin-bottom:2px}
+.order-ai-msg{border:1px solid var(--line);border-radius:15px;background:var(--panel);padding:10px 11px;font-size:12px;font-weight:850;color:var(--muted);line-height:1.55;box-shadow:var(--shadow2);opacity:0;transform:translateY(8px);animation:orderFadeUp .32s ease forwards}
+.order-ai-msg strong{color:var(--text);font-weight:950}
+.order-ai-msg.safe{border-left:4px solid var(--green)}
+.order-ai-msg.warn{border-left:4px solid var(--amber)}
+.order-ai-msg.danger{border-left:4px solid var(--red)}
+.order-ai-msg.ai{border-left:4px solid var(--purple)}
+@keyframes orderFadeUp{to{opacity:1;transform:translateY(0)}}
+.order-prize-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.order-prize-title{font-size:17px;font-weight:950;letter-spacing:-.05em}
+.order-prize-desc{font-size:11px;color:var(--soft);font-weight:850;margin-top:4px}
+.order-prize-actions{display:flex;align-items:center;gap:8px}
+.order-update-time{border:1px solid var(--line);background:var(--chip);border-radius:999px;padding:7px 10px;font-size:11px;font-weight:950;color:var(--muted);white-space:nowrap}
+.order-prize-list{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.order-prize-row{display:grid;grid-template-columns:92px 1fr;gap:10px;align-items:center;border:1px solid var(--line);background:linear-gradient(180deg,var(--panel),var(--panel2));border-radius:16px;padding:11px 12px;box-shadow:var(--shadow2)}
+.order-prize-prod{font-size:12px;font-weight:950;color:var(--text)}
+.order-prize-info{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:11px;font-weight:900;color:var(--muted)}
+.order-prize-badge{border-radius:999px;padding:4px 8px;font-size:10.5px;font-weight:950;border:1px solid var(--line);background:var(--chip)}
+.order-prize-badge.safe{color:var(--green);border-color:rgba(16,185,129,.28);background:rgba(16,185,129,.09)}
+.order-prize-badge.warn{color:#D97706;border-color:rgba(245,158,11,.32);background:rgba(245,158,11,.10)}
+.order-prize-badge.danger{color:var(--red);border-color:rgba(239,68,68,.28);background:rgba(239,68,68,.09)}
+.order-prize-empty{grid-column:1/-1;border:1px dashed var(--line);border-radius:16px;padding:18px;text-align:center;color:var(--muted);font-size:12px;font-weight:850;background:var(--chip)}
+.order-detail-box{border:1px solid var(--line);border-radius:18px;background:var(--panel);box-shadow:var(--shadow2);overflow:hidden}
+.order-detail-box summary{list-style:none;cursor:pointer;padding:15px 17px;font-size:15px;font-weight:950;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.order-detail-box summary::-webkit-details-marker{display:none}
+.order-detail-box summary:after{content:'펼치기';font-size:11px;font-weight:950;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:6px 10px;background:var(--chip)}
+.order-detail-box[open] summary:after{content:'접기'}
+.order-detail-box summary span{font-size:11px;color:var(--muted);font-weight:850;margin-left:auto}
+.order-detail-inner{padding:0 14px 14px;display:flex;flex-direction:column;gap:12px}
+@media(max-width:900px){
+  .order-kpi-grid,.order-prize-list{grid-template-columns:1fr}
+  .order-analysis-grid{grid-template-columns:1fr}
+}
+
+
+/* ===== 주문량 추천 탭 V7.1 안정화 패치 ===== */
+.order-ai-head{align-items:flex-start}
+.order-periodbar{margin-right:auto;justify-content:flex-start}
+.order-panel-head{min-height:48px}
+.order-control-card{min-height:394px}
+.order-analysis-grid{min-height:318px}
+.order-chart-panel{min-height:318px}
+.order-ai-panel{min-height:318px}
+#orderAiBox{min-height:286px}
+.order-prize-row{min-height:64px}
+
+
+/* ===== v9 AI Recommendation Focus ===== */
+.order-kpi-grid{gap:10px}
+.order-kpi-card{min-height:128px;padding:14px 15px 12px;border-radius:16px}
+.order-kpi-main{font-size:34px!important}
+.order-kpi-sub{font-size:10.5px;padding-top:8px;margin-top:8px}
+.order-prize-list{grid-template-columns:1fr 1fr;gap:8px}
+.order-prize-row{
+  border-radius:14px;
+  padding:10px 11px;
+  background:linear-gradient(180deg,#fff,#fafafa);
+}
+.order-prize-prod{
+  font-size:15px;
+  font-weight:950;
+  letter-spacing:-0.05em;
+}
+.order-prize-info{
+  gap:6px;
+  font-size:10.5px;
+}
+.order-prize-badge{
+  font-size:10px;
+  padding:3px 7px;
+}
+.order-ai-panel{
+  min-height:318px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+}
+.order-ai-card-title{
+  font-size:18px;
+  margin-bottom:6px;
+}
+.order-ai-msg{
+  padding:10px;
+  border-radius:12px;
+  font-size:11.5px;
+}
+.order-ai-summary{
+  border:1px solid rgba(124,58,237,.16);
+  background:linear-gradient(135deg,rgba(124,58,237,.08),rgba(124,58,237,.03));
+  border-radius:16px;
+  padding:14px;
+  margin-bottom:10px;
+}
+.order-ai-summary-top{
+  font-size:11px;
+  font-weight:950;
+  color:#7C3AED;
+  margin-bottom:6px;
+}
+.order-ai-summary-main{
+  font-size:28px;
+  font-weight:950;
+  letter-spacing:-0.06em;
+  line-height:1;
+  margin-bottom:6px;
+}
+.order-ai-summary-sub{
+  font-size:11px;
+  color:var(--muted);
+  font-weight:850;
+}
+
+
+
+
+
+
+/* ===== 주문량 추천 탭 V10 최종 패치 ===== */
+.order-periodbar{justify-content:flex-start;margin-right:auto}
+.order-prize-card{order:2}
+.order-control-card{order:3}
+.order-detail-box{order:4}
+.order-prize-list{
+  display:grid!important;
+  grid-template-columns:repeat(4,1fr)!important;
+  gap:10px!important;
+}
+.order-prize-row{
+  display:flex!important;
+  flex-direction:column;
+  justify-content:space-between;
+  min-height:166px!important;
+  border-radius:16px!important;
+  padding:12px 12px 11px!important;
+  position:relative;
+  overflow:hidden;
+}
+.order-prize-row.safe{border-color:rgba(16,185,129,.24);background:linear-gradient(180deg,rgba(16,185,129,.08),var(--panel))}
+.order-prize-row.warn{border-color:rgba(245,158,11,.28);background:linear-gradient(180deg,rgba(245,158,11,.10),var(--panel))}
+.order-prize-row.danger{border-color:rgba(239,68,68,.28);background:linear-gradient(180deg,rgba(239,68,68,.10),var(--panel))}
+.order-prize-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:5px}
+.order-prize-prod-small{font-size:14px;font-weight:950;color:var(--text)}
+.order-prize-top strong{font-size:28px;font-weight:950;line-height:1;letter-spacing:-.07em;color:var(--text)}
+.order-prize-gauge-wrap{display:grid;place-items:center;margin:0 0 3px}
+.order-prize-gauge{width:124px;height:76px;display:block}
+.order-gauge-text{font-size:22px;font-weight:950;fill:var(--text);font-family:'Malgun Gothic','Apple SD Gothic Neo',Arial,sans-serif}
+.order-prize-bottom{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:10.5px;font-weight:900;color:var(--muted);border-top:1px solid var(--line);padding-top:8px}
+
+.order-panel-head{min-height:32px!important}
+.order-panel-title{font-size:18px}
+.order-detail-box{border:1px solid var(--line);border-radius:18px;background:var(--panel);box-shadow:var(--shadow2);overflow:hidden}
+.order-detail-title{padding:15px 17px;font-size:15px;font-weight:950;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line)}
+.order-detail-title span{font-size:11px;color:var(--muted);font-weight:850;margin-left:auto}
+.order-detail-box summary{display:none!important}
+.order-detail-box.always-open .order-detail-inner{padding:14px;display:flex;flex-direction:column;gap:12px}
+@media(max-width:1100px){
+  .order-prize-list{grid-template-columns:repeat(2,1fr)!important}
+}
+/* ===== 로또/토토/통합 매출 탭 ===== */
+
+
+
+
+.stats-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.stats-kpi-card{position:relative;overflow:hidden;background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:18px;padding:15px 15px 13px;box-shadow:var(--shadow2);transition:.16s}
+.stats-kpi-card:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
+.stats-kpi-bar{position:absolute;left:0;right:0;top:0;height:4px}
+.stats-kpi-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px}
+.stats-kpi-label{font-size:11px;color:var(--muted);font-weight:950}
+.stats-kpi-icon{width:34px;height:34px;border-radius:13px;display:grid;place-items:center;font-size:17px}
+.stats-kpi-main{font-size:22px;font-weight:950;line-height:1;letter-spacing:-.05em}
+.stats-kpi-sub{margin-top:8px;padding-top:9px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);font-weight:850;line-height:1.6}
+.stats-kpi-sub b{color:var(--text)}
+.stats-chart-grid{display:grid;grid-template-columns:1.55fr .85fr;gap:12px}
+.stats-mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.sh300{height:300px;position:relative}.sh220{height:220px;position:relative}.sh170{height:170px;position:relative}
+.stats-donut-wrap{display:grid;grid-template-columns:160px 1fr;gap:14px;align-items:center}
+.stats-donut-box{width:160px;height:160px;position:relative}
+.stats-donut-center{position:absolute;inset:0;display:grid;place-items:center;text-align:center;pointer-events:none}
+.stats-donut-center small{display:block;color:var(--soft);font-size:10px;font-weight:900}
+.stats-donut-center b{display:block;font-size:14px;margin-top:3px}
+.stats-donut-list{display:flex;flex-direction:column;gap:7px}
+.stats-donut-row{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding:5px 0;font-weight:900;gap:8px}
+.stats-donut-row:last-child{border-bottom:none}
+.stats-donut-row span{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:11px;white-space:nowrap}
+.stats-donut-row b{text-align:right;font-size:11px}
+.stats-table-wrap{overflow:hidden;border:1px solid var(--line);border-radius:14px}
+.stats-table{width:100%;border-collapse:collapse}
+.stats-table th{background:var(--thead);border-bottom:1px solid var(--line);color:var(--muted);font-size:11px;font-weight:950;padding:11px 10px;text-align:right;white-space:nowrap;cursor:pointer;user-select:none}
+.stats-table th:first-child{text-align:left}
+.stats-table td{border-bottom:1px solid var(--line);padding:10px;text-align:right;color:var(--text);font-size:12px;font-weight:800;white-space:nowrap}
+.stats-table td:first-child{text-align:left;font-weight:950}
+.stats-table tr:last-child td{border-bottom:none}
+.stats-table tr:hover td{background:rgba(79,70,229,.04)}
+.stats-up{color:var(--red)!important}.stats-down{color:var(--blue)!important}.stats-flat{color:var(--muted)!important}
+.unified-hero{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.unified-hero-card{border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow2);position:relative;overflow:hidden;transition:.16s}
+.unified-hero-card:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
+.unified-hero-bar{position:absolute;left:0;right:0;top:0;height:4px}
+.unified-hero-label{font-size:11px;font-weight:950;color:var(--muted);margin-bottom:10px}
+.unified-hero-main{font-size:26px;font-weight:950;letter-spacing:-.05em;line-height:1}
+.unified-hero-sub{font-size:11px;color:var(--muted);font-weight:850;margin-top:7px;padding-top:7px;border-top:1px solid var(--line)}
+
+/* ===== 통계 탭 디자인 정리본 ===== */
+.stats-kpi-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 15px 14px 13px;
+  box-shadow: var(--shadow2);
+  position: relative;
+  overflow: hidden;
+  transition: .16s;
+  min-height: 126px;
+}
+.stats-kpi-card:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
+
+
+
+/* ===== 로또/토토/통합 탭 리디자인 패치 ===== */
+.stats-split-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(300px,1fr);gap:12px;align-items:stretch}
+.stats-chart-card .sh280{height:280px;position:relative}
+.stats-side-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:15px 16px;box-shadow:var(--shadow2);transition:.16s;min-width:0}
+.stats-side-card:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
+.stats-side-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
+.stats-side-title{font-size:15px;font-weight:950;letter-spacing:-.05em}
+.stats-side-desc{font-size:11px;color:var(--soft);font-weight:850;margin-top:4px}
+.stats-donut-mini{display:grid;grid-template-columns:140px 1fr;gap:12px;align-items:center}
+.stats-donut-mini-box{width:140px;height:140px;position:relative}
+.stats-analysis-list{margin-top:12px;border-top:1px solid var(--line);display:flex;flex-direction:column}
+.stats-analysis-row{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);padding:10px 0;font-size:11.5px;font-weight:900;color:var(--muted)}
+.stats-analysis-row:last-child{border-bottom:0;padding-bottom:0}
+.stats-analysis-row b{color:var(--text);font-size:12px;text-align:right}
+.toto-state-tag{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 12px;font-size:11px;font-weight:950;border:1px solid var(--line);background:var(--chip);margin-top:10px;color:var(--muted)}
+.toto-state-tag strong{color:#F97316;font-weight:950}
+.toto-best-day{margin-top:10px;border-top:1px solid var(--line);padding-top:10px;font-size:12px;font-weight:950;color:var(--text);line-height:1.5}
+.unified-exec-card{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow2);overflow:hidden}
+.unified-exec-card:before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:#7C3AED}
+.unified-exec-grid{display:grid;grid-template-columns:2fr 1fr;gap:18px;align-items:center}
+.unified-exec-left{display:grid;grid-template-columns:1.35fr 1fr;gap:14px;align-items:end}
+.unified-exec-label{font-size:11px;font-weight:950;color:var(--muted);margin-bottom:7px}
+.unified-exec-main{font-size:38px;font-weight:950;letter-spacing:-.07em;line-height:1;color:var(--text)}
+.unified-exec-diff{margin-top:8px;font-size:13px;font-weight:950}
+.unified-exec-subgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.unified-exec-mini{border:1px solid var(--line);background:var(--chip);border-radius:13px;padding:10px 11px}
+.unified-exec-mini span{display:block;font-size:10.5px;font-weight:950;color:var(--muted);margin-bottom:5px}
+.unified-exec-mini b{display:block;font-size:12px;font-weight:950;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.unified-share-list{display:flex;flex-direction:column;gap:8px}
+.unified-share-head{display:flex;justify-content:space-between;font-size:11px;font-weight:950;margin-bottom:4px;color:var(--text)}
+.unified-share-bg{height:6px;background:var(--line);border-radius:99px;overflow:hidden}
+.unified-share-fill{height:100%;border-radius:99px;transition:.4s}
+.unified-dominant-text{margin-top:10px;border-top:1px solid var(--line);padding-top:10px;font-size:12px;font-weight:950;color:var(--text);text-align:center}
+.unified-ai-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:15px;box-shadow:var(--shadow2)}
+.unified-ai-title{font-size:16px;font-weight:950;letter-spacing:-.05em;margin-bottom:10px}
+.unified-ai-list{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.unified-ai-msg{border:1px solid var(--line);border-left:4px solid #7C3AED;border-radius:14px;background:var(--panel2);padding:12px 13px;font-size:12px;font-weight:850;color:var(--muted);line-height:1.6;box-shadow:var(--shadow2)}
+.unified-ai-msg strong{color:var(--text);font-weight:950}
+@media(max-width:900px){.stats-split-grid,.unified-exec-grid,.unified-exec-left,.unified-ai-list{grid-template-columns:1fr}.stats-donut-mini{grid-template-columns:130px 1fr}.unified-exec-main{font-size:32px}}
+
+
+
+/* ===== Polishing v2: product consistency / material refinement ===== */
+:root{--sp1:4px;--sp2:8px;--sp3:12px;--sp4:16px;--sp5:20px;--sp6:24px;}
+
+/* spacing system */
+.content{padding:var(--sp3) var(--sp5) 30px;gap:var(--sp3)}
+.page{gap:var(--sp3)}
+.card{padding:var(--sp4);border-radius:14px}
+.stats-kpi-card{padding:var(--sp4) var(--sp4) var(--sp3);border-radius:14px;min-height:auto}
+.kpi{padding:var(--sp4) var(--sp3) var(--sp3);border-radius:14px;min-height:auto}
+.stats-kpi-grid,.kpi-strip{gap:var(--sp3)}
+.hero-card,.order-kpi-card,.periodbar{border-radius:14px}
+
+/* font hierarchy */
+.kpi-main,.stats-kpi-main{font-weight:700;font-size:22px;letter-spacing:-.05em;line-height:1}
+.card-title,.kpi-label,.stats-kpi-label,.brand-title,.tab{font-weight:600}
+.card-desc,.kpi-sub,.stats-kpi-sub,.brand-sub,.muted{font-weight:400}
+.data-table th,.stats-table th{font-weight:600}
+.data-table td,.stats-table td{font-weight:400;font-variant-numeric:tabular-nums;font-feature-settings:"tnum";padding:9px 10px}
+.data-table td:first-child,.stats-table td:first-child{font-weight:600}
+.kpi-sub,.stats-kpi-sub{margin-top:8px;padding-top:8px;font-size:11px;line-height:1.55}
+
+/* chart/card title hierarchy */
+.card-title{font-size:14px;letter-spacing:-.03em;line-height:1.3}
+.card-desc{font-size:11px;color:var(--soft);margin-top:3px;line-height:1.4}
+
+/* table refinement */
+.data-table th,.stats-table th{padding:9px 10px}
+.data-table tr:hover td,.stats-table tr:hover td{background:rgba(79,70,229,.025)}
+
+/* unified executive card refinement */
+.unified-exec-card{border-radius:14px}
+.unified-exec-grid{grid-template-columns:1.6fr 1fr}
+.unified-share-head{align-items:center;margin-bottom:5px;font-size:12px;font-weight:600;color:var(--text)}
+.unified-share-head span:last-child{font-size:14px;font-weight:700}
+.unified-share-bg{height:7px;margin-bottom:10px}
+.unified-share-fill{transition:.25s}
+
+
+/* ===== 데이터 정의 수정 패치 ===== */
+#unifiedKpiGrid{grid-template-columns:repeat(5,1fr)}
+.stats-donut-mini{grid-template-columns:128px 1fr;gap:10px}
+.stats-donut-mini-box{width:128px;height:128px}
+.stats-donut-row b{font-weight:600;white-space:nowrap}
+.stats-donut-row .stats-donut-amt{margin-left:auto;color:var(--text);font-weight:600;white-space:nowrap}
+.stats-donut-row .stats-donut-pct{min-width:34px;text-align:right;color:var(--muted);font-weight:600;white-space:nowrap}
+.toto-state-line{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 12px;font-size:11px;font-weight:600;border:1px solid var(--line);background:var(--chip);color:var(--muted)}
+.toto-state-line strong{color:var(--text);font-weight:700}
+@media(max-width:1100px){#unifiedKpiGrid{grid-template-columns:repeat(5,1fr)}}
+
+
+/* ===== 통합/로또/토토 테이블 정렬 안정화 ===== */
+.stats-table{table-layout:fixed;width:100%}
+.stats-table th,.stats-table td{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stats-table .trend-cell{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  min-width:140px;
+  white-space:nowrap;
+}
+.stats-table .trend-cell .tri{opacity:.72}
+
+
+/* ===== 최종 테이블 전일대비 정렬 패치 ===== */
+.stats-table td{white-space:nowrap}
+
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">LM</div>
+      <div><div class="brand-title">복권판매점 통합 관제 시스템</div><div class="brand-sub">즉석/연금 · 로또 · 토토 통합 분석</div></div>
+    </div>
+    <div class="tab-group">
+      <button class="tab active" data-tab="sales">📊 판매량 통계</button>
+      <button class="tab" data-tab="order">📦 주문량 추천</button>
+      <button class="tab" data-tab="lotto">🎱 로또 매출</button>
+      <button class="tab" data-tab="toto">⚽ 토토 매출</button>
+      <button class="tab" data-tab="unified">📈 통합 매출</button>
+    </div>
+    <div class="top-right">
+      <div class="store" id="storeName">로딩 중...</div>
+      <button class="theme-btn" id="themeBtn">🌙 다크모드</button>
+    </div>
+  </div>
+
+  <div class="periodbar" id="salesPeriodbar">
+    <div class="pb-label">조회기간</div>
+    <button class="pp" data-period="week">이번 주</button>
+    <button class="pp" data-period="lastweek">지난 주</button>
+    <button class="pp active" data-period="month">이번 달</button>
+    <button class="pp" data-period="90">최근 90일</button>
+    <button class="pp" data-period="monthly">월별 전체</button>
+    <button class="pp" data-period="yearly">연도별</button>
+    <div class="data-badge" id="dataInfo">데이터 로딩 중...</div>
+  </div>
+
+  
+
+  <div class="periodbar hidden" id="orderPeriodbar">
+        <div class="pb-label">조회기간</div>
+        <button class="order-pp pp active" data-order-weeks="6">6주</button>
+        <button class="order-pp pp" data-order-weeks="12">12주</button>
+        <div class="data-badge" id="orderDataInfo">-</div>
+      </div>
+
+
+  <div class="periodbar hidden" id="lottoPeriodbar">
+            <div class="pb-label">조회기간</div>
+            <button class="pp" data-period="week">이번 주</button>
+            <button class="pp" data-period="lastweek">지난 주</button>
+            <button class="pp active" data-period="month">이번 달</button>
+            <button class="pp" data-period="90">최근 90일</button>
+            <button class="pp" data-period="monthly">월별 전체</button>
+            <button class="pp" data-period="yearly">연도별</button>
+            <div class="data-badge" id="lottoDataInfo">로딩 중...</div>
+          </div>
+
+
+  <div class="periodbar hidden" id="totoPeriodbar">
+            <div class="pb-label">조회기간</div>
+            <button class="pp" data-period="week">이번 주</button>
+            <button class="pp" data-period="lastweek">지난 주</button>
+            <button class="pp active" data-period="month">이번 달</button>
+            <button class="pp" data-period="90">최근 90일</button>
+            <button class="pp" data-period="monthly">월별 전체</button>
+            <button class="pp" data-period="yearly">연도별</button>
+            <div class="data-badge" id="totoDataInfo">로딩 중...</div>
+          </div>
+
+
+  <div class="periodbar hidden" id="unifiedPeriodbar">
+            <div class="pb-label">조회기간</div>
+            <button class="pp" data-period="week">이번 주</button>
+            <button class="pp" data-period="lastweek">지난 주</button>
+            <button class="pp active" data-period="month">이번 달</button>
+            <button class="pp" data-period="90">최근 90일</button>
+            <button class="pp" data-period="monthly">월별 전체</button>
+            <button class="pp" data-period="yearly">연도별</button>
+            <div class="data-badge" id="unifiedDataInfo">로딩 중...</div>
+          </div>
+<div class="content">
+    <section id="page-sales" class="page">
+      <div class="kpi-strip" id="kpiStrip"></div>
+
+      <div class="card">
+        <div class="card-hd">
+          <div><div class="card-title">판매장수 추이</div><div class="card-desc">요일 포함 · 주말 강조 · 막대 + 기간 평균선</div></div>
+          <button class="more">전체합산</button>
+        </div>
+        <div class="h300"><canvas id="cSalesMix"></canvas></div>
+      </div>
+
+      <div class="row-3">
+        <div class="card">
+          <div class="card-hd"><div><div class="card-title">요일별 평균 판매장수</div><div class="card-desc">월~일 순서 · 최고 요일 강조</div></div></div>
+          <div class="h220"><canvas id="cWeekday"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div><div class="card-title">판매금액 누적 막대</div><div class="card-desc">연금 / 스피또1000 / 스피또2000</div></div></div>
+          <div class="h220"><canvas id="cAmount"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div><div class="card-title">상품별 매출 비중</div><div class="card-desc">권장표기 · 금액 · 비중</div></div></div>
+          <div class="donut-wrap">
+            <div class="donut-box"><canvas id="cDonut"></canvas><div class="donut-center"><div><small>총매출</small><b id="donutTotal">-</b></div></div></div>
+            <div id="donutList" class="donut-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="trend-zone">
+        <div class="card">
+          <div class="card-hd"><div><div class="card-title">근무자별 TOP5</div><div class="card-desc">넓은 랭킹바 · 상품별 세분화</div></div></div>
+          <div id="rankList" class="rank-list"></div>
+        </div>
+        <div class="mini-chart-grid">
+          <div class="card compact-card"><div class="card-hd"><div><div class="card-title">연금복권 추이</div><div class="card-desc">판매장수</div></div></div><div class="h140"><canvas id="cPension"></canvas></div></div>
+          <div class="card compact-card"><div class="card-hd"><div><div class="card-title">스크래치 추이</div><div class="card-desc">스피또1000 / 2000</div></div></div><div class="h140"><canvas id="cScratch"></canvas></div></div>
+          <div class="card compact-card"><div class="card-hd"><div><div class="card-title">당첨금 지급 추이</div></div></div><div class="h140"><canvas id="cPrize"></canvas></div></div>
+          <div class="card compact-card"><div class="card-hd"><div><div class="card-title">즉석 수수료 추이</div><div class="card-desc">매출 6,030만원 → 560.5만원 기준</div></div></div><div class="h140"><canvas id="cFee"></canvas></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd"><div><div class="card-title">판매량 및 판매대금</div><div class="card-desc">상승 빨강 ▲ / 하락 파랑 ▼ · 주말 강조</div></div><div id="dailyTableInfo" class="more">-</div></div>
+        <div class="table-wrap"><table class="data-table market-table"><thead><tr><th>날짜</th><th>연금</th><th>스피또1000</th><th>스피또2000</th><th>총판매량</th><th>총판매대금</th><th>즉석수수료</th><th>전일대비</th></tr></thead><tbody id="dailyTbody"></tbody><tfoot id="dailyTfoot"></tfoot></table></div>
+      </div>
+      <div class="note">* 시재 제외 · closing_date 기준 합산</div>
+    </section>
+
+
+
+
+    <section id="page-order" class="page hidden">
+      
+
+      <div class="order-kpi-grid" id="orderKpiStrip"></div>
+
+      <div class="order-prize-card">
+        <div class="order-prize-head">
+          <div>
+            <div class="order-prize-title">📡 실시간 회차 현황</div>
+            <div class="order-prize-desc">출고율 · 1등 잔여 · 2등 잔여 기준으로 발주 가능 회차를 판단합니다.</div>
+          </div>
+          <div class="order-prize-actions">
+            <button class="more" id="orderPrizeRefresh">새로고침</button>
+            <div class="order-update-time" id="orderPrizeUpdated">🔄 대기 중</div>
+          </div>
+        </div>
+        <div class="order-prize-list" id="orderPrizeList">
+          <div class="order-prize-empty">회차 현황을 불러오는 중입니다.</div>
+        </div>
+      </div>
+
+      
+<div class="order-control-card">
+        <div class="order-product-tabs" id="orderProductTabs">
+          <button class="order-product-tab" data-order-product="p">🎫 연금복권</button>
+          <button class="order-product-tab active" data-order-product="s1">🎟️ 스피또1000</button>
+          <button class="order-product-tab" data-order-product="s2">🎪 스피또2000</button>
+        </div>
+
+        <div class="order-analysis-grid">
+          <div class="order-chart-panel">
+            <div class="order-panel-head">
+              <div>
+                <div class="order-panel-title" id="orderChartTitle">스피또1000 1~6주 판매량</div>
+                <div class="order-panel-desc" id="orderChartDesc">1~4주 실제 · 5~6주 AI 예측</div>
+              </div>
+              <div class="order-legend">
+                <span><i style="background:#7C3AED"></i>실제</span>
+                <span><i style="background:rgba(124,58,237,.24);border:1px dashed #7C3AED"></i>예측</span>
+                <span id="orderHolidayBadge">공휴일 없음</span>
+              </div>
+            </div>
+            <div class="order-chart-box"><canvas id="cOrderMain"></canvas></div>
+          </div>
+
+          <div class="order-ai-panel">
+            <div id="orderAiBox"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="order-detail-box always-open">
+        <div class="order-detail-title">🛡️ 운영 상세정보 <span>재고 위험도 · 예상 소진일 · 최근 판매속도 · 평균 판매량</span></div>
+        <div class="order-detail-inner">
+          <div class="card">
+            <div class="card-hd">
+              <div>
+                <div class="card-title">재고 위험도</div>
+                <div class="card-desc">현재잔여는 최근 마감일 판매장수 임시값 · 추후 마감재고 연동 예정</div>
+              </div>
+              <div class="more" id="orderBaseDate">-</div>
+            </div>
+            <div class="order-risk-grid" id="orderRiskGrid"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+
+    <!-- ===== 로또 매출 탭 ===== -->
+    <section id="page-lotto" class="page hidden">
+      <div class="stats-kpi-grid" id="lottoKpiGrid"></div>
+
+      <div class="stats-split-grid">
+        <div class="card stats-chart-card">
+          <div class="card-hd">
+            <div><div class="card-title">로또 매출</div><div class="card-desc">토요일/최고 매출일 강조 · 기간 평균선 포함</div></div>
+            <div class="more">분석툴</div>
+          </div>
+          <div class="sh280"><canvas id="cLottoMain"></canvas></div>
+        </div>
+
+        <div class="stats-side-card">
+          <div class="stats-side-head">
+            <div><div class="stats-side-title">요일별 비중 분석</div><div class="stats-side-desc">토요일 집중도와 최근 흐름 요약</div></div>
+          </div>
+          <div class="stats-donut-mini">
+            <div class="stats-donut-mini-box"><canvas id="cLottoDonut"></canvas></div>
+            <div id="lottoDonutList" class="stats-donut-list"></div>
+          </div>
+          <div class="stats-analysis-list" id="lottoAnalysisList"></div>
+        </div>
+      </div>
+
+      <div class="card"><div class="card-hd"><div><div class="card-title">로또 상세 매출</div><div class="card-desc">헤더 클릭 정렬 · 회차 컬럼 제외</div></div><div class="more" id="lottoTableInfo">-</div></div>
+        <div class="stats-table-wrap"><table class="stats-table"><thead><tr>
+          <th onclick="statsSort('lotto','date')">날짜</th>
+          <th onclick="statsSort('lotto','lotto')">판매금액</th>
+          <th onclick="statsSort('lotto','lotto_fee')">수수료</th>
+          <th onclick="statsSort('lotto','diff')">전일대비</th>
+          <th onclick="statsSort('lotto','diff_pct')">증감률</th>
+        </tr></thead><tbody id="lottoTbody"></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- ===== 토토 매출 탭 ===== -->
+    <section id="page-toto" class="page hidden">
+      <div class="stats-kpi-grid" id="totoKpiGrid"></div>
+      <div id="totoStateTag" style="margin-top:6px;margin-bottom:2px"></div>
+
+      <div class="stats-split-grid">
+        <div class="card stats-chart-card">
+          <div class="card-hd">
+            <div><div class="card-title">날짜별 토토 매출</div><div class="card-desc">요일별 색상 차별화 · 평균선 포함</div></div>
+            <div class="more">관제툴</div>
+          </div>
+          <div class="sh280"><canvas id="cTotoMain"></canvas></div>
+        </div>
+
+        <div class="stats-side-card">
+          <div class="stats-side-head">
+            <div><div class="stats-side-title">요일별 매출 분포</div><div class="stats-side-desc">주말 집중도와 최고 요일 확인</div></div>
+          </div>
+          <div class="stats-donut-wrap">
+            <div class="stats-donut-box"><canvas id="cTotoDonut"></canvas><div class="stats-donut-center"><small>총매출</small><b id="totoDonutTotal">-</b></div></div>
+            <div id="totoDonutList" class="stats-donut-list"></div>
+          </div>
+          <div class="toto-best-day" id="totoBestDay">-</div>
+        </div>
+      </div>
+
+      <div class="card"><div class="card-hd"><div><div class="card-title">날짜별 토토 상세</div><div class="card-desc">헤더 클릭 정렬 · 주말 행 강조</div></div><div class="more" id="totoTableInfo">-</div></div>
+        <div class="stats-table-wrap"><table class="stats-table"><thead><tr>
+          <th onclick="statsSort('toto','date')">날짜</th>
+          <th onclick="statsSort('toto','day')">요일</th>
+          <th onclick="statsSort('toto','toto')">판매금액</th>
+          <th onclick="statsSort('toto','toto_fee')">수수료</th>
+          <th onclick="statsSort('toto','diff')">전일대비</th>
+          <th onclick="statsSort('toto','diff_pct')">증감률</th>
+        </tr></thead><tbody id="totoTbody"></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- ===== 통합 매출 탭 ===== -->
+    <section id="page-unified" class="page hidden">
+      <div id="unifiedHero"></div>
+
+      <div class="stats-kpi-grid" id="unifiedKpiGrid"></div>
+
+      <div class="stats-split-grid">
+        <div class="card stats-chart-card"><div class="card-hd"><div><div class="card-title">기간별 3종 매출 추이</div><div class="card-desc">로또 · 토토 · 즉석 누적 스택 바 차트</div></div></div><div class="sh280"><canvas id="cUnifiedMain"></canvas></div></div>
+        <div class="stats-side-card"><div class="stats-side-head"><div><div class="stats-side-title">매출 비중</div><div class="stats-side-desc">3종 합산 기준</div></div></div>
+          <div class="stats-donut-wrap"><div class="stats-donut-box"><canvas id="cUnifiedDonut"></canvas><div class="stats-donut-center"><small>총합계</small><b id="unifiedDonutTotal">-</b></div></div><div id="unifiedDonutList" class="stats-donut-list"></div></div>
+          <div class="unified-dominant-text" id="unifiedDominantText">-</div>
+        </div>
+      </div>
+
+      <div class="stats-mini-grid">
+        <div class="card compact-card"><div class="card-hd"><div><div class="card-title">🎱 로또 추이</div><div class="card-desc">판매금액</div></div></div><div class="sh170" style="height:150px"><canvas id="cUnifiedLotto"></canvas></div></div>
+        <div class="card compact-card"><div class="card-hd"><div><div class="card-title">⚽ 토토 추이</div><div class="card-desc">판매금액</div></div></div><div class="sh170" style="height:150px"><canvas id="cUnifiedToto"></canvas></div></div>
+        <div class="card compact-card"><div class="card-hd"><div><div class="card-title">🎟️ 즉석 추이</div><div class="card-desc">판매금액</div></div></div><div class="sh170" style="height:150px"><canvas id="cUnifiedInstant"></canvas></div></div>
+      </div>
+
+      <div class="unified-ai-card">
+        <div class="unified-ai-title">🤖 AI 운영 인사이트</div>
+        <div class="unified-ai-list" id="unifiedInsightList"></div>
+      </div>
+
+      <div class="card"><div class="card-hd"><div><div class="card-title">날짜별 통합 매출</div><div class="card-desc">헤더 클릭 정렬</div></div><div class="more" id="unifiedTableInfo">-</div></div>
+        <div class="stats-table-wrap"><table class="stats-table"><thead><tr>
+          <th onclick="statsSort('unified','date')">날짜</th>
+          <th onclick="statsSort('unified','lotto')">🎱 로또</th>
+          <th onclick="statsSort('unified','toto')">⚽ 토토</th>
+          <th onclick="statsSort('unified','instant')">🎟️ 즉석</th>
+          <th onclick="statsSort('unified','total')">합계</th>
+          <th onclick="statsSort('unified','diff')">전일대비</th>
+          <th onclick="statsSort('unified','diff_pct')">증감률</th>
+        </tr></thead><tbody id="unifiedTbody"></tbody></table></div>
+      </div>
+    </section>
+
+  </div>
+
+<script>
+const SID=new URLSearchParams(location.search).get('store_id')||'store001';
+let allRows=[],period='month',charts={},activeTab='sales';
+const COLORS={all:'#4F46E5',p:'#F97316',s1:'#2563EB',s2:'#7C3AED',red:'#EF4444',green:'#10B981',blue:'#2563EB'};
+const INSTANT_FEE_RATE=5605000/60300000; // 매출 60,300,000원 / 수수료 5,605,000원, 부가세 포함
+const $=id=>document.getElementById(id);
+const num=v=>parseInt(v,10)||0;
+const fmt=n=>num(n).toLocaleString('ko-KR');
+const fmtWon=n=>fmt(n)+'원';
+const fmtShort=n=>{n=num(n);if(n>=100000000)return(n/100000000).toFixed(1)+'억';if(n>=10000)return Math.round(n/10000).toLocaleString('ko-KR')+'만';return fmt(n)};
+function theme(){return document.documentElement.dataset.theme||'light'}
+function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
+function destroy(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+Chart.defaults.font.family="'Malgun Gothic','Apple SD Gothic Neo',Arial,sans-serif";
+Chart.defaults.font.weight='750';
+Chart.defaults.plugins.tooltip.backgroundColor='rgba(15,23,42,.94)';
+Chart.defaults.plugins.tooltip.padding=12;Chart.defaults.plugins.tooltip.cornerRadius=12;
+
+const valueLabelPlugin={id:'valueLabel',afterDatasetsDraw(chart,args,opts){if(!opts?.enabled)return;const{ctx}=chart;ctx.save();ctx.font='900 10px Malgun Gothic';ctx.textAlign='center';ctx.fillStyle=css('--text');const meta=chart.getDatasetMeta(0);meta.data.forEach((bar,i)=>{const v=chart.data.datasets[0].data[i];if(v>0)ctx.fillText(fmt(v),bar.x,bar.y-6)});ctx.restore();}};
+const avgLineLabelPlugin={id:'avgLineLabel',afterDraw(chart,args,opts){if(!opts?.enabled)return;const ds=chart.data.datasets.find(d=>d.yAxisID==='avg');if(!ds)return;const v=ds.data[0];const y=chart.scales.y.getPixelForValue(v);const x=chart.chartArea.right-6;const{ctx}=chart;ctx.save();ctx.fillStyle=COLORS.s1;ctx.font='950 11px Malgun Gothic';ctx.textAlign='right';ctx.fillText(avgUnitLabel()+' '+fmt(Math.round(v))+'장',x,y-8);ctx.restore();}};
+Chart.register(valueLabelPlugin,avgLineLabelPlugin);
+
+function parseLocalDate(value){const s=String(value||'').slice(0,10);const[y,m,d]=s.split('-').map(Number);if(!y||!m||!d)return null;return new Date(y,m-1,d,0,0,0,0);}
+function dateKey(value){return String(value||'').slice(0,10)}
+function weekday(s){const d=parseLocalDate(s);return ['일','월','화','수','목','금','토'][d?d.getDay():0]}
+function isSat(s){return parseLocalDate(s)?.getDay()===6}
+function isSun(s){return parseLocalDate(s)?.getDay()===0}
+function dateLabel(s){if(period==='yearly')return s;if(period==='monthly')return s;const w=weekday(s);return String(s).slice(5)+'('+w+')'}
+function endOfDay(d){const x=new Date(d);x.setHours(23,59,59,999);return x}
+function startOfDay(d){const x=new Date(d);x.setHours(0,0,0,0);return x}
+function validRows(){return allRows.filter(x=>String(x.worker||'').trim()!=='시재'&&parseLocalDate(x.closing_date))}
+function anchorDate(){const rows=validRows();if(!rows.length)return endOfDay(new Date());return endOfDay(rows.map(r=>parseLocalDate(r.closing_date)).sort((a,b)=>b-a)[0])}
+function getRange(mode){const now=anchorDate(),dow=now.getDay(),mo=dow===0?6:dow-1;if(mode==='week'){const f=new Date(now);f.setDate(now.getDate()-mo);return{from:startOfDay(f),to:endOfDay(now)}}if(mode==='lastweek'){const f=new Date(now);f.setDate(now.getDate()-mo-7);const t=new Date(f);t.setDate(f.getDate()+6);return{from:startOfDay(f),to:endOfDay(t)}}if(mode==='month')return{from:startOfDay(new Date(now.getFullYear(),now.getMonth(),1)),to:endOfDay(now)};if(mode==='90'){const f=new Date(now);f.setDate(now.getDate()-90);return{from:startOfDay(f),to:endOfDay(now)}}return null}
+function filteredRows(){const rows=validRows();const r=getRange(period);if(!r)return rows;return rows.filter(x=>{const d=parseLocalDate(x.closing_date);return d&&d>=r.from&&d<=r.to})}
+function bookText(total,unit){const b=Math.floor(total/unit),r=total%unit;return`${fmt(b)}권 ${r}장`}
+function instantFeeValue(p,s1,s2){return Math.round((num(p)*1000+num(s1)*1000+num(s2)*2000)*INSTANT_FEE_RATE)}
+
+function aggregate(rows,gb){
+  const map={};
+  rows.forEach(r=>{
+    const cd=dateKey(r.closing_date),key=gb==='month'?cd.slice(0,7):gb==='year'?cd.slice(0,4):cd;
+    if(!map[key])map[key]={date:key,p:0,s1:0,s2:0,pa:0,s1a:0,s2a:0,instantAmt:0,instantFee:0,fee:0,total:0,amount:0};
+    map[key].p+=num(r.pension_sales_count);
+    map[key].s1+=num(r.instant1000_sales_count);
+    map[key].s2+=num(r.instant2000_sales_count);
+    map[key].pa+=num(r.pension_sales_count)*1000;
+    map[key].s1a+=num(r.instant1000_sales_count)*1000;
+    map[key].s2a+=num(r.instant2000_sales_count)*2000;
+    map[key].instantAmt+=num(r.instant_total_amount);
+    map[key].instantFee+=instantFeeValue(num(r.pension_sales_count),num(r.instant1000_sales_count),num(r.instant2000_sales_count));
+    map[key].fee+=num(r.total_fee);
+  });
+  return Object.values(map).map(r=>({...r,total:r.p+r.s1+r.s2,amount:r.pa+r.s1a+r.s2a,instantFee:Math.round(r.instantFee)})).sort((a,b)=>a.date.localeCompare(b.date));
+}
+function gb(){return period==='monthly'?'month':period==='yearly'?'year':'date'}
+function avgUnitLabel(){return period==='monthly'?'월평균':period==='yearly'?'연평균':'일평균'}
+function avgUnitShort(){return period==='monthly'?'월':period==='yearly'?'년':'일'}
+function scales(yCb){return{x:{grid:{color:css('--grid')},ticks:{color:css('--muted'),maxTicksLimit:12,font:{size:11}}},y:{grid:{color:css('--grid')},ticks:{color:css('--muted'),font:{size:11},callback:yCb||(v=>fmt(v))}}}}
+function baseLine(label,data,color,fill=false,dash=[]){return{label,data,borderColor:color,backgroundColor:fill?color+'22':'transparent',borderWidth:2.4,tension:0,fill,pointRadius:2.5,pointHoverRadius:5,pointBackgroundColor:color,pointBorderColor:css('--panel'),pointBorderWidth:1,borderDash:dash}}
+
+function renderKpi(rows,agg){
+  const days=agg.length||1,tP=agg.reduce((s,r)=>s+r.p,0),tS1=agg.reduce((s,r)=>s+r.s1,0),tS2=agg.reduce((s,r)=>s+r.s2,0),tAmt=tP*1000+tS1*1000+tS2*2000,tFee=instantFeeValue(tP,tS1,tS2),tot=tP+tS1+tS2;
+  const data=[
+    ['연금복권',bookText(tP,50),`총 ${fmt(tP)}장`,`${avgUnitLabel()} ${fmt(Math.round(tP/days))}장`,COLORS.p,'🎫'],
+    ['스피또1000',bookText(tS1,200),`총 ${fmt(tS1)}장`,`${avgUnitLabel()} ${fmt(Math.round(tS1/days))}장`,COLORS.s1,'🎟️'],
+    ['스피또2000',bookText(tS2,100),`총 ${fmt(tS2)}장`,`${avgUnitLabel()} ${fmt(Math.round(tS2/days))}장`,COLORS.s2,'🎪'],
+    [avgUnitLabel()+' 합계',fmt(Math.round(tot/days))+'장/'+avgUnitShort(),`총 ${fmt(tot)}장`,`${Math.floor(tP/50)+Math.floor(tS1/200)+Math.floor(tS2/100)}권 합산`,COLORS.all,'📊'],
+    ['즉석 총매출',fmtWon(tAmt),`${avgUnitLabel()} ${fmtWon(Math.round(tAmt/days))}`,'즉석복권 기준',COLORS.all,'💰'],
+    ['즉석 수수료',fmtWon(tFee),`${avgUnitLabel()} ${fmtWon(Math.round(tFee/days))}`,'부가세 포함 실수수료율',COLORS.s2,'📈']
+  ];
+  $('kpiStrip').innerHTML=data.map(k=>`<div class="kpi"><div class="kpi-bar" style="background:${k[4]}"></div><div class="kpi-head"><div class="kpi-label">${k[0]}</div><div class="kpi-icon" style="background:${k[4]}18;color:${k[4]}">${k[5]}</div></div><div class="kpi-main" style="color:${k[4]}">${k[1]}</div><div class="kpi-sub"><b>${k[2]}</b><br>${k[3]}</div></div>`).join('');
+}
+
+function renderSalesMix(agg){
+  destroy('cSalesMix');const avg=agg.reduce((s,r)=>s+r.total,0)/(agg.length||1);
+  charts.cSalesMix=new Chart($('cSalesMix'),{type:'bar',data:{labels:agg.map(r=>dateLabel(r.date)),datasets:[
+    {type:'bar',label:'판매장수',data:agg.map(r=>r.total),backgroundColor:agg.map(r=>isSun(r.date)?COLORS.red+'B8':isSat(r.date)?COLORS.blue+'B8':COLORS.s2+'95'),borderRadius:9,borderSkipped:false},
+    {type:'line',label:avgUnitLabel(),data:agg.map(()=>avg),borderColor:COLORS.s1,borderWidth:2,borderDash:[6,4],pointRadius:0,tension:0,yAxisID:'avg'}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:css('--muted'),boxWidth:10,font:{size:11}}},valueLabel:{enabled:true},avgLineLabel:{enabled:true},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(Math.round(c.raw))+'장'}}},scales:{...scales(),avg:{display:false,position:'right',min:0,max:Math.max(...agg.map(r=>r.total),avg)*1.18}}}});
+}
+
+function renderWeekday(rows){
+  destroy('cWeekday');
+  const order=[1,2,3,4,5,6,0],names=['월','화','수','목','금','토','일'],sums=Array(7).fill(0),cnt=Array(7).fill(0);
+  rows.forEach(r=>{const d=parseLocalDate(r.closing_date).getDay();sums[d]+=num(r.pension_sales_count)+num(r.instant1000_sales_count)+num(r.instant2000_sales_count);cnt[d]++});
+  const vals=order.map(i=>cnt[i]?Math.round(sums[i]/cnt[i]):0),mx=Math.max(...vals);
+  charts.cWeekday=new Chart($('cWeekday'),{type:'bar',data:{labels:names,datasets:[{label:'요일평균',data:vals,backgroundColor:vals.map((v,i)=>i===5?COLORS.blue+'B8':i===6?COLORS.red+'B8':v===mx?COLORS.all:COLORS.all+'44'),borderRadius:8,borderSkipped:false},{type:'line',data:vals.map(()=>mx),borderColor:COLORS.all,borderDash:[5,4],pointRadius:0,tension:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:scales(v=>fmt(v)+'장')}});
+}
+
+function renderAmount(agg){
+  destroy('cAmount');
+  charts.cAmount=new Chart($('cAmount'),{type:'bar',data:{labels:agg.map(r=>dateLabel(r.date)),datasets:[{label:'연금',data:agg.map(r=>r.pa),backgroundColor:COLORS.p+'CC',stack:'s',borderRadius:2},{label:'스피또1000',data:agg.map(r=>r.s1a),backgroundColor:COLORS.s1+'CC',stack:'s',borderRadius:2},{label:'스피또2000',data:agg.map(r=>r.s2a),backgroundColor:COLORS.s2+'CC',stack:'s',borderRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:css('--muted'),boxWidth:10,font:{size:11}}}},scales:{x:{stacked:true,grid:{display:false},ticks:{color:css('--muted'),maxTicksLimit:8,font:{size:11}}},y:{stacked:true,grid:{color:css('--grid')},ticks:{color:css('--muted'),callback:v=>fmtShort(v)}}}}});
+}
+
+function renderDonut(rows){
+  destroy('cDonut');const pCnt=rows.reduce((s,r)=>s+num(r.pension_sales_count),0),s1Cnt=rows.reduce((s,r)=>s+num(r.instant1000_sales_count),0),s2Cnt=rows.reduce((s,r)=>s+num(r.instant2000_sales_count),0),p=pCnt*1000,s1=s1Cnt*1000,s2=s2Cnt*2000,total=p+s1+s2||1;
+  $('donutTotal').textContent=fmtShort(total)+'원';
+  charts.cDonut=new Chart($('cDonut'),{type:'doughnut',data:{labels:['연금','스피또1000','스피또2000'],datasets:[{data:[p,s1,s2],backgroundColor:[COLORS.p,COLORS.s1,COLORS.s2],borderColor:css('--panel'),borderWidth:4,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'70%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.label}: ${fmtWon(c.raw)} (${Math.round(c.raw/total*100)}%)`}}}}});
+  const items=[['연금복권',pCnt,50,p,COLORS.p],['스피또1000',s1Cnt,200,s1,COLORS.s1],['스피또2000',s2Cnt,100,s2,COLORS.s2]];
+  $('donutList').innerHTML=items.map(x=>`<div class="donut-row"><span><i class="dot" style="background:${x[4]}"></i>${x[0]}</span><b>${bookText(x[1],x[2])}<br>${fmtWon(x[3])} · ${Math.round(x[3]/total*100)}%</b></div>`).join('');
+}
+
+function renderRank(rows){
+  const m={};rows.forEach(r=>{const w=r.worker||'미상';if(!m[w])m[w]={p:0,s1:0,s2:0,total:0};m[w].p+=num(r.pension_sales_count);m[w].s1+=num(r.instant1000_sales_count);m[w].s2+=num(r.instant2000_sales_count);m[w].total+=num(r.pension_sales_count)+num(r.instant1000_sales_count)+num(r.instant2000_sales_count)});
+  const a=Object.entries(m).sort((x,y)=>y[1].total-x[1].total).slice(0,5),mx=a[0]?.[1].total||1;
+  $('rankList').innerHTML=a.map((x,i)=>`
+<div class="rank-item">
+  <div class="rank-no">${i+1}</div>
+  <div class="rank-name" title="${x[0]}">${x[0]}</div>
+  <div class="rank-bg">
+    <div class="rank-fill" style="width:${x[1].total/mx*100}%;background:${[COLORS.all,COLORS.s1,COLORS.p,COLORS.s2,COLORS.red][i]}"></div>
+  </div>
+  <div class="rank-val">${fmt(x[1].total)}장</div>
+
+  <div class="rank-donut-wrap">
+    <div class="rank-donut-canvas">
+      <canvas id="workerDonut_${i}"></canvas>
+      <div class="rank-donut-center">
+        <span>총장수</span>
+        <b>${fmt(x[1].total)}장</b>
+      </div>
+    </div>
+
+    <div class="rank-donut-detail">
+      <div><span><i style="background:#F97316"></i>연금</span><b>${fmt(x[1].p)}장</b></div>
+      <div><span><i style="background:#2563EB"></i>스1000</span><b>${fmt(x[1].s1)}장</b></div>
+      <div><span><i style="background:#7C3AED"></i>스2000</span><b>${fmt(x[1].s2)}장</b></div>
+    </div>
+  </div>
+</div>`).join('')||'<div class="note">데이터 없음</div>';
+
+  const top2=a.slice(0,2);
+  const totalShare=top2.reduce((s,x)=>s+x[1].total,0)||1;
+  if($('workerTotal')) $('workerTotal').textContent=fmt(totalShare)+'장';
+  if($('workerShareList')){
+    $('workerShareList').innerHTML=top2.map((x,i)=>{
+      const pct=Math.round(x[1].total/totalShare*100);
+      return `<div class="worker-share-row"><span><i class="dot" style="background:${[COLORS.all,COLORS.s1][i]}"></i> ${x[0]}</span><b>${pct}%</b></div>`;
+    }).join('');
+  }
+  if($('cWorkerDonut')){
+    destroy('cWorkerDonut');
+    charts.cWorkerDonut=new Chart($('cWorkerDonut'),{
+      type:'doughnut',
+      data:{
+        labels:top2.map(x=>x[0]),
+        datasets:[{
+          data:top2.map(x=>x[1].total),
+          backgroundColor:[COLORS.all,COLORS.s1],
+          borderColor:css('--panel'),
+          borderWidth:4,
+          hoverOffset:4
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        cutout:'72%',
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.label}: ${fmt(c.raw)}장`}}}
+      }
+    });
+  }
+}
+
+function renderLine(id,agg,datasets,yCb){
+  destroy(id);charts[id]=new Chart($(id),{type:'line',data:{labels:agg.map(r=>dateLabel(r.date)),datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:datasets.length>1,labels:{color:css('--muted'),boxWidth:10,font:{size:11}}}},scales:scales(yCb)}});
+}
+
+function renderDailyTable(agg){
+  let html='',sumP=0,sumS1=0,sumS2=0,sumQ=0,sumA=0,sumFee=0;
+  const pct=(d,p)=>p?`${Math.abs((d/p)*100).toFixed(1)}%`:'-';
+  const trend=(v,prev,unit='')=>{if(v==null)return`<div class="trend-cell flat"><span>기준일</span><span class="tri">━</span></div>`;const c=v>0?'up':v<0?'down':'flat';return`<div class="trend-cell ${c}"><span>${v>0?'+':'-'}${fmt(Math.abs(v))}${unit}</span><span>${pct(v,prev)}</span><span class="tri">${v>0?'▲':v<0?'▼':'━'}</span></div>`};
+  agg.forEach((r,i)=>{const prev=agg[i-1],dq=prev?r.total-prev.total:null,rowCls=isSun(r.date)?'weekend-row-sun':isSat(r.date)?'weekend-row-sat':'';const dCls=isSun(r.date)?'weekend-sun':isSat(r.date)?'weekend-sat':'';html+=`<tr class="${rowCls}"><td class="${dCls}">${r.date} (${weekday(r.date)})</td><td>${bookText(r.p,50)}</td><td>${bookText(r.s1,200)}</td><td>${bookText(r.s2,100)}</td><td><b>${fmt(r.total)}장</b></td><td><b>${fmtWon(r.amount)}</b></td><td><b>${fmtWon(r.instantFee)}</b></td><td>${trend(dq,prev?.total,'장')}</td></tr>`;sumP+=r.p;sumS1+=r.s1;sumS2+=r.s2;sumQ+=r.total;sumA+=r.amount;sumFee+=r.instantFee});
+  $('dailyTbody').innerHTML=html;
+  $('dailyTfoot').innerHTML=`<tr><td>합계</td><td>${bookText(sumP,50)}</td><td>${bookText(sumS1,200)}</td><td>${bookText(sumS2,100)}</td><td>${fmt(sumQ)}장</td><td>${fmtWon(sumA)}</td><td>${fmtWon(sumFee)}</td><td>-</td></tr>`;
+  $('dailyTableInfo').textContent=`${agg.length}건`;
+}
+
+function riskLabel(level){
+  if(level==='high')return{text:'🔴 높음',color:'#EF4444'};
+  if(level==='mid')return{text:'🟡 보통',color:'#F59E0B'};
+  return{text:'🟢 낮음',color:'#10B981'};
+}
+
+const HOLIDAYS = {
+  '2026-01-01':'신정','2026-02-16':'설연휴','2026-02-17':'설날',
+  '2026-02-18':'설연휴','2026-03-01':'삼일절','2026-05-05':'어린이날',
+  '2026-05-25':'부처님오신날','2026-06-06':'현충일','2026-08-15':'광복절',
+  '2026-09-24':'추석연휴','2026-09-25':'추석','2026-09-26':'추석연휴',
+  '2026-10-03':'개천절','2026-10-09':'한글날','2026-12-25':'크리스마스'
+};
+
+let orderWeeksPeriod=6;
+let orderActiveProduct='s1';
+let orderPrizeStatus=[];
+let orderPrizeLoading=false;
+let orderPrizeLoaded=false;
+let orderAiTimer=null;
+
+function pad2(n){return String(n).padStart(2,'0')}
+function ymd(d){return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`}
+function md(d){return `${d.getMonth()+1}/${d.getDate()}`}
+function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);x.setHours(0,0,0,0);return x}
+function startOfWeekMon(d){const x=startOfDay(d);const day=x.getDay();const diff=day===0?-6:1-day;x.setDate(x.getDate()+diff);return x}
+function weekRangeLabel(w){return `${md(w.from)}~${md(w.to)}`}
+function weekHolidayList(w){const arr=[];for(let d=new Date(w.from);d<=w.to;d=addDays(d,1)){const k=ymd(d);if(HOLIDAYS[k])arr.push({date:k,name:HOLIDAYS[k],label:`${HOLIDAYS[k]}(${md(d)})`});}return arr}
+
+function orderProducts(){return[
+  {name:'연금복권',short:'연금',api:'pension',key:'p',unit:50,price:1000,color:COLORS.p,emoji:'🎫'},
+  {name:'스피또1000',short:'스1000',api:'sp1000',key:'s1',unit:200,price:1000,color:COLORS.s1,emoji:'🎟️'},
+  {name:'스피또2000',short:'스2000',api:'sp2000',key:'s2',unit:100,price:2000,color:COLORS.s2,emoji:'🎪'}
+]}
+function orderProduct(key){return orderProducts().find(p=>p.key===key)||orderProducts()[1]}
+
+function makeOrderWeeks(n=orderWeeksPeriod){
+  const today=startOfDay(new Date());
+  const currentStart=startOfWeekMon(today);
+  const actualCount=Math.max(1,n-2);
+  const firstStart=addDays(currentStart,-actualCount*7);
+  return Array.from({length:n},(_,i)=>{
+    const from=addDays(firstStart,i*7),to=addDays(firstStart,i*7+6);
+    return{idx:i+1,from,to,label:`${i+1}주차`,range:weekRangeLabel({from,to}),holidays:weekHolidayList({from,to}),predicted:i>=actualCount};
+  });
+}
+function weeklyProductTotals(rows,weeks){
+  return weeks.map(w=>{
+    const item={...w,p:0,s1:0,s2:0,total:0};
+    rows.forEach(r=>{
+      const d=parseLocalDate(r.closing_date);
+      if(d&&d>=w.from&&d<=w.to){
+        item.p+=num(r.pension_sales_count);
+        item.s1+=num(r.instant1000_sales_count);
+        item.s2+=num(r.instant2000_sales_count);
+      }
+    });
+    item.total=item.p+item.s1+item.s2;
+    return item;
+  });
+}
+function trendAdjust(actual,key){
+  const half=Math.max(1,Math.floor(actual.length/2));
+  const prev=actual.slice(0,half), recent=actual.slice(-half);
+  const prevAvg=prev.reduce((s,w)=>s+w[key],0)/(prev.length||1);
+  const recentAvg=recent.reduce((s,w)=>s+w[key],0)/(recent.length||1);
+  if(recentAvg>prevAvg*1.03)return{rate:1.05,text:'상승 추세',tone:'safe',emoji:'🟢'};
+  if(recentAvg<prevAvg*0.97)return{rate:.95,text:'하락 추세',tone:'warn',emoji:'🟡'};
+  return{rate:1,text:'보합 추세',tone:'safe',emoji:'🟢'};
+}
+function forecastValue(actual,key,week){
+  const avg=actual.reduce((s,w)=>s+w[key],0)/(actual.length||1);
+  const tr=trendAdjust(actual,key);
+  let v=avg*tr.rate;
+  if(week.holidays.length)v*=1.10;
+  return Math.round(v);
+}
+function orderForecastData(){
+  const baseWeeks=weeklyProductTotals(validRows(),makeOrderWeeks(orderWeeksPeriod));
+  const actual=baseWeeks.filter(w=>!w.predicted);
+  const predWeeks=baseWeeks.filter(w=>w.predicted).map(w=>({...w}));
+  orderProducts().forEach(p=>predWeeks.forEach(w=>{w[p.key]=forecastValue(actual,p.key,w)}));
+  return{actual,predWeeks,chartWeeks:[...actual,...predWeeks]};
+}
+
+function orderStatusClass(status){
+  if(status==='danger')return'danger';
+  if(status==='warn')return'warn';
+  return'safe';
+}
+function formatR2Text(v){
+  const s=String(v??'').trim();
+  if(!s)return'-';
+  const cleaned=s.replace(/\s+/g,'').replaceAll('매/','/').replace(/매$/,'');
+  return cleaned.includes('/')?cleaned+'매':cleaned;
+}
+function formatR2Text(v){
+  const s=String(v??'').trim();
+  if(!s)return'-';
+  const cleaned=s.replace(/\s+/g,'').replaceAll('매/','/').replace(/매$/,'');
+  return cleaned.includes('/')?cleaned+'매':cleaned;
+}
+function normalizePrizeStatus(raw){
+  const src=Array.isArray(raw)?raw:(raw?.data||raw?.items||raw?.rows||raw?.results||[]);
+  const mapped=src.map(x=>{
+    const label=String(x.label||x.product||x.type||x.game||x.name||x.product_name||'').trim();
+    const labelLower=label.toLowerCase();
+    let api=label.includes('스2000')||label.includes('2000')||labelLower.includes('sp2000')?'sp2000'
+      :label.includes('스1000')||label.includes('1000')||labelLower.includes('sp1000')?'sp1000'
+      :(x.product_key||x.key||'');
+    if(api==='s1')api='sp1000';
+    if(api==='s2')api='sp2000';
+
+    const issue=num(x.epsd??x.issue??x.round??x.round_no??x.회차??x.issue_no);
+    const releaseRate=num(x.spmt??x.release_rate??x.shipment_rate??x.out_rate??x.출고율);
+    const firstRemain=num(x.r1??x.first_remain??x.firstPrizeRemain??x.first_prize_remain??x.first??x['1등잔여']??x['1등']);
+    const secondText=formatR2Text(x.r2??x.second_text??x.secondRemainText??x.second_remain_text??'');
+    const dt=x.dt||x.date||x.updated_at||'';
+
+    let status='safe', labelText='안전';
+    if(firstRemain===0){status='danger';labelText='금지';}
+    else if(firstRemain<=3||releaseRate>=70){status='warn';labelText='신중';}
+    else {status='safe';labelText='안전';}
+
+    return{api,issue,releaseRate,firstRemain,secondText,dt,status,label:labelText};
+  }).filter(x=>x.api==='sp1000'||x.api==='sp2000');
+
+  const order={sp1000:0,sp2000:1};
+  return mapped.sort((a,b)=>{
+    const g=(order[a.api]??9)-(order[b.api]??9);
+    if(g!==0)return g;
+    return num(b.issue)-num(a.issue);
+  });
+}
+function prizeStatusForProduct(p){
+  if(p.key==='p')return[];
+  return orderPrizeStatus.filter(x=>x.api===p.api);
+}
+function latestPrizeStatus(p){
+  const arr=prizeStatusForProduct(p);
+  return arr.length?arr[0]:null;
+}
+function latestPrizeStatus(p){
+  const arr=prizeStatusForProduct(p);
+  return arr.length?arr[0]:null;
+}
+function productDecision(p,actual,predWeeks){
+  const latest=latestPrizeStatus(p);
+  if(latest){
+    if(latest.firstRemain===0)return{tone:'danger',badge:'🔴 보류',text:'보류'};
+    if(latest.firstRemain<=3||latest.releaseRate>=70)return{tone:'warn',badge:'🟡 신중',text:'신중'};
+  }
+  const totalPred=predWeeks.reduce((s,w)=>s+w[p.key],0);
+  const totalActual=actual.reduce((s,w)=>s+w[p.key],0);
+  const avgActual=totalActual/(actual.length||1);
+  const tr=trendAdjust(actual,p.key);
+  if(totalPred<=0&&totalActual<=0)return{tone:'warn',badge:'🟡 신중',text:'신중'};
+  if(tr.text==='하락 추세'&&totalPred<avgActual*.85)return{tone:'warn',badge:'🟡 신중',text:'신중'};
+  return{tone:'safe',badge:'🟢 발주 권장',text:'발주 권장'};
+}
+
+function orderBarLabelPlugin(){
+  return{id:'orderBarLabel',afterDatasetsDraw(chart,args,opts){
+    if(!opts?.enabled)return;
+    const{ctx}=chart;ctx.save();ctx.font='800 9px Malgun Gothic';ctx.textAlign='center';ctx.fillStyle=css('--muted');
+    // 실제 데이터(ds 0)만 라벨 표시
+    const meta=chart.getDatasetMeta(0);
+    meta.data.forEach((bar,i)=>{
+      const v=chart.data.datasets[0].data[i];if(v==null||v<=0)return;
+      const text=chart.$orderLabelText?chart.$orderLabelText(v):fmt(v)+'장';
+      ctx.fillText(text,bar.x,bar.y-8);
+      if(chart.$orderHolidays?.[i])ctx.fillText('🎌',bar.x,bar.y-20);
+    });
+    // 예측 데이터(ds 1) 라벨
+    const meta2=chart.getDatasetMeta(1);
+    meta2.data.forEach((bar,i)=>{
+      const v=chart.data.datasets[1].data[i];if(v==null||v<=0)return;
+      const text=chart.$orderLabelText?chart.$orderLabelText(v):fmt(v)+'장';
+      ctx.fillStyle='rgba(124,58,237,.7)';
+      ctx.fillText(text,bar.x,bar.y-8);
+      ctx.fillStyle=css('--muted');
+    });
+    ctx.restore();
+  }}
+}
+const ORDER_BAR_LABEL_PLUGIN=orderBarLabelPlugin();
+if(!Chart.registry.plugins.get('orderBarLabel'))Chart.register(ORDER_BAR_LABEL_PLUGIN);
+
+function renderOrderChart(id,product,weeks){
+  destroy(id);
+  const labels=weeks.map(w=>`${w.idx}주 ${w.range}`);
+  const actualData=weeks.map(w=>w.predicted?null:w[product.key]);
+  const predData=weeks.map(w=>w.predicted?w[product.key]:null);
+  const actualVals=weeks.filter(w=>!w.predicted).map(w=>w[product.key]);
+  const avgVal=Math.round(actualVals.reduce((s,v)=>s+v,0)/(actualVals.length||1));
+  const avgData=weeks.map(()=>avgVal);
+  const maxVal=Math.max(10,...weeks.map(w=>w[product.key]),avgVal);
+  const canvas=$(id);if(!canvas)return;
+  charts[id]=new Chart(canvas,{type:'bar',data:{labels,datasets:[
+    {label:'실제',data:actualData,backgroundColor:product.color,borderColor:product.color,borderWidth:1,borderRadius:10,borderSkipped:false},
+    {label:'AI 예측',data:predData,backgroundColor:'rgba(124,58,237,.24)',borderColor:'rgba(124,58,237,.62)',borderWidth:2,borderDash:[5,4],borderRadius:10,borderSkipped:false},
+    {type:'line',label:'평균',data:avgData,borderColor:'#2563EB',borderDash:[5,4],borderWidth:2,pointRadius:0,tension:0}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:css('--muted'),boxWidth:10,font:{size:10,weight:'900'}}},orderBarLabel:{enabled:true},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${bookText(c.raw||0,product.unit)} (${fmt(c.raw||0)}장)`}}},scales:{x:{grid:{display:false},ticks:{color:css('--muted'),maxRotation:0,minRotation:0,font:{size:10}}},y:{beginAtZero:true,suggestedMax:maxVal*1.35,grid:{color:css('--grid')},ticks:{color:css('--muted'),font:{size:10},callback:v=>fmt(v)+'장'}}}}});
+  charts[id].$orderLabelText=(v)=>bookText(num(v),product.unit);
+  charts[id].$orderHolidays=weeks.map(w=>w.holidays.length>0);
+}
+
+function renderOrderKpis(actual,predWeeks){
+  const el=$('orderKpiStrip');if(!el)return;
+  el.innerHTML=orderProducts().map(p=>{
+    const actualTotal=actual.reduce((s,w)=>s+w[p.key],0);
+    const recTotal=predWeeks.reduce((s,w)=>s+w[p.key],0);
+    const dayCount=Math.max(1,actual.length*7);
+    const dailyAvg=Math.round(actualTotal/dayCount);
+    const dec=productDecision(p,actual,predWeeks);
+    return `<div class="order-kpi-card">
+      <div class="order-kpi-bar" style="background:${p.color}"></div>
+      <div class="order-kpi-head">
+        <div class="order-kpi-title">${p.emoji} ${p.name}</div>
+        <div class="order-kpi-icon" style="background:${p.color}18;color:${p.color}">${p.emoji}</div>
+      </div>
+      <div class="order-kpi-main" style="color:${p.color}">${bookText(recTotal,p.unit)}</div>
+      <div class="order-kpi-sub"><span class="order-kpi-badge ${dec.tone}">${dec.badge}</span> 실판매 ${bookText(actualTotal,p.unit)} · 일평균 ${fmt(dailyAvg)}장</div>
+    </div>`;
+  }).join('');
+}
+
+function renderOrderAi(product,actual,predWeeks,chartWeeks,animate=true){
+  const box=$('orderAiBox');if(!box)return;
+  if(orderAiTimer){clearTimeout(orderAiTimer);orderAiTimer=null;}
+  if(animate)box.innerHTML='<div class="order-ai-loading">📊 발주 분석 중...</div>';
+
+  const renderResult=()=>{
+    const tr=trendAdjust(actual,product.key);
+    const totalPred=predWeeks.reduce((s,w)=>s+w[product.key],0);
+    const holidaySent=predWeeks.flatMap(w=>w.holidays.map(h=>`${w.idx}주차(${w.range}) ${h.name} 포함 주간 +8% 예상`));
+    const statuses=prizeStatusForProduct(product);
+    const danger=statuses.find(s=>s.status==='danger');
+    const warn=statuses.find(s=>s.status==='warn');
+    const latest=statuses[0];
+    const roundLine=product.key==='p'
+      ? '연금복권은 회차 위험도 제외 · 판매 추세 기준 판단'
+      : danger?`${product.name} ${danger.issue}회차 제외 (1등 잔여 0개)`
+      : warn?`${product.name} ${warn.issue}회차 신중 (${warn.releaseRate}% 출고 · 1등 ${warn.firstRemain}개)`
+      : (latest?`${product.name} ${latest.issue}회차 ${latest.label} (출고율 ${latest.releaseRate}% · 1등 ${latest.firstRemain}개)`:'회차 현황 미반영');
+    const roundTone=danger?'danger':warn?'warn':'safe';
+    const hText=holidaySent.length?holidaySent.join('<br>'):'예측 주차 공휴일 영향 없음';
+    box.innerHTML=`<div class="order-ai-result">
+      <div class="order-ai-card-title">📊 발주 분석 완료 · ${product.name}</div>
+      <div class="order-ai-msg ${tr.tone}" style="animation-delay:0s">${tr.emoji} <strong>판매량 ${tr.text}</strong></div>
+      <div class="order-ai-msg warn" style="animation-delay:.1s">🎌 ${hText}</div>
+      <div class="order-ai-msg ${roundTone}" style="animation-delay:.2s">${danger?'🔴':warn?'🟡':'🟢'} ${roundLine}</div>
+      <div class="order-ai-msg ai" style="animation-delay:.3s">📦 <strong>추천 발주량 ${bookText(totalPred,product.unit)}</strong> <span style="color:var(--muted)">(${fmt(totalPred)}장)</span></div>
+    </div>`;
+  };
+  if(animate)orderAiTimer=setTimeout(renderResult,700);else renderResult();
+}
+
+function gaugeColor(status){
+  if(status==='danger')return'#EF4444';
+  if(status==='warn')return'#F59E0B';
+  return'#10B981';
+}
+function prizeGaugeSvg(rate,status){
+  const r=Math.max(0,Math.min(100,num(rate)));
+  const dash=125.6;
+  const offset=dash*(1-r/100);
+  const color=gaugeColor(status);
+  return `<svg class="order-prize-gauge" viewBox="0 0 120 70" aria-label="출고율 ${r}%">
+    <path d="M20 60 A40 40 0 0 1 100 60" fill="none" stroke="var(--line)" stroke-width="12" stroke-linecap="round"/>
+    <path d="M20 60 A40 40 0 0 1 100 60" fill="none" stroke="${color}" stroke-width="12" stroke-linecap="round" stroke-dasharray="${dash}" stroke-dashoffset="${offset}"/>
+    <text x="60" y="50" text-anchor="middle" class="order-gauge-text">${r}%</text>
+  </svg>`;
+}
+function renderPrizeStatus(){
+  const list=$('orderPrizeList');if(!list)return;
+  if(orderPrizeLoading){list.innerHTML='<div class="order-prize-empty">📡 회차 현황을 불러오는 중입니다.</div>';return;}
+  if(!orderPrizeStatus.length){list.innerHTML='<div class="order-prize-empty">회차 현황 데이터가 없습니다. 새로고침을 눌러 다시 확인하세요.</div>';return;}
+  const labelName=api=>api==='sp1000'?'스1000':'스2000';
+  const ordered=[...orderPrizeStatus].sort((a,b)=>{
+    const o={sp1000:0,sp2000:1};
+    const g=(o[a.api]??9)-(o[b.api]??9);
+    if(g!==0)return g;
+    return num(b.issue)-num(a.issue);
+  });
+  list.innerHTML=ordered.map(s=>`<div class="order-prize-row ${s.status}">
+    <div class="order-prize-top">
+      <span class="order-prize-prod-small">${labelName(s.api)}</span>
+      <strong>${s.issue}회차</strong>
+    </div>
+    <div class="order-prize-gauge-wrap">${prizeGaugeSvg(s.releaseRate,s.status)}</div>
+    <div class="order-prize-bottom">
+      <span class="order-prize-badge ${s.status}">${s.status==='danger'?'🔴':s.status==='warn'?'🟡':'🟢'} ${s.label}</span>
+      <span>1등 <b>${fmt(s.firstRemain)}개</b></span>
+      <span>2등 <b>${s.secondText||'-'}</b></span>
+    </div>
+  </div>`).join('');
+}
+async function fetchPrizeStatus(force=false){
+  if(orderPrizeLoading)return;
+  if(orderPrizeLoaded&&!force)return;
+  orderPrizeLoading=true;
+  if($('orderPrizeUpdated'))$('orderPrizeUpdated').textContent='🔄 조회 중';
+  renderPrizeStatus();
+  try{
+    const res=await fetch(`/instant/prize-status?store_id=${encodeURIComponent(SID)}`);
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const raw=await res.json();
+    orderPrizeStatus=normalizePrizeStatus(raw);
+    orderPrizeLoaded=true;
+    const now=new Date();
+    if($('orderPrizeUpdated'))$('orderPrizeUpdated').textContent=`🔄 ${pad2(now.getHours())}:${pad2(now.getMinutes())} 기준`;
+  }catch(e){
+    orderPrizeStatus=[];
+    if($('orderPrizeUpdated'))$('orderPrizeUpdated').textContent='⚠ 조회 실패';
+    const list=$('orderPrizeList');
+    if(list)list.innerHTML=`<div class="order-prize-empty">/instant/prize-status 호출 실패: ${e.message}</div>`;
+  }finally{
+    orderPrizeLoading=false;
+    renderPrizeStatus();
+    renderOrder(validRows(),false);
+  }
+}
+
+function renderOrder(rows,animateAi=false){
+  const {actual,predWeeks,chartWeeks}=orderForecastData();
+  renderOrderKpis(actual,predWeeks);
+  const p=orderProduct(orderActiveProduct);
+  if($('orderChartTitle'))$('orderChartTitle').textContent=`${p.name}`;
+  if($('orderChartDesc'))$('orderChartDesc').textContent=`1~${Math.max(1,orderWeeksPeriod-2)}주 실제 · ${Math.max(2,orderWeeksPeriod-1)}~${orderWeeksPeriod}주 발주 예측`;
+  const h=chartWeeks.filter(w=>w.holidays.length).map(w=>`${w.idx}주차 ${w.holidays.map(x=>x.label).join(', ')}`).join(' · ');
+  if($('orderHolidayBadge'))$('orderHolidayBadge').textContent=h?`🎌 ${h}`:'공휴일 없음';
+  // 기간 표시
+  if($('orderDataInfo')&&chartWeeks.length){
+    const first=chartWeeks[0].range.split('~')[0].trim();
+    const last2=chartWeeks[chartWeeks.length-1].range.split('~')[1]?.trim()||'';
+    $('orderDataInfo').textContent=`${first} ~ ${last2} · ${orderWeeksPeriod}주`;
+  }
+
+  renderOrderChart('cOrderMain',p,chartWeeks);
+  renderOrderAi(p,actual,predWeeks,chartWeeks,animateAi);
+
+  const a14=aggregate(validRows(),'date').slice(-14);
+  const avg14=k=>Math.round(a14.reduce((s,r)=>s+r[k],0)/(a14.length||1));
+  const last=a14[a14.length-1]||{p:0,s1:0,s2:0};
+  const baseDate=a14.length?a14[a14.length-1].date:'-';
+  if($('orderBaseDate'))$('orderBaseDate').textContent=baseDate+' 기준';
+  if($('orderRiskGrid')){
+    $('orderRiskGrid').innerHTML=orderProducts().map(p=>{
+      const cur=last[p.key]||0;
+      const avg=avg14(p.key);
+      const exp14=avg*14;
+      const days=avg?Math.round(cur/avg):99;
+      const ratio=exp14?cur/exp14:0;
+      const lvl=ratio<0.75?'high':ratio<1.5?'mid':'low';
+      const rl=riskLabel(lvl);
+      const recentSpeed=avg>0?`${fmt(avg)}장/일`:'데이터 부족';
+      return`<div class="order-risk-card">
+        <div class="order-risk-bar" style="background:${p.color}"></div>
+        <div class="order-risk-title"><b style="color:${p.color}">${p.emoji} ${p.name}</b><span class="order-risk-badge" style="color:${rl.color}">${rl.text}</span></div>
+        <div class="order-risk-main" style="color:${p.color}">${bookText(cur,p.unit)}</div>
+        <div class="order-risk-list">
+          <div class="order-risk-row"><span>예상 소진일</span><b>${days}일</b></div>
+          <div class="order-risk-row"><span>최근 판매속도</span><b>${recentSpeed}</b></div>
+          <div class="order-risk-row"><span>평균 판매량</span><b>${bookText(avg,p.unit)}</b></div>
+          <div class="order-risk-row"><span>2주 예상소진</span><b>${bookText(exp14,p.unit)}</b></div>
+        </div>
+        <div class="order-risk-note">⚠ 현재잔여는 마감재고 연동 예정 · 현재는 최근 마감일 참고값 표시</div>
+      </div>`;
+    }).join('');
+  }
+}
+
+function initOrderTab(){
+  updatePeriodbarVisibility();
+  renderOrder(validRows(),true);
+  fetchPrizeStatus(false);
+  setTimeout(()=>charts.cOrderMain?.resize(),30);
+}
+
+
+
+
+function renderAll(){
+  const rows=filteredRows(),agg=aggregate(rows,gb());
+  if(!agg.length){$('dataInfo').textContent='데이터 없음';return}
+  const unit=gb()==='date'?'일':gb()==='month'?'개월':'년';
+  $('dataInfo').textContent=`${agg[0].date} ~ ${agg[agg.length-1].date} · ${agg.length}${unit}`;renderKpi(rows,agg);renderSalesMix(agg);renderWeekday(rows);renderAmount(agg);renderDonut(rows);renderRank(rows);
+  renderLine('cPension',agg,[baseLine('연금',agg.map(r=>r.p),COLORS.p,true)]);
+  renderLine('cScratch',agg,[baseLine('스피또1000',agg.map(r=>r.s1),COLORS.s1),baseLine('스피또2000',agg.map(r=>r.s2),COLORS.s2,false,[5,4])]);
+  renderLine('cPrize',agg,[baseLine('당첨금',agg.map(r=>r.instantAmt),COLORS.red,true)],v=>fmtShort(v));
+  renderLine('cFee',agg,[baseLine('즉석수수료',agg.map(r=>r.instantFee),COLORS.s2,true)],v=>fmtShort(v));
+  renderDailyTable(agg);
+  if(activeTab==='order')renderOrder(rows);
+}
+function updatePeriodbarVisibility(){
+  ['salesPeriodbar','orderPeriodbar','lottoPeriodbar','totoPeriodbar','unifiedPeriodbar']
+    .forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add('hidden');});
+  const map={sales:'salesPeriodbar',order:'orderPeriodbar',lotto:'lottoPeriodbar',toto:'totoPeriodbar',unified:'unifiedPeriodbar'};
+  const target=document.getElementById(map[activeTab]);
+  if(target)target.classList.remove('hidden');
+}
+function bind(){
+  document.querySelectorAll('#salesPeriodbar .pp').forEach(b=>b.onclick=()=>{period=b.dataset.period;document.querySelectorAll('#salesPeriodbar .pp').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderAll()});
+  document.querySelectorAll('.order-pp').forEach(b=>b.onclick=()=>{orderWeeksPeriod=parseInt(b.dataset.orderWeeks,10)||6;document.querySelectorAll('.order-pp').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderOrder(validRows(),true);setTimeout(()=>charts.cOrderMain?.resize(),30)});
+  document.querySelectorAll('.order-product-tab').forEach(b=>b.onclick=()=>{orderActiveProduct=b.dataset.orderProduct||'s1';document.querySelectorAll('.order-product-tab').forEach(x=>x.classList.toggle('active',x===b));renderOrder(validRows(),true);setTimeout(()=>charts.cOrderMain?.resize(),30)});
+  const refresh=$('orderPrizeRefresh');if(refresh)refresh.onclick=()=>fetchPrizeStatus(true);
+  document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{activeTab=b.dataset.tab;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));['sales','order','lotto','toto','unified'].forEach(t=>$('page-'+t)&&$('page-'+t).classList.toggle('hidden',t!==activeTab));updatePeriodbarVisibility();if(activeTab==='order')initOrderTab();if(activeTab==='lotto')initStatsTab('lotto');if(activeTab==='toto')initStatsTab('toto');if(activeTab==='unified')initStatsTab('unified');setTimeout(()=>Object.values(charts).forEach(c=>c?.resize&&c.resize()),30)});
+  updatePeriodbarVisibility();
+  $('themeBtn').onclick=()=>{
+    const next=theme()==='dark'?'light':'dark';
+    document.documentElement.dataset.theme=next;
+    localStorage.setItem('premiumTheme',next);
+    $('themeBtn').textContent=next==='dark'?'☀️ 라이트모드':'🌙 다크모드';
+    renderAll();
+    if(activeTab==='lotto')renderLotto();
+    else if(activeTab==='toto')renderToto();
+    else if(activeTab==='unified')renderUnified();
+  };
+}
+async function load(){
+  bind();const saved=localStorage.getItem('premiumTheme')||'light';document.documentElement.dataset.theme=saved;$('themeBtn').textContent=saved==='dark'?'☀️ 라이트모드':'🌙 다크모드';
+  try{
+    const res=await fetch(`/stats/list?store_id=${encodeURIComponent(SID)}&days=2920`);
+    if(!res.ok)throw new Error('서버 오류 '+res.status);
+    allRows=await res.json();
+    $('storeName').textContent=(allRows[0]?.store_name||SID);
+  }catch(e){
+    $('dataInfo').textContent='오류: '+e.message;
+    $('storeName').textContent=SID+' · 연결 실패';
+    return;
+  }
+  try{
+    renderAll();
+  }catch(e){
+    console.error('renderAll 오류:', e);
+    $('dataInfo').textContent='렌더링 오류: '+e.message;
+  }
+}
+/* ===== 로또/토토/통합 매출 탭 JS ===== */
+const statsData={lotto:{rows:[],summary:{},period:'month',sortKey:'',sortDir:1},toto:{rows:[],summary:{},period:'month',sortKey:'',sortDir:1},unified:{rows:[],summary:{},period:'month',sortKey:'',sortDir:1}};
+function sN(v){return Number(v)||0}
+function sF(n){return Math.round(sN(n)).toLocaleString('ko-KR')}
+function sFW(n){return sF(n)+'원'}
+function sFSh(n){n=sN(n);if(n>=100000000)return(n/100000000).toFixed(1)+'억';if(n>=10000)return Math.round(n/10000).toLocaleString('ko-KR')+'만';return sF(n)}
+function sDC(v){return sN(v)>0?'stats-up':sN(v)<0?'stats-down':'stats-flat'}
+function sDN(s){const d=new Date(String(s||'').slice(0,10)+'T00:00:00');return['일','월','화','수','목','금','토'][d.getDay()]||'-'}
+function sFP(n){return(sN(n)>0?'+':'')+sN(n).toFixed(1)+'%'}
+
+function fmtMoneySmart(v){
+  v=sN(v);
+  if(Math.abs(v)>=100000000){
+    const e=v/100000000;
+    return e.toFixed(e>=10?1:2).replace(/\.0+$/,'')+'억원';
+  }
+  if(Math.abs(v)>=10000000)return Math.round(v/10000).toLocaleString('ko-KR')+'만원';
+  return Math.round(v).toLocaleString('ko-KR')+'원';
+}
+function getPeriodLabel(period){
+  const map={week:['이번주 매출','지난주 대비'],lastweek:['지난주 매출','직전주 대비'],month:['이번달 매출','지난달 대비'],90:['최근 90일','직전 90일 대비'],monthly:['월별 합산','전월 대비'],yearly:['연도별 합산','전년 대비']};
+  return map[period]||['기간 매출','직전 기간 대비'];
+}
+function getPeriodCompare(rows,period,key){
+  if(period==='monthly'){
+    const months=[...new Set(rows.map(r=>String(r.date||'').slice(0,7)))].filter(Boolean).sort();
+    const last=rows.filter(r=>String(r.date||'').startsWith(months[months.length-1]||''));
+    const prev=rows.filter(r=>String(r.date||'').startsWith(months[months.length-2]||''));
+    return{thisW:last.reduce((s,r)=>s+sN(r[key]),0),prevW:prev.reduce((s,r)=>s+sN(r[key]),0)};
+  }
+  if(period==='yearly'){
+    const years=[...new Set(rows.map(r=>String(r.date||'').slice(0,4)))].filter(Boolean).sort();
+    const last=rows.filter(r=>String(r.date||'').startsWith(years[years.length-1]||''));
+    const prev=rows.filter(r=>String(r.date||'').startsWith(years[years.length-2]||''));
+    return{thisW:last.reduce((s,r)=>s+sN(r[key]),0),prevW:prev.reduce((s,r)=>s+sN(r[key]),0)};
+  }
+  const half=Math.floor(rows.length/2);
+  return{thisW:rows.slice(half).reduce((s,r)=>s+sN(r[key]),0),prevW:rows.slice(0,half).reduce((s,r)=>s+sN(r[key]),0)};
+}
+function statArrow(v){return sN(v)>0?'▲':sN(v)<0?'▼':'－'}
+
+function statsTrend(diff,pct){
+  if((diff===null||diff===undefined||sN(diff)===0)&&(pct===null||pct===undefined||sN(pct)===0))
+    return `<span class="flat">기준일</span>`;
+  const cls=sN(diff)>0?'up':sN(diff)<0?'down':'flat';
+  const arrow=sN(diff)>0?'▲':sN(diff)<0?'▼':'━';
+  return `<span class="${cls}">${sN(diff)>0?'+':sN(diff)<0?'-':''}${sFW(Math.abs(sN(diff)))}</span>&nbsp;<span class="${cls}" style="font-size:10px">${sFP(pct)}</span>&nbsp;<span class="tri ${cls}">${arrow}</span>`;
+}
+// DB fee 컬럼 신뢰 불가 - 계산식으로 고정
+function lottoFeeOf(r){ return Math.round(sN(r.lotto) * 0.055) }
+function totoFeeOf(r){ return Math.round(sN(r.toto) * 0.0597) }
+function instantFeeOf(r){ return Math.round(sN(r.instant) * INSTANT_FEE_RATE) }
+
+async function loadStatsData(type){
+  const sd=statsData[type];
+  const infoEl=$(type+'DataInfo');
+  if(infoEl)infoEl.textContent='처리 중...';
+  try{
+    const raw=validRows();
+    if(!raw.length)throw new Error('데이터 없음');
+
+    const r=getRange(sd.period);
+    const filtered=r?raw.filter(x=>{
+      const d=parseLocalDate(x.closing_date);
+      return d&&d>=r.from&&d<=r.to;
+    }):raw;
+    if(!filtered.length)throw new Error('기간 내 데이터 없음');
+
+    const gbMode=sd.period==='monthly'?'month':sd.period==='yearly'?'year':'date';
+
+// 1단계: 날짜별 최종 마감행 선택 (record_id 순번 가장 큰 행)
+const getSeq=(rid)=>{
+  const m=String(rid||'').match(/^\d{8}-(\d+)-/);
+  return m?parseInt(m[1],10):0;
+};
+
+const finalByDate={};
+filtered.forEach(r=>{
+  const cd=String(r.closing_date||'').slice(0,10);
+  const seq=getSeq(r.record_id);
+  if(!finalByDate[cd]||seq>finalByDate[cd]._seq){
+    finalByDate[cd]={
+      date:cd,
+      lotto:sN(r.lotto_sales),
+      toto:sN(r.toto_sales),
+      instant:sN(r.instant_total_amount)||sN(r.instant1000_sales_amount)+sN(r.instant2000_sales_amount),
+      lotto_fee:sN(r.lotto_fee),
+      toto_fee:sN(r.toto_fee),
+      total_fee:sN(r.total_fee),
+      _seq:seq
+    };
+  }
+});
+
+// 2단계: 월별/연도별이면 합산, 일별이면 그대로
+const dayMap={};
+Object.values(finalByDate).forEach(r=>{
+  const key=gbMode==='month'?r.date.slice(0,7):gbMode==='year'?r.date.slice(0,4):r.date;
+  if(!dayMap[key])dayMap[key]={date:key,lotto:0,toto:0,instant:0,lotto_fee:0,toto_fee:0,total_fee:0};
+  dayMap[key].lotto+=r.lotto;
+  dayMap[key].toto+=r.toto;
+  dayMap[key].instant+=r.instant;
+  dayMap[key].lotto_fee+=r.lotto_fee;
+  dayMap[key].toto_fee+=r.toto_fee;
+  dayMap[key].total_fee+=r.total_fee;
+});
+
+  const sorted=Object.values(dayMap).sort((a,b)=>a.date.localeCompare(b.date));
+    if(!sorted.length)throw new Error('집계 결과 없음');
+
+    sorted.forEach((row,i)=>{
+      row.day=['일','월','화','수','목','금','토'][new Date(String(row.date||'').slice(0,10)+'T00:00:00').getDay()]||'';
+      row.total=row.lotto+row.toto+row.instant;
+      const base=type==='toto'?row.toto:type==='lotto'?row.lotto:row.total;
+      const prev=i>0?(type==='toto'?sorted[i-1].toto:type==='lotto'?sorted[i-1].lotto:sorted[i-1].total):base;
+      row.diff=base-prev;
+      row.diff_pct=prev?parseFloat(((row.diff/prev)*100).toFixed(1)):0;
+      row.round=1160-sorted.length+i;
+    });
+
+    sd.rows=sorted;
+    sd.summary={
+      lotto_total:sorted.reduce((s,r)=>s+r.lotto,0),
+      toto_total:sorted.reduce((s,r)=>s+r.toto,0),
+      instant_total:sorted.reduce((s,r)=>s+r.instant,0)
+    };
+    sd.summary.grand_total=sd.summary.lotto_total+sd.summary.toto_total+sd.summary.instant_total;
+    const unit=gbMode==='month'?'개월':gbMode==='year'?'년':'일';
+    if(infoEl)infoEl.textContent=`${sorted[0]?.date||''} ~ ${sorted[sorted.length-1]?.date||''} · ${sorted.length}${unit}`;
+
+  }catch(e){
+    sd.rows=[];
+    sd.summary={lotto_total:0,toto_total:0,instant_total:0,grand_total:0};
+    if(infoEl)infoEl.textContent=`연결 실패 · ${e.message}`;
+  }
+
+  if(type==='lotto')renderLotto();
+  if(type==='toto')renderToto();
+  if(type==='unified')renderUnified();
+}
+function sCB(){return{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{color:css('--muted'),boxWidth:10,font:{size:11,weight:'900'}}}},scales:{x:{grid:{display:false},ticks:{color:css('--muted'),font:{size:11},maxRotation:0}},y:{grid:{color:css('--grid')},ticks:{color:css('--muted'),font:{size:11},callback:v=>sFSh(v)}}}}}
+function statsSort(type,key){const sd=statsData[type];if(sd.sortKey===key)sd.sortDir*=-1;else{sd.sortKey=key;sd.sortDir=1;}if(type==='lotto')renderLottoTable();else if(type==='toto')renderTotoTable();else renderUnifiedTable();}
+function statsDateLabel(date,period){
+  if(period==='yearly'||period==='monthly')return date||'';
+  return `${(date||'').slice(5)}(${sDN(date)})`;
+}
+function sDotHtml(color){return`<i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};margin-right:5px"></i>`}
+const DCOLS=['#4F46E5','#2563EB','#7C3AED','#10B981','#F97316','#F59E0B','#EF4444'];
+const TCOLS=['#F97316','#FB923C','#FDBA74','#10B981','#2563EB','#7C3AED','#EF4444'];
+const DAYS=['월','화','수','목','금','토','일'];
+
+function renderLotto(){
+  const sd=statsData.lotto;const rows=sd.rows;
+  if(!rows.length){
+    $('lottoKpiGrid').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-size:13px;font-weight:600">📭 기간 내 데이터 없음</div>';
+    destroy('cLottoMain');destroy('cLottoDonut');
+    $('lottoDonutList').innerHTML='';
+    $('lottoAnalysisList').innerHTML='';
+    $('lottoTbody').innerHTML='';
+    return;
+  }
+
+  const total=rows.reduce((s,r)=>s+sN(r.lotto),0);
+  const [periodLabel,compareLabel]=getPeriodLabel(sd.period);
+  const {thisW,prevW}=getPeriodCompare(rows,sd.period,'lotto');
+  const dp=prevW?((thisW-prevW)/prevW*100):0;
+  const avg=Math.round(total/(rows.length||1));
+  const fee=rows.reduce((s,r)=>s+lottoFeeOf(r),0);
+  const maxVal=Math.max(...rows.map(r=>sN(r.lotto)));
+  const maxIndex=rows.findIndex(r=>sN(r.lotto)===maxVal);
+  const best=rows[maxIndex]||rows[0];
+  const avgCompare=avg?((maxVal-avg)/avg*100):0;
+  const recentRate=prevW?((thisW-prevW)/prevW*100):0;
+  $('lottoKpiGrid').innerHTML=[
+    ['총판매금액',fmtMoneySmart(total),'선택 기간 합산','#4F46E5','💰'],
+    [periodLabel,fmtMoneySmart(thisW),compareLabel,'#4F46E5','📈'],
+    ['전기간 대비',sFP(dp),`${compareLabel} ${fmtMoneySmart(prevW)}`,dp>=0?'#EF4444':'#2563EB','↕️'],
+    ['수수료',fmtMoneySmart(fee),'부가세 포함 0.55%','#7C3AED','💵']
+  ].map(k=>`<div class="stats-kpi-card"><div class="stats-kpi-bar" style="background:${k[3]}"></div><div class="stats-kpi-head"><div class="stats-kpi-label">${k[0]}</div><div class="stats-kpi-icon" style="background:${k[3]}18;color:${k[3]}">${k[4]}</div></div><div class="stats-kpi-main" style="color:${k[3]}">${k[1]}</div><div class="stats-kpi-sub">${k[2]}</div></div>`).join('');
+  destroy('cLottoMain');destroy('cLottoDonut');
+  const vals=rows.map(r=>sN(r.lotto));
+  charts.cLottoMain=new Chart($('cLottoMain'),{type:'bar',data:{labels:rows.map(r=>statsDateLabel(r.date,sd.period)),datasets:[
+    {label:'로또 판매금액',data:vals,backgroundColor:rows.map((r,i)=>{const day=new Date(String(r.date||'').slice(0,10)+'T00:00:00').getDay();const hi=(sd.period==='week'||sd.period==='lastweek')?day===6:i===maxIndex;return hi?'rgba(79,70,229,.95)':'rgba(79,70,229,.45)';}),borderRadius:4,borderSkipped:false,barPercentage:.5,categoryPercentage:.6},
+    {type:'line',label:'기간 평균',data:rows.map(()=>avg),borderColor:'rgba(37,99,235,.4)',borderWidth:1.2,borderDash:[4,5],pointRadius:0,fill:false,tension:0}
+  ]},options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:12,bottom:4}},plugins:{legend:{display:true,labels:{color:css('--muted'),boxWidth:10,font:{size:11}}}},scales:{x:{grid:{display:false},ticks:{color:css('--muted'),font:{size:11},maxTicksLimit:10,maxRotation:0}},y:{grid:{color:theme()==='dark'?'rgba(226,232,240,.06)':'rgba(15,23,42,.045)'},ticks:{color:css('--muted'),font:{size:11},callback:v=>sFSh(v)}}}}});
+  const sum={};DAYS.forEach(d=>sum[d]=0);rows.forEach(r=>sum[sDN(r.date)]+=sN(r.lotto));
+  const dvals=DAYS.map(d=>sum[d]),dtot=dvals.reduce((a,b)=>a+b,0)||1;
+  charts.cLottoDonut=new Chart($('cLottoDonut'),{type:'doughnut',data:{labels:DAYS,datasets:[{data:dvals,backgroundColor:DCOLS,borderColor:css('--panel'),borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false}}}});
+  $('lottoDonutList').innerHTML=DAYS.map((d,i)=>`<div class="stats-donut-row"><span>${sDotHtml(DCOLS[i])}${d}</span><span class="stats-donut-amt">${sFSh(dvals[i])}</span><span class="stats-donut-pct">${Math.round(dvals[i]/dtot*100)}%</span></div>`).join('');
+  $('lottoAnalysisList').innerHTML=[
+    ['최고 판매일',`${best.date||'-'} · ${sFSh(maxVal)}원`],
+    ['평균 대비',`${avgCompare>=0?'+':''}${avgCompare.toFixed(1)}%`],
+    ['기간 상승률',`${recentRate>=0?'+':''}${recentRate.toFixed(1)}%`]
+  ].map(x=>`<div class="stats-analysis-row"><span>${x[0]}</span><b>${x[1]}</b></div>`).join('');
+  renderLottoTable();
+}
+function renderLottoTable(){
+  const sd=statsData.lotto;
+  const showDay=!['monthly','yearly'].includes(sd.period);
+  let rows=[...sd.rows];
+  if(sd.sortKey)rows.sort((a,b)=>{
+    const av=a[sd.sortKey],bv=b[sd.sortKey];
+    return(typeof av==='string'?String(av).localeCompare(String(bv)):sN(av)-sN(bv))*sd.sortDir;
+  });
+  $('lottoTableInfo').textContent=rows.length+'건';
+
+  const thead=document.querySelector('#page-lotto .stats-table thead tr');
+  if(thead)thead.innerHTML=`
+    <th onclick="statsSort('lotto','date')">날짜</th>
+    ${showDay?`<th onclick="statsSort('lotto','day')">요일</th>`:''}
+    <th onclick="statsSort('lotto','lotto')">판매금액</th>
+    <th onclick="statsSort('lotto','lotto_fee')">수수료</th>
+    <th>전일대비</th>
+  `;
+
+  $('lottoTbody').innerHTML=rows.map(r=>{
+    const dayNo=new Date(String(r.date||'').slice(0,10)+'T00:00:00').getDay();
+    const st=dayNo===0?'background:rgba(239,68,68,.04)':dayNo===6?'background:rgba(37,99,235,.04)':'';
+    const dayCls=dayNo===0?'weekend-sun':dayNo===6?'weekend-sat':'';
+    return `<tr style="${st}">
+      <td class="${dayCls}">${r.date||'-'}</td>
+      ${showDay?`<td class="${dayCls}">${r.day||'-'}</td>`:''}
+      <td>${sFW(r.lotto)}</td>
+      <td>${sFW(lottoFeeOf(r))}</td>
+      <td style="text-align:right;white-space:nowrap">${statsTrend(r.diff,r.diff_pct)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderToto(){
+  const sd=statsData.toto;const rows=sd.rows;
+  if(!rows.length){
+    $('totoKpiGrid').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-size:13px;font-weight:600">📭 기간 내 데이터 없음</div>';
+    if($('totoStateTag'))$('totoStateTag').innerHTML='';
+    destroy('cTotoMain');destroy('cTotoDonut');
+    $('totoDonutList').innerHTML='';
+    $('totoBestDay').textContent='-';
+    $('totoTbody').innerHTML='';
+    return;
+  }
+
+  const total=rows.reduce((s,r)=>s+sN(r.toto),0);
+  const [periodLabel,compareLabel]=getPeriodLabel(sd.period);
+  const {thisW,prevW}=getPeriodCompare(rows,sd.period,'toto');
+  const dp=prevW?((thisW-prevW)/prevW*100):0;
+  const lastVal=rows[rows.length-1]?.toto||0;
+  const avg=Math.round(total/(rows.length||1));
+  const ratio=avg?lastVal/avg:0;
+  const tag=ratio>1.5?'주말 집중형':ratio>1.2?'경기일 영향형':ratio<0.7?'저조 흐름':'안정 흐름';
+  const fee=rows.reduce((s,r)=>s+totoFeeOf(r),0);
+  $('totoKpiGrid').innerHTML=[
+    ['총판매금액',fmtMoneySmart(total),'선택 기간 합산','#F97316','⚽'],
+    [periodLabel,fmtMoneySmart(thisW),compareLabel,'#F59E0B','📈'],
+    ['전기간 대비',sFP(dp),`${compareLabel} ${fmtMoneySmart(prevW)}`,dp>=0?'#EF4444':'#2563EB','↕️'],
+    ['수수료',fmtMoneySmart(fee),'부가세 포함','#F59E0B','💵']
+  ].map(k=>`<div class="stats-kpi-card"><div class="stats-kpi-bar" style="background:${k[3]}"></div><div class="stats-kpi-head"><div class="stats-kpi-label">${k[0]}</div><div class="stats-kpi-icon" style="background:${k[3]}18;color:${k[3]}">${k[4]}</div></div><div class="stats-kpi-main" style="color:${k[3]}">${k[1]}</div><div class="stats-kpi-sub">${k[2]}</div></div>`).join('');
+  if($('totoStateTag'))$('totoStateTag').innerHTML=`<span class="toto-state-line">상태 <strong>${tag}</strong></span>`;
+  destroy('cTotoMain');destroy('cTotoDonut');
+  const vals=rows.map(r=>sN(r.toto));
+  charts.cTotoMain=new Chart($('cTotoMain'),{type:'bar',data:{labels:rows.map(r=>statsDateLabel(r.date,sd.period)),datasets:[
+    {label:'토토 판매금액',data:vals,backgroundColor: rows.map(r=>{const day=new Date(r.date+'T00:00:00').getDay();if(day===0)return 'rgba(239,68,68,.80)';if(day===6)return 'rgba(249,115,22,.90)';return 'rgba(180,100,30,.38)';}),borderRadius:4,borderSkipped:false,barPercentage:.5,categoryPercentage:.6},
+    {type:'line',label:'기간 평균',data:rows.map(()=>avg),borderColor:'#F59E0B',borderWidth:1.2,borderDash:[4,5],pointRadius:0,fill:false,tension:0}
+  ]},options:sCB()});
+  const sum={};DAYS.forEach(d=>sum[d]=0);rows.forEach(r=>sum[sDN(r.date)]+=sN(r.toto));
+  const dvals=DAYS.map(d=>sum[d]),dtot=dvals.reduce((a,b)=>a+b,0)||1;
+  const bestIdx=dvals.indexOf(Math.max(...dvals));
+  $('totoDonutTotal').textContent=sFSh(dtot);
+  charts.cTotoDonut=new Chart($('cTotoDonut'),{type:'doughnut',data:{labels:DAYS,datasets:[{data:dvals,backgroundColor:TCOLS,borderColor:css('--panel'),borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false}}}});
+  $('totoDonutList').innerHTML=DAYS.map((d,i)=>`<div class="stats-donut-row"><span>${sDotHtml(TCOLS[i])}${d}요일</span><span class="stats-donut-amt">${sFSh(dvals[i])}</span><span class="stats-donut-pct">${Math.round(dvals[i]/dtot*100)}%</span></div>`).join('');
+  $('totoBestDay').textContent=`최고 요일: ${DAYS[bestIdx]}요일 (전체 ${Math.round(dvals[bestIdx]/dtot*100)}%)`;
+  renderTotoTable();
+}
+function renderTotoTable(){
+  const sd=statsData.toto;
+  const showDay=!['monthly','yearly'].includes(sd.period);
+  let rows=[...sd.rows].map(r=>({...r,toto_fee:totoFeeOf(r)}));
+  if(sd.sortKey)rows.sort((a,b)=>{
+    const av=a[sd.sortKey],bv=b[sd.sortKey];
+    return(typeof av==='string'?String(av).localeCompare(String(bv)):sN(av)-sN(bv))*sd.sortDir;
+  });
+  $('totoTableInfo').textContent=rows.length+'건';
+
+  const thead=document.querySelector('#page-toto .stats-table thead tr');
+  if(thead)thead.innerHTML=`
+    <th onclick="statsSort('toto','date')">날짜</th>
+    ${showDay?`<th onclick="statsSort('toto','day')">요일</th>`:''}
+    <th onclick="statsSort('toto','toto')">판매금액</th>
+    <th onclick="statsSort('toto','toto_fee')">수수료</th>
+    <th>전일대비</th>
+  `;
+
+  $('totoTbody').innerHTML=rows.map(r=>{
+    const dayNo=new Date(String(r.date||'').slice(0,10)+'T00:00:00').getDay();
+    const st=dayNo===0?'background:rgba(239,68,68,.04)':dayNo===6?'background:rgba(37,99,235,.04)':'';
+    const dayCls=dayNo===0?'weekend-sun':dayNo===6?'weekend-sat':'';
+    return `<tr style="${st}">
+      <td class="${dayCls}">${r.date||'-'}</td>
+      ${showDay?`<td class="${dayCls}">${r.day||'-'}</td>`:''}
+      <td>${sFW(r.toto)}</td>
+      <td>${sFW(r.toto_fee)}</td>
+      <td style="text-align:right;white-space:nowrap">${statsTrend(r.diff,r.diff_pct)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function generateUnifiedInsight(rows,summary){
+  const lt=sN(summary.lotto_total),tt=sN(summary.toto_total),it=sN(summary.instant_total);
+  const gt=lt+tt+it;
+  const dominant=lt>tt&&lt>it?'로또':tt>lt&&tt>it?'토토':'즉석';
+  const sd=statsData.unified;
+  const [,compareLabel]=getPeriodLabel(sd.period);
+  const {thisW,prevW}=getPeriodCompare(rows,sd.period,'total');
+  const trend=thisW>=prevW?'상승':'하락';
+  const pct=prevW?Math.abs(((thisW-prevW)/prevW)*100).toFixed(1):0;
+  const josa=(word)=>{
+    const code=word[word.length-1]?.charCodeAt(0);
+    if(!code||code<0xAC00||code>0xD7A3)return '으로';
+    return (code-0xAC00)%28===0?'로':'으로';
+  };
+  const avgUnit=sd.period==='monthly'?'월평균':sd.period==='yearly'?'연평균':'일평균';
+  const avgVal=Math.round(gt/(rows.length||1));
+  return [
+    `이번 기간 주력 상품은 <strong>${dominant}</strong>${josa(dominant)} 전체 매출의 ${gt?Math.round((dominant==='로또'?lt:dominant==='토토'?tt:it)/gt*100):0}%를 차지합니다.`,
+    `선택 기간 매출은 ${compareLabel} <strong>${trend} ${pct}%</strong>입니다.`,
+    `${avgUnit}은 <strong>${sFSh(avgVal)}원</strong>입니다.`
+  ];
+}
+function renderUnified(){
+  const sd=statsData.unified;const rows=sd.rows;
+  if(!rows.length){
+    $('unifiedHero').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-size:13px;font-weight:900">📭 기간 내 데이터 없음</div>';
+    $('unifiedKpiGrid').innerHTML='';
+    destroy('cUnifiedMain');destroy('cUnifiedDonut');destroy('cUnifiedLotto');destroy('cUnifiedToto');destroy('cUnifiedInstant');
+    $('unifiedDonutList').innerHTML='';
+    $('unifiedInsightList').innerHTML='';
+    $('unifiedTbody').innerHTML='';
+    return;
+  }
+  const sm=sd.summary;
+  const lt=sN(sm.lotto_total),tt=sN(sm.toto_total),it=sN(sm.instant_total),gt=sN(sm.grand_total)||lt+tt+it;
+  const [periodLabel,compareLabel]=getPeriodLabel(sd.period);
+  const {thisW,prevW}=getPeriodCompare(rows,sd.period,'total');
+  const wp=prevW?((thisW-prevW)/prevW*100):0;
+  const avg=Math.round(gt/(rows.length||1));
+  const best=rows.reduce((m,r)=>sN(r.total)>sN(m.total)?r:m,rows[0]);
+  const pctL=gt?Math.round(lt/gt*100):0,pctT=gt?Math.round(tt/gt*100):0,pctI=gt?Math.round(it/gt*100):0;
+  $('unifiedHero').innerHTML=`<div class="unified-exec-card">
+    <div class="unified-exec-grid">
+      <div class="unified-exec-left">
+        <div>
+          <div class="unified-exec-label">총매출</div>
+          <div class="unified-exec-main">${fmtMoneySmart(gt)}</div>
+          <div class="unified-exec-diff ${sDC(wp)}">${compareLabel} ${sFP(wp)} ${wp>=0?'▲':'▼'}</div>
+        </div>
+        <div class="unified-exec-subgrid">
+          <div class="unified-exec-mini"><span>일평균</span><b>${sFSh(avg)}원</b></div>
+          <div class="unified-exec-mini"><span>최고일</span><b>${best.date||'-'} (${sFSh(best.total)}원)</b></div>
+        </div>
+      </div>
+      <div class="unified-share-list">
+        <div><div class="unified-share-head"><span>🎱 로또</span><span id="uLottoPct">${pctL}%</span></div><div class="unified-share-bg"><div id="uLottoBar" class="unified-share-fill" style="width:${pctL}%;background:#4F46E5"></div></div></div>
+        <div><div class="unified-share-head"><span>⚽ 토토</span><span id="uTotoPct">${pctT}%</span></div><div class="unified-share-bg"><div id="uTotoBar" class="unified-share-fill" style="width:${pctT}%;background:#F97316"></div></div></div>
+        <div><div class="unified-share-head"><span>🎟️ 즉석</span><span id="uInstantPct">${pctI}%</span></div><div class="unified-share-bg"><div id="uInstantBar" class="unified-share-fill" style="width:${pctI}%;background:#10B981"></div></div></div>
+      </div>
+    </div>
+  </div>`;
+  $('unifiedKpiGrid').innerHTML=[
+    ['로또 총매출',fmtMoneySmart(lt),`${pctL}% 비중`,'#4F46E5','🎱'],
+    ['토토 총매출',fmtMoneySmart(tt),`${pctT}% 비중`,'#F97316','⚽'],
+    ['즉석 총매출',fmtMoneySmart(it),`${pctI}% 비중`,'#10B981','🎟️'],
+    ['전기간 대비',sFP(wp),`${compareLabel} ${fmtMoneySmart(prevW)}`,wp>=0?'#EF4444':'#2563EB','↕️'],
+    ['수수료 총액',fmtMoneySmart(rows.reduce((s,r)=>s+lottoFeeOf(r)+totoFeeOf(r)+instantFeeOf(r),0)),'로또+토토+즉석 수수료 합산','#7C3AED','💵']
+  ].map(k=>`<div class="stats-kpi-card"><div class="stats-kpi-bar" style="background:${k[3]}"></div><div class="stats-kpi-head"><div class="stats-kpi-label">${k[0]}</div><div class="stats-kpi-icon" style="background:${k[3]}18;color:${k[3]}">${k[4]}</div></div><div class="stats-kpi-main" style="color:${k[3]}">${k[1]}</div><div class="stats-kpi-sub">${k[2]}</div></div>`).join('');
+  destroy('cUnifiedMain');destroy('cUnifiedDonut');destroy('cUnifiedLotto');destroy('cUnifiedToto');destroy('cUnifiedInstant');
+  const so={...sCB(),scales:{x:{stacked:true,grid:{display:false},ticks:{color:css('--muted'),font:{size:11},maxRotation:0}},y:{stacked:true,grid:{color:css('--grid')},ticks:{color:css('--muted'),font:{size:11},callback:v=>sFSh(v)}}}};
+  charts.cUnifiedMain=new Chart($('cUnifiedMain'),{type:'bar',data:{labels:rows.map(r=>statsDateLabel(r.date,sd.period)),datasets:[{label:'로또',data:rows.map(r=>sN(r.lotto)),backgroundColor:'rgba(79,70,229,.80)',stack:'s',borderRadius:2},{label:'토토',data:rows.map(r=>sN(r.toto)),backgroundColor:'rgba(249,115,22,.80)',stack:'s',borderRadius:2},{label:'즉석',data:rows.map(r=>sN(r.instant)),backgroundColor:'rgba(16,185,129,.80)',stack:'s',borderRadius:2}]},options:so});
+  const dv=[lt,tt,it],dl=['로또','토토','즉석'],dc=['#4F46E5','#F97316','#10B981'];
+  $('unifiedDonutTotal').textContent=sFSh(gt);
+  charts.cUnifiedDonut=new Chart($('cUnifiedDonut'),{type:'doughnut',data:{labels:dl,datasets:[{data:dv,backgroundColor:dc,borderColor:css('--panel'),borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false}}}});
+  $('unifiedDonutList').innerHTML=dl.map((l,i)=>`<div class="stats-donut-row"><span>${sDotHtml(dc[i])}${l}</span><b>${sFSh(dv[i])}<br>${gt?Math.round(dv[i]/gt*100):0}%</b></div>`).join('');
+  const dominant=lt>tt&&lt>it?'로또 중심':tt>lt&&tt>it?'토토 강세':'즉석 견조';
+  $('unifiedDominantText').textContent=dominant;
+  const mo={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:css('--muted'),font:{size:10},maxRotation:0,maxTicksLimit:7}},y:{grid:{color:css('--grid')},ticks:{color:css('--muted'),font:{size:10},callback:v=>sFSh(v)}}}};
+  const ml=rows.map(r=>statsDateLabel(r.date,sd.period));
+  charts.cUnifiedLotto=new Chart($('cUnifiedLotto'),{type:'line',data:{labels:ml,datasets:[{data:rows.map(r=>sN(r.lotto)),borderColor:'#4F46E5',backgroundColor:'rgba(79,70,229,.10)',borderWidth:2,tension:.3,fill:true,pointRadius:0}]},options:mo});
+  charts.cUnifiedToto=new Chart($('cUnifiedToto'),{type:'line',data:{labels:ml,datasets:[{data:rows.map(r=>sN(r.toto)),borderColor:'#F97316',backgroundColor:'rgba(249,115,22,.10)',borderWidth:2,tension:.3,fill:true,pointRadius:0}]},options:mo});
+  charts.cUnifiedInstant=new Chart($('cUnifiedInstant'),{type:'line',data:{labels:ml,datasets:[{data:rows.map(r=>sN(r.instant)),borderColor:'#10B981',backgroundColor:'rgba(16,185,129,.10)',borderWidth:2,tension:.3,fill:true,pointRadius:0}]},options:mo});
+  $('unifiedInsightList').innerHTML=generateUnifiedInsight(rows,sm).map(x=>`<div class="unified-ai-msg">${x}</div>`).join('');
+  renderUnifiedTable();
+}
+function renderUnifiedTable(){
+  const sd=statsData.unified;
+  const showDay=!['monthly','yearly'].includes(sd.period);
+  let rows=[...sd.rows];
+  if(sd.sortKey)rows.sort((a,b)=>{
+    const av=a[sd.sortKey],bv=b[sd.sortKey];
+    return(typeof av==='string'?String(av).localeCompare(String(bv)):sN(av)-sN(bv))*sd.sortDir;
+  });
+  $('unifiedTableInfo').textContent=rows.length+'건';
+
+  const thead=document.querySelector('#page-unified .stats-table thead tr');
+  if(thead)thead.innerHTML=`
+    <th onclick="statsSort('unified','date')">날짜</th>
+    ${showDay?`<th onclick="statsSort('unified','day')">요일</th>`:''}
+    <th onclick="statsSort('unified','lotto')">🎱 로또</th>
+    <th onclick="statsSort('unified','toto')">⚽ 토토</th>
+    <th onclick="statsSort('unified','instant')">🎟️ 즉석</th>
+    <th onclick="statsSort('unified','total')">합계</th>
+    <th>전일대비</th>
+  `;
+
+  $('unifiedTbody').innerHTML=rows.map(r=>{
+    const dayNo=new Date(String(r.date||'').slice(0,10)+'T00:00:00').getDay();
+    const st=dayNo===0?'background:rgba(239,68,68,.04)':dayNo===6?'background:rgba(37,99,235,.04)':'';
+    const dayCls=dayNo===0?'weekend-sun':dayNo===6?'weekend-sat':'';
+    return `<tr style="${st}">
+      <td class="${dayCls}">${r.date||'-'}</td>
+      ${showDay?`<td class="${dayCls}">${r.day||'-'}</td>`:''}
+      <td>${sFW(r.lotto)}</td>
+      <td>${sFW(r.toto)}</td>
+      <td>${sFW(r.instant)}</td>
+      <td style="font-weight:700;color:var(--text)">${sFW(r.total)}</td>
+      <td style="text-align:right;white-space:nowrap">${statsTrend(r.diff,r.diff_pct)}</td>
+    </tr>`;
+  }).join('');
+}
+
+
+const _statsInited={};
+async function initStatsTab(type){
+  await loadStatsData(type);
+  if(type==='lotto')renderLotto();else if(type==='toto')renderToto();else renderUnified();
+  if(_statsInited[type])return;
+  _statsInited[type]=true;
+  document.querySelectorAll(`#${type}Periodbar .pp`).forEach(b=>b.onclick=async()=>{
+    statsData[type].period=b.dataset.period;
+    document.querySelectorAll(`#${type}Periodbar .pp`).forEach(x=>x.classList.toggle('active',x===b));
+    await loadStatsData(type);
+    if(type==='lotto')renderLotto();else if(type==='toto')renderToto();else renderUnified();
+    setTimeout(()=>Object.values(charts).forEach(c=>c?.resize&&c.resize()),30);
+  });
+}
+load();
+</script>
+</body>
+</html>
